@@ -1,8 +1,9 @@
 // Ficheiro de Configuração Gerado Automaticamente
-const STORAGE_DATA_KEY = "appConfigData_v2.0";
+const STORAGE_DATA_KEY = "appConfigData_v2.0.1";
 
 const DADOS_PADRAO = {
   lojas: [
+    {"formato":"Hiper","loja":"001-Teste"},
     {"formato":"Hiper","loja":"008-Gaia"},
     {"formato":"Hiper","loja":"009-Coimbra"},
     {"formato":"Hiper","loja":"010-Viseu"},
@@ -381,6 +382,14 @@ const DADOS_PADRAO = {
         "label": "Jade",
         "url": "https://genai-platform.auchan.com/#/share/dcd986cf-ca6e-41df-bb4e-8dc387eb0906",
         "icone": "Jade.jpg"
+    },
+    {
+        "formato": "Hiper",
+        "loja": "001-Teste",
+        "nome": "Manelinho",
+        "label": "Manelinho",
+        "url": "http://www.google.com",
+        "icone": "AibyAuchan.png"
     },
     {
         "formato": "Prox",
