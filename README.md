@@ -2,7 +2,7 @@
 
 Esta é uma Web App (PWA) desenvolvida para centralizar o acesso aos assistentes de Inteligência Artificial da Auchan. Permite aos colaboradores selecionar a sua loja e aceder rapidamente às ferramentas relevantes para o seu formato.
 
-🔗 **Aceder à App:** [Coloca aqui o teu Link do GitHub Pages]
+🔗 **Aceder à App:** [(https://filiperod-byte.github.io/ai-by-auchan/)]
 
 ---
 
@@ -36,7 +36,7 @@ A aplicação funciona como uma PWA (Progressive Web App). Para a melhor experi�
 A gestão de lojas e assistentes é feita através da própria aplicação, gerando um ficheiro de configuração que deve ser atualizado aqui no GitHub.
 
 ### 1. Aceder ao Admin
-* Toque **5 vezes seguidas** no logótipo (Pássaro/AI) no topo da App.
+* Toque **5 vezes seguidas** no logótipo (AI by Auchan) no topo da App.
 * Insira a senha de administrador.
 
 ### 2. Fluxo de Atualização (Como atualizar os dados)
@@ -66,3 +66,4 @@ Como este projeto não usa base de dados online, o processo de atualização é:
 * HTML5 / CSS3 / JavaScript (Vanilla)
 * PWA (Progressive Web App)
 * GitHub Pages (Hospedagem)
+* Desenvolvido por IAD3.0 no G2G
