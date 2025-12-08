@@ -4,197 +4,47 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>AI by Auchan - App & Admin</title>
-
   <link rel="manifest" href="manifest.json">
+
+  <script src="config.js?v=1.1"></script>
 
   <style>
     /* --- ESTILOS GERAIS --- */
-    body {
-      margin: 0;
-      font-family: "Roboto", Arial, sans-serif;
-      background: linear-gradient(135deg, #d63a3e 0%, #6a1b9a 100%);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      color: #fff;
-    }
-
-    .app {
-      width: min(420px, 95%);
-      padding: 1rem;
-      box-sizing: border-box;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      min-height: 90vh;
-    }
-
+    body { margin: 0; font-family: "Roboto", Arial, sans-serif; background: linear-gradient(135deg, #d63a3e 0%, #6a1b9a 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #fff; }
+    .app { width: min(420px, 95%); padding: 1rem; box-sizing: border-box; text-align: center; display: flex; flex-direction: column; min-height: 90vh; }
     .content-wrap { flex: 1; }
-
-    .logo {
-      width: 180px;
-      margin: 0 auto 0.8rem auto;
-      display: block;
-      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25));
-      cursor: pointer;
-    }
-
-    .loja-info {
-      font-size: .85rem;
-      margin-bottom: 0.8rem;
-      opacity: 0.9;
-    }
-
-    .change-store {
-      font-size: .75rem;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
-      margin-bottom: 1rem;
-    }
-
-    .btn {
-      background: rgba(255, 255, 255, 0.12);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 20px;
-      padding: .5rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: .4rem;
-      cursor: pointer;
-      transition: transform .15s ease-in-out, box-shadow .15s;
-      min-height: 160px;
-      backdrop-filter: blur(8px);
-    }
-
-    .btn:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
-      background: rgba(255, 255, 255, 0.18);
-    }
-
-    .btn img {
-      width: 100%;
-      max-width: 150px;
-      object-fit: contain;
-      border-radius: 14px;
-      user-select: none;
-    }
-
-    .label {
-      font-size: .9rem;
-      font-weight: bold;
-      color: #fff;
-      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
-    }
-
-    .app-footer {
-        margin-top: 20px;
-        font-size: 0.7rem;
-        opacity: 0.6;
-        font-family: monospace;
-    }
-
-    /* --- OVERLAYS --- */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-      overflow-y: auto;
-    }
-
-    .overlay-box {
-      background: #ffffff;
-      color: #333;
-      border-radius: 18px;
-      padding: 1.5rem 1.2rem;
-      width: min(380px, 90%);
-      box-shadow: 0 10px 25px rgba(0,0,0,.35);
-      text-align: center;
-      margin: 2rem 0;
-    }
-
-    .overlay-box h2 {
-      margin-top: 0;
-      margin-bottom: .8rem;
-      font-size: 1.2rem;
-      color: #d63a3e;
-    }
-
-    .overlay-box select, .overlay-box input {
-      width: 100%;
-      padding: .6rem;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: .95rem;
-      margin-bottom: 0.8rem;
-      box-sizing: border-box;
-    }
-
-    .overlay-box button {
-      width: 100%;
-      padding: .6rem;
-      border-radius: 999px;
-      border: none;
-      font-size: 1rem;
-      font-weight: 600;
-      background: linear-gradient(135deg, #d63a3e, #6a1b9a);
-      color: #fff;
-      cursor: pointer;
-      margin-bottom: 0.5rem;
-    }
-
+    .logo { width: 180px; margin: 0 auto 0.8rem auto; display: block; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25)); cursor: pointer; }
+    .loja-info { font-size: .85rem; margin-bottom: 0.8rem; opacity: 0.9; }
+    .change-store { font-size: .75rem; text-decoration: underline; cursor: pointer; }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; }
+    .btn { background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: .5rem; display: flex; flex-direction: column; align-items: center; gap: .4rem; cursor: pointer; transition: transform .15s ease-in-out, box-shadow .15s; min-height: 160px; backdrop-filter: blur(8px); }
+    .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25); background: rgba(255, 255, 255, 0.18); }
+    .btn img { width: 100%; max-width: 150px; object-fit: contain; border-radius: 14px; user-select: none; }
+    .label { font-size: .9rem; font-weight: bold; color: #fff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25); }
+    .app-footer { margin-top: 20px; font-size: 0.7rem; opacity: 0.6; font-family: monospace; }
+    
+    /* OVERLAYS */
+    .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 999; overflow-y: auto; }
+    .overlay-box { background: #ffffff; color: #333; border-radius: 18px; padding: 1.5rem 1.2rem; width: min(380px, 90%); box-shadow: 0 10px 25px rgba(0,0,0,.35); text-align: center; margin: 2rem 0; }
+    .overlay-box h2 { margin-top: 0; margin-bottom: .8rem; font-size: 1.2rem; color: #d63a3e; }
+    .overlay-box select, .overlay-box input { width: 100%; padding: .6rem; border-radius: 10px; border: 1px solid #ccc; font-size: .95rem; margin-bottom: 0.8rem; box-sizing: border-box; }
+    .overlay-box button { width: 100%; padding: .6rem; border-radius: 999px; border: none; font-size: 1rem; font-weight: 600; background: linear-gradient(135deg, #d63a3e, #6a1b9a); color: #fff; cursor: pointer; margin-bottom: 0.5rem; }
     .overlay-box button.secondary { background: #eee; color: #333; }
     .overlay-box button.danger { background: #ff4444; color: white; }
     .overlay-box button.cancel { background: #777; color: white; }
-    
-    /* Estilo para o botão de upload pequeno */
-    .file-btn {
-        width: auto !important;
-        padding: 0.6rem 1rem !important;
-        background: #666 !important;
-        white-space: nowrap;
-    }
+    .file-btn { width: auto !important; padding: 0.6rem 1rem !important; background: #666 !important; white-space: nowrap; }
 
-    /* --- ADMIN TABS --- */
+    /* ADMIN TABS */
     .admin-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 1rem; }
     .admin-tab { padding: 5px 10px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; }
     .admin-tab.active { border-bottom: 2px solid #d63a3e; color: #d63a3e; }
     .admin-list { text-align: left; max-height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px; font-size: 0.85rem; }
-    
-    .admin-item { 
-        display: flex; 
-        justify-content: space-between; 
-        align-items: center; 
-        padding: 8px; 
-        border-bottom: 1px solid #eee; 
-    }
+    .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee; }
     .admin-item-text { flex-grow: 1; cursor: pointer; }
     .admin-item-text:hover { color: #d63a3e; font-weight: bold; }
     .admin-item button { width: auto; padding: 2px 8px; font-size: 0.7rem; margin: 0; background: #ff4444; margin-left: 10px;}
     
-    #admin-export-area { display: none; margin-top: 10px; }
-    #export-textarea { width: 100%; height: 100px; font-size: 0.7rem; }
-    
-    .version-control {
-        background: #f9f9f9;
-        padding: 10px;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        text-align: left;
-        border: 1px solid #eee;
-    }
+    .version-control { background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: left; border: 1px solid #eee; }
     .version-control label { font-size: 0.8rem; color: #666; display: block; margin-bottom: 3px; }
   </style>
 </head>
@@ -230,7 +80,7 @@
       <div class="admin-tabs">
         <div class="admin-tab active" onclick="switchAdminTab('lojas')">Lojas</div>
         <div class="admin-tab" onclick="switchAdminTab('assistentes')">Assistentes</div>
-        <div class="admin-tab" onclick="switchAdminTab('exportar')">Guardar/Exportar</div>
+        <div class="admin-tab" onclick="switchAdminTab('exportar')">Guardar</div>
       </div>
 
       <div id="admin-tab-lojas">
@@ -242,22 +92,18 @@
           <option value="Prox">Prox</option>
           <option value="Servicos">Serviços</option>
         </select>
-        
         <div style="display:flex; gap:5px;">
             <input type="text" id="admin-nova-loja-cod" placeholder="Cod" maxlength="3" style="width: 80px;">
             <input type="text" id="admin-nova-loja-nome" placeholder="Nome da Loja" style="flex:1;">
         </div>
-
         <button onclick="adminAddLoja()">Adicionar Loja</button>
       </div>
 
       <div id="admin-tab-assistentes" style="display:none;">
         <div class="admin-list" id="admin-assistentes-list"></div>
-        
         <h3 id="admin-ast-title">Adicionar Assistente</h3>
         <small style="display:block; margin-bottom:10px; color:#666;">Clica na lista acima para editar</small>
-
-        <input type="text" id="admin-ast-nome" placeholder="ID Interno (Nome)">
+        
         <input type="text" id="admin-ast-label" placeholder="Nome no Botão (Label)">
         <input type="text" id="admin-ast-url" placeholder="URL Destino">
         
@@ -266,8 +112,6 @@
             <input type="file" id="admin-file-picker" style="display:none" onchange="selecionarImagemArquivo()">
             <button class="file-btn" onclick="document.getElementById('admin-file-picker').click()" style="margin-bottom:0.8rem;" title="Escolher ficheiro">📂</button>
         </div>
-        
-        <label style="display:block; text-align:left; font-size:0.8rem; margin-top:5px; color:#666;">Formato e Loja:</label>
         <div style="display:flex; gap:5px; margin-bottom: 0.8rem;">
            <select id="admin-ast-formato" style="margin-bottom:0;" onchange="atualizarSelectLojasAdmin()">
                 <option value="*">Qualquer Formato (*)</option>
@@ -276,7 +120,6 @@
                 <option value="*">Qualquer Loja (*)</option>
            </select>
         </div>
-
         <div style="display: flex; gap: 5px;">
             <button onclick="adminSaveAssistente()" id="btn-save-ast">Adicionar Assistente</button>
             <button onclick="cancelarEdicao()" id="btn-cancel-ast" class="cancel" style="display:none;">Cancelar</button>
@@ -285,7 +128,7 @@
 
       <div id="admin-tab-exportar" style="display:none;">
         <p style="font-size: 0.85rem; margin-bottom: 10px;">
-            Ao gerar o código, o sistema vai <b>corrigir automaticamente</b> os formatos (ex: muda "SUPER" para "Super").
+            Gera e baixa o ficheiro <b>config.js</b>. Depois, faz upload apenas deste ficheiro para o GitHub.
         </p>
         
         <div class="version-control">
@@ -296,8 +139,7 @@
             <input type="text" id="input-nova-versao" style="width: 100%; margin-bottom:0;" placeholder="Ex: v1.1.1">
         </div>
 
-        <button onclick="gerarExportacao()">Gerar Código (Limpar e Atualizar)</button>
-        <textarea id="export-textarea"></textarea>
+        <button onclick="baixarConfiguracao()">📥 Baixar Ficheiro de Configuração</button>
         <button class="danger" onclick="limparTudoAdmin()">⚠️ Resetar Fábrica</button>
       </div>
 
@@ -315,850 +157,297 @@
         </div>
         <div class="grid"></div>
     </div>
-    
-    <div class="app-footer" id="app-footer-version">
-        Powered By G2G IAD3.0 ...
-    </div>
+    <div class="app-footer" id="app-footer-version">Carregando...</div>
   </div>
 
   <script>
-    /*******************************************************
-     * SECÇÃO LÓGICA DO SISTEMA
-     *******************************************************/
-    
+    /* --- LÓGICA PRINCIPAL --- */
     const FORM_BASE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeGFYjlrXC27y-a8sXgdnxKD4XzT8yImmL_0CZRXP26NwjQhQ/formResponse';
     const ENTRY_LOJA = 'entry.1749648688';
     const ENTRY_ASSISTENTE = 'entry.182917282';
     const FORMATO_KEY = 'formatoSelecionado';
     const LOJA_KEY = 'lojaSelecionada';
+    const ADMIN_PASSWORD = "9602"; 
 
     let STATE = { lojas: [], assistentes: [] };
     let editingAssistenteIndex = -1; 
+    let DADOS_PADRAO_FALLBACK = { lojas: [], assistentes: [] };
 
     window.addEventListener('load', () => {
       carregarDados();
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('service-worker.js')
-          .then(() => console.log('SW ok')).catch(console.log);
-      }
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(console.log);
     });
 
     function carregarDados() {
-      const dadosLocais = localStorage.getItem(STORAGE_DATA_KEY);
-      if (dadosLocais) {
-        STATE = JSON.parse(dadosLocais);
-      } else {
-        STATE = JSON.parse(JSON.stringify(DADOS_PADRAO));
+      if (typeof DADOS_PADRAO === 'undefined') {
+          console.warn("Ficheiro config.js não encontrado.");
+          DADOS_PADRAO = DADOS_PADRAO_FALLBACK;
+          STORAGE_DATA_KEY = "v0.0";
       }
+      const dadosLocais = localStorage.getItem(STORAGE_DATA_KEY);
+      if (dadosLocais) { STATE = JSON.parse(dadosLocais); } 
+      else { STATE = JSON.parse(JSON.stringify(DADOS_PADRAO)); }
       renderizarApp();
       atualizarVersaoRodape();
     }
 
     function atualizarVersaoRodape() {
-        const versao = STORAGE_DATA_KEY.split('_')[1] || 'vX.X';
+        let versao = "Desconhecida";
+        if (typeof STORAGE_DATA_KEY !== 'undefined') { versao = STORAGE_DATA_KEY.split('_')[1] || 'vX.X'; }
         document.getElementById('app-footer-version').textContent = `Powered By G2G IAD3.0 ${versao.toUpperCase()}`;
     }
 
-    function guardarDadosLocais() {
-      localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(STATE));
-      renderizarApp();
-    }
-
-    function renderizarApp() {
-      atualizarSelectFormato();
-      atualizarUILoja();
-    }
-
-    function formatarTextoBonito(texto) {
-        if (!texto || texto === "*") return texto;
-        return texto.charAt(0).toUpperCase() + texto.slice(1).toLowerCase();
-    }
-
-    function ordenarLojas(a, b) {
-        return a.loja.localeCompare(b.loja, undefined, { numeric: true, sensitivity: 'base' });
-    }
-
-    function obterFormatosUnicos() {
-        const formatosRaw = STATE.lojas.map(l => l.formato ? formatarTextoBonito(l.formato) : "");
-        const formatosUnicos = [...new Set(formatosRaw)].filter(f => f !== "");
-        return formatosUnicos.sort();
+    function guardarDadosLocais() { localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(STATE)); renderizarApp(); }
+    function renderizarApp() { atualizarSelectFormato(); atualizarUILoja(); }
+    function formatarTextoBonito(t) { if (!t || t === "*") return t; return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase(); }
+    function ordenarLojas(a, b) { return a.loja.localeCompare(b.loja, undefined, { numeric: true, sensitivity: 'base' }); }
+    function obterFormatosUnicos() { 
+        const raw = STATE.lojas.map(l => l.formato ? formatarTextoBonito(l.formato) : "");
+        return [...new Set(raw)].filter(f => f !== "").sort();
     }
 
     function atualizarSelectFormato() {
-      const select = document.getElementById('formato-select');
-      const valAtual = select.value;
-      select.innerHTML = '<option value="" disabled selected>Seleciona o formato…</option>';
-      
-      const formatos = obterFormatosUnicos();
-      formatos.forEach(fmt => {
-        const opt = document.createElement('option');
-        opt.value = fmt;
-        opt.textContent = fmt;
-        select.appendChild(opt);
-      });
-      if (valAtual) select.value = valAtual;
+      const s = document.getElementById('formato-select'); const val = s.value;
+      s.innerHTML = '<option value="" disabled selected>Seleciona o formato…</option>';
+      obterFormatosUnicos().forEach(f => { const o = document.createElement('option'); o.value = f; o.textContent = f; s.appendChild(o); });
+      if (val) s.value = val;
     }
 
     function atualizarSelectLojas() {
-      const formato = document.getElementById('formato-select').value;
-      const selectLoja = document.getElementById('loja-select');
-      selectLoja.innerHTML = '<option value="" disabled selected>Seleciona a loja…</option>';
-      if (!formato) return;
-
-      const formatoNorm = formato.toUpperCase();
-      const lojasDoFormato = STATE.lojas.filter(l => (l.formato || '').toUpperCase() === formatoNorm);
-      
-      lojasDoFormato.sort(ordenarLojas);
-
-      lojasDoFormato.forEach(item => {
-        const opt = document.createElement('option');
-        opt.value = item.loja;
-        opt.textContent = item.loja;
-        selectLoja.appendChild(opt);
-      });
+      const fmt = document.getElementById('formato-select').value;
+      const s = document.getElementById('loja-select');
+      s.innerHTML = '<option value="" disabled selected>Seleciona a loja…</option>';
+      if (!fmt) return;
+      const fmtN = fmt.toUpperCase();
+      const ljs = STATE.lojas.filter(l => (l.formato || '').toUpperCase() === fmtN);
+      ljs.sort(ordenarLojas);
+      ljs.forEach(l => { const o = document.createElement('option'); o.value = l.loja; o.textContent = l.loja; s.appendChild(o); });
     }
 
     function atualizarUILoja() {
-      const formato = localStorage.getItem(FORMATO_KEY);
-      const loja = localStorage.getItem(LOJA_KEY);
-      const span = document.getElementById('loja-nome');
-      const overlay = document.getElementById('loja-overlay');
-
-      if (formato && loja) {
-        span.textContent = `${formatarTextoBonito(formato)} – ${loja}`;
-        overlay.style.display = 'none';
-        renderizarGridAssistentes(formato, loja);
-      } else {
-        span.textContent = 'a definir…';
-        overlay.style.display = 'flex';
-        document.querySelector('.grid').innerHTML = '';
-      }
+      const f = localStorage.getItem(FORMATO_KEY); const l = localStorage.getItem(LOJA_KEY);
+      const span = document.getElementById('loja-nome'); const over = document.getElementById('loja-overlay');
+      if (f && l) { span.textContent = `${formatarTextoBonito(f)} – ${l}`; over.style.display = 'none'; renderizarGridAssistentes(f, l); } 
+      else { span.textContent = 'a definir…'; over.style.display = 'flex'; document.querySelector('.grid').innerHTML = ''; }
     }
 
-    function renderizarGridAssistentes(formatoUser, lojaUser) {
-      const grid = document.querySelector('.grid');
-      grid.innerHTML = '';
-      const formatoNorm = formatoUser.toUpperCase();
-      const lojaNorm = lojaUser.toUpperCase();
-
+    function renderizarGridAssistentes(uf, ul) {
+      const grid = document.querySelector('.grid'); grid.innerHTML = '';
+      const ufN = uf.toUpperCase(); const ulN = ul.toUpperCase();
       const matches = STATE.assistentes.filter(a => {
-        const f = (a.formato || '').toUpperCase();
-        const l = (a.loja || '').toUpperCase();
-        const formatoOk = (f === '*' || f === formatoNorm);
-        const lojaOk = (l === '*' || l === lojaNorm);
-        return formatoOk && lojaOk;
+        const f = (a.formato || '').toUpperCase(); const l = (a.loja || '').toUpperCase();
+        return (f === '*' || f === ufN) && (l === '*' || l === ulN);
       });
-      
-      // ORDENAÇÃO ALFABÉTICA DOS ASSISTENTES
       matches.sort((a, b) => a.label.localeCompare(b.label));
-
-      if(matches.length === 0) {
-        grid.innerHTML = '<p style="grid-column: span 2; opacity: 0.7;">Nenhum assistente disponível.</p>';
-        return;
-      }
-
+      if(matches.length === 0) { grid.innerHTML = '<p style="grid-column: span 2; opacity: 0.7;">Nenhum assistente disponível.</p>'; return; }
       matches.forEach(a => {
-        const btn = document.createElement('div');
-        btn.className = 'btn';
+        const btn = document.createElement('div'); btn.className = 'btn';
         btn.onclick = () => abrirAssistente(a.nome, a.url);
-
-        const img = document.createElement('img');
-        img.src = a.icone || 'AibyAuchan.png';
-        img.onerror = function() { this.src = 'AibyAuchan.png'; }; 
-        img.alt = a.nome;
-
-        const lbl = document.createElement('div');
-        lbl.className = 'label';
-        lbl.textContent = a.label || a.nome;
-
-        btn.appendChild(img);
-        btn.appendChild(lbl);
-        grid.appendChild(btn);
+        const img = document.createElement('img'); img.src = a.icone || 'AibyAuchan.png'; img.onerror = function() { this.src = 'AibyAuchan.png'; };
+        const lbl = document.createElement('div'); lbl.className = 'label'; lbl.textContent = a.label || a.nome;
+        btn.appendChild(img); btn.appendChild(lbl); grid.appendChild(btn);
       });
     }
 
     function guardarLoja() {
-      const formato = document.getElementById('formato-select').value;
-      const loja = document.getElementById('loja-select').value;
-      if (!formato || !loja) return alert('Escolhe formato e loja.');
-      localStorage.setItem(FORMATO_KEY, formato);
-      localStorage.setItem(LOJA_KEY, loja);
-      atualizarUILoja();
+      const f = document.getElementById('formato-select').value; const l = document.getElementById('loja-select').value;
+      if (!f || !l) return alert('Escolhe formato e loja.');
+      localStorage.setItem(FORMATO_KEY, f); localStorage.setItem(LOJA_KEY, l); atualizarUILoja();
     }
-
     function forcarEscolhaLoja() {
-      const overlay = document.getElementById('loja-overlay');
-      document.getElementById('formato-select').value = "";
-      document.getElementById('loja-select').innerHTML = '<option value="" disabled selected>Seleciona a loja…</option>';
-      overlay.style.display = 'flex';
+      document.getElementById('formato-select').value = ""; document.getElementById('loja-select').innerHTML = '<option value="" disabled selected>Seleciona a loja…</option>';
+      document.getElementById('loja-overlay').style.display = 'flex';
+    }
+    function abrirAssistente(n, u) {
+      const l = localStorage.getItem(LOJA_KEY) || 'Sem loja';
+      const p = new URLSearchParams(); p.append(ENTRY_LOJA, l); p.append(ENTRY_ASSISTENTE, n);
+      fetch(FORM_BASE_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: p.toString() }).catch(e=>{});
+      window.location.href = u;
     }
 
-    function abrirAssistente(nomeInterno, urlDestino) {
-      const loja = localStorage.getItem(LOJA_KEY) || 'Sem loja';
-      const payload = new URLSearchParams();
-      payload.append(ENTRY_LOJA, loja);
-      payload.append(ENTRY_ASSISTENTE, nomeInterno);
-      fetch(FORM_BASE_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: payload.toString() }).catch(e=>console.log(e));
-      window.location.href = urlDestino;
-    }
-
-    // -- LOGIN e ADMIN LOGIC --
-    let logoClicks = 0;
-    document.getElementById('logo-trigger').addEventListener('click', () => {
-      logoClicks++;
-      if (logoClicks === 5) {
-        logoClicks = 0;
-        abrirLogin(); 
-      }
-    });
-
-    function abrirLogin() {
-        document.getElementById('login-overlay').style.display = 'flex';
-        const input = document.getElementById('login-password-input');
-        input.value = '';
-        setTimeout(() => input.focus(), 100);
-    }
-
-    function fecharLogin() {
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('login-password-input').value = '';
-    }
-
-    function verificarSenhaLogin() {
-        const pass = document.getElementById('login-password-input').value;
-        if (pass === ADMIN_PASSWORD) {
-            fecharLogin();
-            abrirAdmin();
-        } else {
-            alert("Senha incorreta.");
-            document.getElementById('login-password-input').value = '';
-        }
-    }
-
-    function abrirAdmin() {
-      document.getElementById('admin-overlay').style.display = 'flex';
-      renderizarAdminListas();
-      atualizarDropdownsAdminInicial(); 
-    }
-    function fecharAdmin() { 
-        document.getElementById('admin-overlay').style.display = 'none'; 
-        cancelarEdicao(); 
-    }
-    
+    /* --- ADMIN --- */
+    let lc = 0;
+    document.getElementById('logo-trigger').addEventListener('click', () => { lc++; if (lc === 5) { lc=0; abrirLogin(); } });
+    function abrirLogin() { document.getElementById('login-overlay').style.display = 'flex'; setTimeout(()=>document.getElementById('login-password-input').focus(),100); }
+    function fecharLogin() { document.getElementById('login-overlay').style.display = 'none'; document.getElementById('login-password-input').value=''; }
+    function verificarSenhaLogin() { if(document.getElementById('login-password-input').value === ADMIN_PASSWORD) { fecharLogin(); abrirAdmin(); } else { alert("Senha incorreta."); } }
+    function abrirAdmin() { document.getElementById('admin-overlay').style.display = 'flex'; renderizarAdminListas(); atualizarDropdownsAdminInicial(); }
+    function fecharAdmin() { document.getElementById('admin-overlay').style.display = 'none'; cancelarEdicao(); }
     function switchAdminTab(t) {
       document.querySelectorAll('.admin-tab').forEach(x => x.classList.remove('active'));
-      document.getElementById('admin-tab-lojas').style.display = 'none';
-      document.getElementById('admin-tab-assistentes').style.display = 'none';
-      document.getElementById('admin-tab-exportar').style.display = 'none';
-      document.getElementById(`admin-tab-${t}`).style.display = 'block';
-      
+      ['lojas','assistentes','exportar'].forEach(id => document.getElementById(`admin-tab-${id}`).style.display='none');
+      document.getElementById(`admin-tab-${t}`).style.display='block';
       if(t==='lojas') document.querySelectorAll('.admin-tab')[0].classList.add('active');
-      if(t==='assistentes') {
-          document.querySelectorAll('.admin-tab')[1].classList.add('active');
-          atualizarDropdownsAdminInicial();
-      }
-      if(t==='exportar') {
-          document.querySelectorAll('.admin-tab')[2].classList.add('active');
-          atualizarSugestaoVersao();
-      }
-    }
-
-    // --- FILE PICKER LOGIC ---
-    function selecionarImagemArquivo() {
-        const input = document.getElementById('admin-file-picker');
-        const textBox = document.getElementById('admin-ast-icone');
-        
-        if (input.files && input.files[0]) {
-            // Pega apenas o nome do ficheiro, ex: "imagem.jpg"
-            textBox.value = input.files[0].name;
-        }
+      if(t==='assistentes') { document.querySelectorAll('.admin-tab')[1].classList.add('active'); atualizarDropdownsAdminInicial(); }
+      if(t==='exportar') { document.querySelectorAll('.admin-tab')[2].classList.add('active'); atualizarSugestaoVersao(); }
     }
 
     function renderizarAdminListas() {
-      const lList = document.getElementById('admin-lojas-list');
-      lList.innerHTML = '';
-      
-      const lojasOrdenadas = [...STATE.lojas].sort(ordenarLojas);
-
-      lojasOrdenadas.forEach((l) => {
-        const originalIndex = STATE.lojas.indexOf(l);
+      const ll = document.getElementById('admin-lojas-list'); ll.innerHTML = '';
+      const lSorted = [...STATE.lojas].sort(ordenarLojas);
+      lSorted.forEach(l => {
+        const idx = STATE.lojas.indexOf(l);
         const d = document.createElement('div'); d.className='admin-item';
-        d.innerHTML = `<span>${formatarTextoBonito(l.formato)} - ${l.loja}</span><button onclick="adminRemoverLoja(${originalIndex})">X</button>`;
-        lList.appendChild(d);
+        d.innerHTML = `<span>${formatarTextoBonito(l.formato)} - ${l.loja}</span><button onclick="adminRemoverLoja(${idx})">X</button>`;
+        ll.appendChild(d);
       });
-
-      const aList = document.getElementById('admin-assistentes-list');
-      aList.innerHTML = '';
-      
-      // COPIA E ORDENA OS ASSISTENTES PARA A LISTA
-      const assistentesOrdenados = [...STATE.assistentes].sort((a,b) => a.label.localeCompare(b.label));
-
-      assistentesOrdenados.forEach((a) => {
-        // Encontra o índice no array original
-        const originalIndex = STATE.assistentes.indexOf(a);
-        
+      const al = document.getElementById('admin-assistentes-list'); al.innerHTML = '';
+      const aSorted = [...STATE.assistentes].sort((a,b)=>a.label.localeCompare(b.label));
+      aSorted.forEach(a => {
+        const idx = STATE.assistentes.indexOf(a);
         const d = document.createElement('div'); d.className='admin-item';
-        const infoExtra = `(${a.formato})(${a.loja})`;
-        
-        d.innerHTML = `
-            <div class="admin-item-text" onclick="prepararEdicao(${originalIndex})">
-                ${a.label} <small style="opacity:0.7">${infoExtra}</small>
-            </div>
-            <button onclick="adminRemoverAssistente(event, ${originalIndex})">X</button>
-        `;
-        aList.appendChild(d);
+        d.innerHTML = `<div class="admin-item-text" onclick="prepararEdicao(${idx})">${a.label} <small style="opacity:0.7">(${a.formato})(${a.loja})</small></div><button onclick="adminRemoverAssistente(event, ${idx})">X</button>`;
+        al.appendChild(d);
       });
     }
 
     function atualizarDropdownsAdminInicial() {
-        const selFmt = document.getElementById('admin-ast-formato');
-        const valAnterior = selFmt.value;
-
-        selFmt.innerHTML = '<option value="*">Qualquer Formato (*)</option>';
-        const formatos = obterFormatosUnicos(); 
-        
-        formatos.forEach(f => {
-            const opt = document.createElement('option');
-            opt.value = f;
-            opt.textContent = f;
-            selFmt.appendChild(opt);
-        });
-        
-        if (valAnterior && (formatos.includes(valAnterior) || valAnterior === '*')) {
-            selFmt.value = valAnterior;
-        }
-        atualizarSelectLojasAdmin();
+       const s = document.getElementById('admin-ast-formato'); const prev = s.value;
+       s.innerHTML = '<option value="*">Qualquer Formato (*)</option>';
+       obterFormatosUnicos().forEach(f => { const o = document.createElement('option'); o.value=f; o.textContent=f; s.appendChild(o); });
+       if(prev) s.value = prev;
+       atualizarSelectLojasAdmin();
     }
-
     function atualizarSelectLojasAdmin() {
-        const selFmt = document.getElementById('admin-ast-formato');
-        const selLoja = document.getElementById('admin-ast-loja');
-        const formatoSelecionado = selFmt.value;
-        const lojaAnterior = selLoja.value;
-
-        selLoja.innerHTML = '<option value="*">Qualquer Loja (*)</option>';
-
-        let lojasFiltradas = [];
-        if (formatoSelecionado === '*') {
-            lojasFiltradas = [...STATE.lojas];
-        } else {
-            const formatoNorm = formatoSelecionado.toUpperCase();
-            lojasFiltradas = STATE.lojas.filter(l => (l.formato || '').toUpperCase() === formatoNorm);
-        }
-
-        lojasFiltradas.sort(ordenarLojas);
-
-        lojasFiltradas.forEach(l => {
-            const opt = document.createElement('option');
-            opt.value = l.loja;
-            opt.textContent = l.loja;
-            selLoja.appendChild(opt);
-        });
-
-        let existe = false;
-        for(let i=0; i<selLoja.options.length; i++) {
-            if(selLoja.options[i].value === lojaAnterior) existe = true;
-        }
-        if(existe) selLoja.value = lojaAnterior;
-        else selLoja.value = "*";
+       const sf = document.getElementById('admin-ast-formato'); const sl = document.getElementById('admin-ast-loja');
+       const prev = sl.value; sl.innerHTML = '<option value="*">Qualquer Loja (*)</option>';
+       let list = [];
+       if(sf.value === '*') list = [...STATE.lojas];
+       else list = STATE.lojas.filter(l => (l.formato||'').toUpperCase() === sf.value.toUpperCase());
+       list.sort(ordenarLojas);
+       list.forEach(l => { const o = document.createElement('option'); o.value=l.loja; o.textContent=l.loja; sl.appendChild(o); });
+       sl.value = (Array.from(sl.options).some(o=>o.value===prev)) ? prev : '*';
     }
 
-    function prepararEdicao(index) {
-        editingAssistenteIndex = index;
-        const ast = STATE.assistentes[index];
-        
-        document.getElementById('admin-ast-nome').value = ast.nome;
-        document.getElementById('admin-ast-label').value = ast.label;
-        document.getElementById('admin-ast-url').value = ast.url;
-        document.getElementById('admin-ast-icone').value = ast.icone;
-        
-        document.getElementById('admin-ast-formato').value = formatarTextoBonito(ast.formato);
-        atualizarSelectLojasAdmin();
-        document.getElementById('admin-ast-loja').value = ast.loja;
-
-        document.getElementById('admin-ast-title').innerText = "Editar Assistente";
-        document.getElementById('btn-save-ast').innerText = "Atualizar Assistente";
-        document.getElementById('btn-cancel-ast').style.display = "block";
-    }
-
-    function cancelarEdicao() {
-        editingAssistenteIndex = -1;
-        document.getElementById('admin-ast-nome').value = '';
-        document.getElementById('admin-ast-label').value = '';
-        document.getElementById('admin-ast-url').value = '';
-        document.getElementById('admin-ast-icone').value = '';
-        document.getElementById('admin-ast-formato').value = '*';
-        
-        atualizarSelectLojasAdmin();
-        document.getElementById('admin-ast-loja').value = '*';
-
-        document.getElementById('admin-ast-title').innerText = "Adicionar Assistente";
-        document.getElementById('btn-save-ast').innerText = "Adicionar Assistente";
-        document.getElementById('btn-cancel-ast').style.display = "none";
+    function selecionarImagemArquivo() {
+        const i = document.getElementById('admin-file-picker');
+        if (i.files && i.files[0]) document.getElementById('admin-ast-icone').value = i.files[0].name;
     }
 
     function adminAddLoja() {
-      let f = document.getElementById('admin-novo-formato').value;
-      const cod = document.getElementById('admin-nova-loja-cod').value.trim(); 
-      const nome = document.getElementById('admin-nova-loja-nome').value.trim(); 
-      
-      if (!cod || !nome) return alert("Preenche o código e o nome.");
-      
-      const lojaCompleta = `${cod}-${nome}`;
-      f = formatarTextoBonito(f);
-
-      const existe = STATE.lojas.some(l => l.formato === f && l.loja === lojaCompleta);
-      if (existe) {
-          return alert("Esta loja já existe!");
-      }
-
-      STATE.lojas.push({formato:f, loja:lojaCompleta});
-      guardarDadosLocais(); 
-      renderizarAdminListas(); 
-      atualizarDropdownsAdminInicial();
-      document.getElementById('admin-nova-loja-cod').value = '';
-      document.getElementById('admin-nova-loja-nome').value = '';
+        let f = document.getElementById('admin-novo-formato').value;
+        const c = document.getElementById('admin-nova-loja-cod').value.trim();
+        const n = document.getElementById('admin-nova-loja-nome').value.trim();
+        if(!c || !n) return alert("Preenche código e nome.");
+        f = formatarTextoBonito(f); const lc = `${c}-${n}`;
+        if(STATE.lojas.some(l=>l.formato===f && l.loja===lc)) return alert("Loja já existe.");
+        STATE.lojas.push({formato:f, loja:lc});
+        guardarDadosLocais(); renderizarAdminListas(); atualizarDropdownsAdminInicial();
+        document.getElementById('admin-nova-loja-cod').value=''; document.getElementById('admin-nova-loja-nome').value='';
     }
-    
-    function adminRemoverLoja(i) { 
-        if(confirm("Apagar?")) { 
-            STATE.lojas.splice(i,1); 
-            guardarDadosLocais(); 
-            renderizarAdminListas(); 
-            atualizarDropdownsAdminInicial(); 
-        } 
+    function adminRemoverLoja(i) { if(confirm("Apagar?")) { STATE.lojas.splice(i,1); guardarDadosLocais(); renderizarAdminListas(); atualizarDropdownsAdminInicial(); } }
+
+    function prepararEdicao(i) {
+        editingAssistenteIndex = i; const a = STATE.assistentes[i];
+        // Remover admin-ast-nome, usar o label
+        document.getElementById('admin-ast-label').value = a.label;
+        document.getElementById('admin-ast-url').value = a.url;
+        document.getElementById('admin-ast-icone').value = a.icone;
+        document.getElementById('admin-ast-formato').value = formatarTextoBonito(a.formato);
+        atualizarSelectLojasAdmin();
+        document.getElementById('admin-ast-loja').value = a.loja;
+        document.getElementById('admin-ast-title').innerText = "Editar Assistente";
+        document.getElementById('btn-save-ast').innerText = "Atualizar";
+        document.getElementById('btn-cancel-ast').style.display = "block";
     }
-    
+    function cancelarEdicao() {
+        editingAssistenteIndex = -1;
+        ['admin-ast-label','admin-ast-url','admin-ast-icone'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('admin-ast-formato').value='*'; atualizarSelectLojasAdmin();
+        document.getElementById('admin-ast-title').innerText="Adicionar Assistente";
+        document.getElementById('btn-save-ast').innerText="Adicionar";
+        document.getElementById('btn-cancel-ast').style.display="none";
+    }
     function adminSaveAssistente() {
-      const n = document.getElementById('admin-ast-nome').value.trim();
-      const l = document.getElementById('admin-ast-label').value.trim();
-      const u = document.getElementById('admin-ast-url').value.trim();
-      const i = document.getElementById('admin-ast-icone').value.trim();
-      
-      let fm = document.getElementById('admin-ast-formato').value || '*';
-      const lj = document.getElementById('admin-ast-loja').value || '*';
-      
-      if (fm !== '*') fm = formatarTextoBonito(fm);
+        const l = document.getElementById('admin-ast-label').value.trim();
+        const n = l; // Nome = Label (ID interno igual ao nome do botão)
+        const u = document.getElementById('admin-ast-url').value.trim();
+        const i = document.getElementById('admin-ast-icone').value.trim();
+        let f = document.getElementById('admin-ast-formato').value || '*';
+        const loj = document.getElementById('admin-ast-loja').value || '*';
+        if(f !== '*') f = formatarTextoBonito(f);
+        if(!l || !u) return alert("Falta Nome ou URL");
+        
+        const novo = {formato:f, loja:loj, nome:n, label:l, url:u, icone:i};
+        // Check duplicate
+        const dup = STATE.assistentes.some((a, idx) => {
+            if(editingAssistenteIndex === idx) return false;
+            return a.nome===novo.nome && a.label===novo.label && a.url===novo.url && a.formato===novo.formato && a.loja===novo.loja;
+        });
+        if(dup) return alert("Assistente duplicado!");
 
-      if(!n || !u) return alert("Falta ID ou URL");
-      
-      const novoObjeto = {formato:fm, loja:lj, nome:n, label:l||n, url:u, icone:i};
-
-      const duplicado = STATE.assistentes.some((a, index) => {
-          if (editingAssistenteIndex === index) return false; 
-          return a.nome === novoObjeto.nome && 
-                 a.label === novoObjeto.label && 
-                 a.url === novoObjeto.url && 
-                 a.formato === novoObjeto.formato && 
-                 a.loja === novoObjeto.loja;
-      });
-
-      if (duplicado) {
-          return alert("Este assistente já existe (duplicado)!");
-      }
-
-      if (editingAssistenteIndex >= 0) {
-          STATE.assistentes[editingAssistenteIndex] = novoObjeto;
-      } else {
-          STATE.assistentes.push(novoObjeto);
-      }
-
-      guardarDadosLocais(); 
-      renderizarAdminListas();
-      cancelarEdicao(); 
+        if(editingAssistenteIndex >= 0) STATE.assistentes[editingAssistenteIndex] = novo;
+        else STATE.assistentes.push(novo);
+        guardarDadosLocais(); renderizarAdminListas(); cancelarEdicao();
     }
-    
-    function adminRemoverAssistente(event, i) { 
-        event.stopPropagation(); 
-        if(confirm("Apagar este assistente?")) { 
-            STATE.assistentes.splice(i,1); 
-            guardarDadosLocais(); 
-            renderizarAdminListas(); 
-            if(editingAssistenteIndex === i) cancelarEdicao();
-        } 
-    }
-    
-    // -- Lógica de Versão e Exportação --
-    
+    function adminRemoverAssistente(e, i) { e.stopPropagation(); if(confirm("Apagar?")) { STATE.assistentes.splice(i,1); guardarDadosLocais(); renderizarAdminListas(); if(editingAssistenteIndex===i) cancelarEdicao(); } }
+
+    /* --- EXPORTAR CONFIG.JS (CORRIGIDO PARA ESTRUTURA E COMPACTAÇÃO MISTA) --- */
     function atualizarSugestaoVersao() {
-        let versaoStr = STORAGE_DATA_KEY.split('_v')[1]; 
-        document.getElementById('lbl-versao-atual').textContent = "v" + versaoStr;
-        
-        let parts = versaoStr.split('.').map(Number);
-        if (parts.length === 2) {
-            parts.push(0); 
-        }
-        parts[parts.length - 1]++;
-        
-        let novaVersao = "v" + parts.join('.');
-        document.getElementById('input-nova-versao').value = novaVersao;
+        let v = "1.0";
+        if(typeof STORAGE_DATA_KEY !== 'undefined') v = STORAGE_DATA_KEY.split('_v')[1] || "1.0";
+        document.getElementById('lbl-versao-atual').textContent = "v" + v;
+        let p = v.split('.').map(Number); if(p.length===2) p.push(0);
+        p[p.length-1]++;
+        document.getElementById('input-nova-versao').value = "v" + p.join('.');
     }
 
-    function gerarExportacao() {
-      let novaVersaoUser = document.getElementById('input-nova-versao').value.trim();
-      if(novaVersaoUser.startsWith('v')) novaVersaoUser = novaVersaoUser.substring(1);
-      const novaKey = "appConfigData_v" + novaVersaoUser;
-      
-      let output = "";
-      output += `// 2. Versão dos dados (Atualizado automaticamente)\n`;
-      output += `const STORAGE_DATA_KEY = "${novaKey}";\n\n`;
-      output += "// 3. Dados de Fábrica (Formato Compacto)\n";
-      output += "const DADOS_PADRAO = {\n";
-      
-      STATE.lojas.forEach(l => {
-          if(l.formato) l.formato = formatarTextoBonito(l.formato);
-      });
-      STATE.assistentes.forEach(a => {
-          if(a.formato && a.formato !== '*') a.formato = formatarTextoBonito(a.formato);
-      });
+    function baixarConfiguracao() {
+      let vUser = document.getElementById('input-nova-versao').value.trim();
+      if(vUser.startsWith('v')) vUser = vUser.substring(1);
+      const newKey = "appConfigData_v" + vUser;
 
-      // Ordenar antes de exportar
+      // Normaliza e ordena
+      STATE.lojas.forEach(l => { if(l.formato) l.formato = formatarTextoBonito(l.formato); });
+      STATE.assistentes.forEach(a => { if(a.formato && a.formato!=='*') a.formato = formatarTextoBonito(a.formato); });
       STATE.lojas.sort(ordenarLojas);
-      STATE.assistentes.sort((a,b) => a.label.localeCompare(b.label));
+      STATE.assistentes.sort((a,b)=>a.label.localeCompare(b.label));
 
-      output += "  lojas: [\n";
-      STATE.lojas.forEach((l, i) => {
-        let linha = JSON.stringify(l);
-        if (i < STATE.lojas.length - 1) linha += ",";
-        output += "    " + linha + "\n";
-      });
-      output += "  ],\n";
-
-      output += "  assistentes: [\n";
-      STATE.assistentes.forEach((a, i) => {
-        let linha = JSON.stringify(a);
-        if (i < STATE.assistentes.length - 1) linha += ",";
-        output += "    " + linha + "\n";
-      });
-      output += "  ]\n";
+      // CONSTRÓI O FICHEIRO MANUALMENTE PARA FORMATAÇÃO MISTA
+      let content = `// Ficheiro de Configuração Gerado Automaticamente\n`;
+      content += `const STORAGE_DATA_KEY = "${newKey}";\n\n`;
       
-      output += "};";
+      content += `const DADOS_PADRAO = {\n`;
+      
+      // Lojas (Compacto: 1 linha)
+      content += `  lojas: [\n`;
+      STATE.lojas.forEach((l, i) => {
+          let line = JSON.stringify(l);
+          if(i < STATE.lojas.length - 1) line += ",";
+          content += `    ${line}\n`;
+      });
+      content += `  ],\n`;
 
-      const txt = document.getElementById('export-textarea');
-      txt.value = output;
-      txt.select(); 
-      document.execCommand('copy');
-      alert("Código copiado! \n\nCola no index.html.");
+      // Assistentes (Estruturado: Pretty Print)
+      content += `  assistentes: [\n`;
+      STATE.assistentes.forEach((a, i) => {
+          // Pretty print com 4 espaços
+          let block = JSON.stringify(a, null, 4);
+          // Adiciona indentação ao bloco para alinhar com o array
+          block = block.split('\n').map(line => "    " + line).join('\n');
+          
+          if(i < STATE.assistentes.length - 1) block += ",";
+          content += `${block}\n`;
+      });
+      content += `  ]\n`;
+      content += `};\n`;
+
+      const blob = new Blob([content], { type: "text/javascript" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "config.js";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      alert("Ficheiro config.js baixado!\nFaz upload dele para a pasta do GitHub.");
     }
 
     function limparTudoAdmin() {
       if(confirm("Resetar Fábrica?")) { localStorage.removeItem(STORAGE_DATA_KEY); location.reload(); }
     }
-
-
-
-    // 1. Senha para aceder ao menu admin (5 cliques no logo)
-    const ADMIN_PASSWORD = "9602"; 
-
-    /*******************************************************
-     * ⬇️ ÁREA DE CONFIGURAÇÃO - PODE EDITAR AQUI ⬇️
-     *******************************************************/
-
-// 2. Versão dos dados (Atualizado automaticamente)
-const STORAGE_DATA_KEY = "appConfigData_v1.1.10";
-
-// 3. Dados de Fábrica (Formato Compacto)
-const DADOS_PADRAO = {
-  lojas: [
-    {"formato":"Hiper","loja":"008-Gaia"},
-    {"formato":"Hiper","loja":"009-Coimbra"},
-    {"formato":"Hiper","loja":"010-Viseu"},
-    {"formato":"Hiper","loja":"012-Almada"},
-    {"formato":"Hiper","loja":"013-Torres Vedras"},
-    {"formato":"Hiper","loja":"014-Amadora"},
-    {"formato":"Hiper","loja":"016-Matosinhos"},
-    {"formato":"Hiper","loja":"017-Guimarães"},
-    {"formato":"Hiper","loja":"018-Paço de Arcos"},
-    {"formato":"Hiper","loja":"019-Coina"},
-    {"formato":"Hiper","loja":"021-Evora"},
-    {"formato":"Hiper","loja":"022-Cascais Nascente"},
-    {"formato":"Hiper","loja":"023-Portimão"},
-    {"formato":"Hiper","loja":"024-Amoreiras"},
-    {"formato":"Hiper","loja":"024-Amoreiras-Gourmet"},
-    {"formato":"Hiper","loja":"025-Alfragide"},
-    {"formato":"Hiper","loja":"026-Maia"},
-    {"formato":"Hiper","loja":"027-Setúbal"},
-    {"formato":"Hiper","loja":"028-Castelo Branco"},
-    {"formato":"Hiper","loja":"029-Alverca"},
-    {"formato":"Hiper","loja":"030-Santo Tirso"},
-    {"formato":"Hiper","loja":"031-Famalicao"},
-    {"formato":"Hiper","loja":"032-Aveiro"},
-    {"formato":"Hiper","loja":"033-Faro"},
-    {"formato":"Hiper","loja":"034-Figueira da Foz"},
-    {"formato":"Hiper","loja":"035-Gondomar"},
-    {"formato":"Hiper","loja":"036-Vila Real"},
-    {"formato":"Hiper","loja":"038-Sintra"},
-    {"formato":"Hiper","loja":"039-Vila do Conde"},
-    {"formato":"Hiper","loja":"053-Olhão"},
-    {"formato":"Hiper","loja":"062-Eiras"},
-    {"formato":"Hiper","loja":"063-Lagoa"},
-    {"formato":"Prox","loja":"402-UP LX JOÃO XXI"},
-    {"formato":"Prox","loja":"403-UP LX PASCOAL DE MELO"},
-    {"formato":"Prox","loja":"404-UP LX DUQUE AVILA"},
-    {"formato":"Prox","loja":"405-UP RUA DOS PESCADORES"},
-    {"formato":"Prox","loja":"406-UP DAM MONTEIRO-GRAÇA"},
-    {"formato":"Prox","loja":"407-UP D. PEDRO IV-QUELUZ"},
-    {"formato":"Prox","loja":"408-UP C QUINTINHA-CAMPOLIDE"},
-    {"formato":"Prox","loja":"409-UP ALMIRANTE REIS"},
-    {"formato":"Prox","loja":"410-UP PENHA DE FRANCA"},
-    {"formato":"Prox","loja":"411-UP MAJOR NEUTEL ABREU"},
-    {"formato":"Prox","loja":"412-UP PRACA GIL VICENTE-ALMADA"},
-    {"formato":"Prox","loja":"413-UP AV REPUBLICA"},
-    {"formato":"Prox","loja":"414-UP COLUMBANO BORDALO PINHEIRO"},
-    {"formato":"Prox","loja":"416-UP F NAMORA ODIVELAS"},
-    {"formato":"Prox","loja":"417-UP DNUNO ÁLVARES PER-ALMADA"},
-    {"formato":"Prox","loja":"419-UP COMBAT GRANDE GUERRA_ALGES"},
-    {"formato":"Prox","loja":"420-UP PCT JOSÉ FONTANA_BOBADELA"},
-    {"formato":"Prox","loja":"421-UP ALMIRANTE REIS 203"},
-    {"formato":"Prox","loja":"422-UP R DA BENEFICENCIA"},
-    {"formato":"Prox","loja":"423-UP ALM BENTO GONCALVES"},
-    {"formato":"Prox","loja":"424-UP LX LUIS MACEDO"},
-    {"formato":"Prox","loja":"425-UP ALM LUIS QUEIROZ"},
-    {"formato":"Prox","loja":"427-UP ESTRADA BENFICA 418"},
-    {"formato":"Prox","loja":"429-UP ADELAIDE CABETE CARNIDE"},
-    {"formato":"Prox","loja":"430-UP RUA ELIAS GARCIA AMADORA"},
-    {"formato":"Prox","loja":"432-UP PRACETA NOSSA SRA NAVEGANTES"},
-    {"formato":"Prox","loja":"433-UP OSCAR MONTEIRO TORRES"},
-    {"formato":"Prox","loja":"434-UP AV D JOAO II"},
-    {"formato":"Prox","loja":"435-UP RUA JOSE RICARDO"},
-    {"formato":"Prox","loja":"436-UP RUA FERREIRA BORGES"},
-    {"formato":"Prox","loja":"437-UP RUA PEDRO NUNES"},
-    {"formato":"Prox","loja":"438-UP RUA VISCONDE SANTAREM"},
-    {"formato":"Prox","loja":"439-UP CALÇADA DA AJUDA"},
-    {"formato":"Prox","loja":"440-UP ALVARES CABRAL"},
-    {"formato":"Prox","loja":"441-UP FABRICA 1921"},
-    {"formato":"Prox","loja":"442-UP MORAIS SOARES"},
-    {"formato":"Prox","loja":"443-UP C REIS (Cacilhas)"},
-    {"formato":"Prox","loja":"444-UP C.G.GUERRA (VFX)"},
-    {"formato":"Prox","loja":"445-UP CONDE REDONDO"},
-    {"formato":"Prox","loja":"446-UP BJ CARAÇA (PORTO)"},
-    {"formato":"Prox","loja":"447-UP PÇ EXÉRCITO LIBERTADOR"},
-    {"formato":"Prox","loja":"449-UP RUA CAMÕES PORTO"},
-    {"formato":"Prox","loja":"450-UP CAMPO ALEGRE PORTO"},
-    {"formato":"Prox","loja":"451-UP R CAPITÃO LEITÃO ALMADA"},
-    {"formato":"Prox","loja":"452-UP R VENEZUELA PORTO"},
-    {"formato":"Prox","loja":"453-UP R MARECHAL SALDANHA PORTO FOZ"},
-    {"formato":"Prox","loja":"454-UP AV BOAVISTA PORTO"},
-    {"formato":"Prox","loja":"455-UP AV D MANUEL II MAIA"},
-    {"formato":"Prox","loja":"458-UP RINCHOA"},
-    {"formato":"Prox","loja":"459-UP LUMIAR - ALAMEDA DAS LINHAS DE TORRES"},
-    {"formato":"Super","loja":"460-UP TIRES"},
-    {"formato":"Super","loja":"461-UP B. BANHEIRA - RUA LIBERDADE"},
-    {"formato":"Prox","loja":"462-UP LARGO GRAÇA"},
-    {"formato":"Prox","loja":"A01-MA Costa Cabral, Paranhos"},
-    {"formato":"Prox","loja":"A02-MA Nova Seixo, Custóias"},
-    {"formato":"Prox","loja":"A03-MA Pires Lima, Paranhos"},
-    {"formato":"Prox","loja":"A04-MA Liberdade, Braga Centro"},
-    {"formato":"Prox","loja":"A05-MA Marquês Pombal, Póvoa Varzim"},
-    {"formato":"Prox","loja":"A06-MA 9 Abril, Paranhos"},
-    {"formato":"Prox","loja":"A07-MA José Sampaio, Guimarães Centro"},
-    {"formato":"Prox","loja":"A08-MA Firmeza, Bonfim"},
-    {"formato":"Prox","loja":"A09-MA Vila D'Este, Vilar Andorinho"},
-    {"formato":"Prox","loja":"A10-MA Gonçalo Mendes Maia, Pedrouços"},
-    {"formato":"Super","loja":"A11-SU D António Castro Meireles, Ermesinde"},
-    {"formato":"Prox","loja":"A12-MA Dr Fernando Aroso, Matosinhos Centro"},
-    {"formato":"Prox","loja":"A13-MA Praia, Apúlia"},
-    {"formato":"Prox","loja":"A14-MA Lourenço Marques, Ermesinde"},
-    {"formato":"Prox","loja":"A15-MA República, Buarcos"},
-    {"formato":"Prox","loja":"A16-MA Fernandes Tomás, Porto Centro"},
-    {"formato":"Prox","loja":"A17-MA Cedofeita, Porto Centro"},
-    {"formato":"Prox","loja":"A18-MA Pr Exército Libertador, Porto Centro"},
-    {"formato":"Prox","loja":"A19-MA Ferreirinha, Peso Régua"},
-    {"formato":"Super","loja":"A20-SU D Pedro V, Bougado"},
-    {"formato":"Super","loja":"A21-SU José Régio, Ermesinde"},
-    {"formato":"Super","loja":"A23-SU Lugar Sernados, Feitosa"},
-    {"formato":"Super","loja":"A24-SU Retail Park, Esgueira"},
-    {"formato":"Super","loja":"A25-SU Comend António Mª Lopes, Sto Tirso"},
-    {"formato":"Super","loja":"A27-SU Malaposta, Mogofores"},
-    {"formato":"Super","loja":"A28-SU Ribeirinha, Sta Maria Lamas"},
-    {"formato":"Super","loja":"A29-SU José Cardoso Castro, Fafe"},
-    {"formato":"Super","loja":"A30-SU Vasco Gama, Vilar Andorinho"},
-    {"formato":"Super","loja":"A31-SU D Afonso Henriques, Rio Tinto"},
-    {"formato":"Super","loja":"A32-SU Cândido Reis, Custóias"},
-    {"formato":"Super","loja":"A33-SU Poesia, Fânzeres"},
-    {"formato":"Super","loja":"A34-SU Ponte Pedrinha, Braga Centro"},
-    {"formato":"Prox","loja":"A35-MA S Bento, Estrela"},
-    {"formato":"Prox","loja":"A37-MA Guerra Junqueiro, Arroios"},
-    {"formato":"Prox","loja":"A38-MA Major Afonso Pala, Carnaxide"},
-    {"formato":"Prox","loja":"A39-MA D Nuno Álvares Pereira, Venteira"},
-    {"formato":"Prox","loja":"A40-MA Heliodoro Salgado, Almada"},
-    {"formato":"Prox","loja":"A41-MA Duque Loulé, Sto António"},
-    {"formato":"Prox","loja":"A42-MA Elias Garcia, Queluz"},
-    {"formato":"Prox","loja":"A43-MA Saraiva Carvalho, Campo Ourique"},
-    {"formato":"Prox","loja":"A44-MA Est Mem Martins 274, Algueirão"},
-    {"formato":"Prox","loja":"A45-MA Sacadura Cabral, S Domingos Rana"},
-    {"formato":"Prox","loja":"A46-MA Urb Qta Sto Amaro, Laranjeiro"},
-    {"formato":"Prox","loja":"A47-MA Vitor Gallo, Marinha Grande"},
-    {"formato":"Prox","loja":"A48-MA Infante D Pedro, Alverca"},
-    {"formato":"Prox","loja":"A49-MA S Paulo, Misericórdia"},
-    {"formato":"Prox","loja":"A50-MA Calvário, Alcântara"},
-    {"formato":"Prox","loja":"A52-MA Boa Hora, Ajuda"},
-    {"formato":"Prox","loja":"A53-MA 1 Maio, Camarate"},
-    {"formato":"Prox","loja":"A54-MA Dr Dário Gandra Nunes, Venteira"},
-    {"formato":"Prox","loja":"A55-MA Calhariz, Misericórdia"},
-    {"formato":"Prox","loja":"A56-MA Forno Tijolo, Arroios"},
-    {"formato":"Prox","loja":"A57-MA Padre Manuel Nóbrega, Areeiro"},
-    {"formato":"Prox","loja":"A58-MA Prof Dr Augusto Abreu Lopes, Odivelas"},
-    {"formato":"Prox","loja":"A59-MA Qta Campo, Corroios"},
-    {"formato":"Prox","loja":"A60-MA 25 Abril, Cascais"},
-    {"formato":"Prox","loja":"A62-MA Dr António Elvas 26, Laranjeiro"},
-    {"formato":"Prox","loja":"A63-MA República, Mafamude"},
-    {"formato":"Prox","loja":"A64-MA Palma, Sta Maria Maior"},
-    {"formato":"Prox","loja":"A65-MA Qta Lomba, Barreiro"},
-    {"formato":"Prox","loja":"A66-MA Gago Coutinho, Venteira"},
-    {"formato":"Prox","loja":"A67-MA Beira Mar, Armação Pêra"},
-    {"formato":"Prox","loja":"A68-MA D Maria II, Cacém"},
-    {"formato":"Prox","loja":"A69-MA Santos Leite, Cidade Maia"},
-    {"formato":"Prox","loja":"A70-MA Poveiros, Porto Centro"},
-    {"formato":"Prox","loja":"A71-MA Loios, Porto Centro"},
-    {"formato":"Prox","loja":"A72-MA Diamantina, Paranhos"},
-    {"formato":"Prox","loja":"A74-MA 23, Espinho"},
-    {"formato":"Prox","loja":"A75-MA Sá Bandeira, Porto Centro"},
-    {"formato":"Prox","loja":"A76-MA Conde, S Mamede Infesta"},
-    {"formato":"Prox","loja":"A77-MA Heroísmo, Bonfim"},
-    {"formato":"Prox","loja":"A78-MA Nova Corujeira, Campanhã"},
-    {"formato":"Super","loja":"A79-SU Nova Laborim, Mafamude"},
-    {"formato":"Prox","loja":"A80-MA Dr José Lencastre, Paços Ferreira"},
-    {"formato":"Prox","loja":"A81-MA 5 Outubro, Ramalde"},
-    {"formato":"Prox","loja":"A82-MA Cruzinha, Abrigada"},
-    {"formato":"Prox","loja":"A83-MA João Batista Correia, Cast Ribatejo"},
-    {"formato":"Prox","loja":"A85-MA Coração Maria, Cacém"},
-    {"formato":"Prox","loja":"A86-MA Marquês Pombal, Sobral Monte Agraço"},
-    {"formato":"Prox","loja":"A87-MA 5 Outubro, Aljustrel"},
-    {"formato":"Prox","loja":"A88-MA Agostinho Neto, Sobreda"},
-    {"formato":"Prox","loja":"A89-MA Rosa Falcão, Ansião"},
-    {"formato":"Prox","loja":"A90-MA Foros Amora, Amora"},
-    {"formato":"Prox","loja":"A91-MA 9 Julho, Venda Pinheiro"},
-    {"formato":"Prox","loja":"A92-MA Sta Apolónia, Recarei"},
-    {"formato":"Prox","loja":"A93-MA Pinheiro, Póvoa Varzim"},
-    {"formato":"Prox","loja":"A95-MA Povoença, Areosa"},
-    {"formato":"Prox","loja":"A96-MA D Nuno Álvares Pereira, Almada"},
-    {"formato":"Prox","loja":"A97-MA Lusíadas, Alcântara"},
-    {"formato":"Prox","loja":"A98-MA Mário Sacramento, Corroios"},
-    {"formato":"Prox","loja":"A99-MA Alfredo Silva, Barreiro"},
-    {"formato":"Prox","loja":"B01-MA Carlos Mardel, Arroios"},
-    {"formato":"Prox","loja":"B02-MA Aquiles Machado, Beato"},
-    {"formato":"Prox","loja":"B03-MA Afonso III, Penha França"},
-    {"formato":"Prox","loja":"B04-MA Heróis Liberdade, Massamá"},
-    {"formato":"Prox","loja":"B06-MA Bento Jesus Caraça 166, S Sebastião"},
-    {"formato":"Prox","loja":"B07-MA Infante D Augusto, Amora"},
-    {"formato":"Prox","loja":"B08-MA Gago Coutinho, Cascais"},
-    {"formato":"Prox","loja":"B10-MA Mário Graça, Rio Mouro"},
-    {"formato":"Prox","loja":"B11-MA Guilherme Kjolner, Amora"},
-    {"formato":"Prox","loja":"B12-MA Luís Camões, Pinhal Novo"},
-    {"formato":"Prox","loja":"B13-MA Cabo Verde, Prior Velho"},
-    {"formato":"Prox","loja":"B14-MA Brasil, Alvalade"},
-    {"formato":"Prox","loja":"B15-MA Miguel Bombarda, Queluz"},
-    {"formato":"Prox","loja":"B17-MA Manuel Alpedrinha, Venteira"},
-    {"formato":"Prox","loja":"B18-MA Ulisses Alves, Sintra Centro"},
-    {"formato":"Prox","loja":"B19-MA D Dinis, Odivelas"},
-    {"formato":"Prox","loja":"B20-MA Alexandre Ferreira, Lumiar"},
-    {"formato":"Prox","loja":"B21-MA Bons Amigos, Agualva"},
-    {"formato":"Prox","loja":"B22-MA Penha França, Penha França"},
-    {"formato":"Prox","loja":"B23-MA Cristóvão Gama, Águas Livres"},
-    {"formato":"Prox","loja":"B24-MA Tristão Vaz, Alfragide"},
-    {"formato":"Prox","loja":"B25-MA D Filipa Vilhena, Areeiro"},
-    {"formato":"Prox","loja":"B26-MA Cidade Salazar, Olivais"},
-    {"formato":"Prox","loja":"B27-MA Liberdade, Encosta Sol"},
-    {"formato":"Prox","loja":"B28-MA António Maria Pais, Moscavide"},
-    {"formato":"Prox","loja":"B29-MA Sacadura Cabral, Areeiro"},
-    {"formato":"Prox","loja":"B30-MA Circular Sul, Olivais"},
-    {"formato":"Prox","loja":"B31-MA Cidade Viseu, Camarate"},
-    {"formato":"Prox","loja":"B32-MA Eng Ferreira Dias, Marvila"},
-    {"formato":"Prox","loja":"B33-MA Dr Francisco Sousa Tavares, Algueirão"},
-    {"formato":"Prox","loja":"B34-MA José Conceição Nunes, Vale Amoreira"},
-    {"formato":"Prox","loja":"B35-MA Bela Vista, Caparica"},
-    {"formato":"Prox","loja":"B36-MA Dr João Silva, Santiago Cacém"},
-    {"formato":"Prox","loja":"B37-MA Domingos Rodrigues Pablo, Sines"},
-    {"formato":"Super","loja":"B38-SU 24 Setembro, Vialonga"},
-    {"formato":"Prox","loja":"B39-MA Quintas, Caparica"},
-    {"formato":"Prox","loja":"B40-MA José Gomes Monteiro, Odivelas"},
-    {"formato":"Prox","loja":"B41-MA Mouzinho Albuquerque, Águas Livres"},
-    {"formato":"Prox","loja":"B42-MA General Humberto Delgado, Mina Água"},
-    {"formato":"Prox","loja":"B43-MA Combatentes Grande Guerra, Gondomar"},
-    {"formato":"Prox","loja":"B44-MA Direita Massamá, Massamá"},
-    {"formato":"Prox","loja":"B45-MA Ovar, Marvila"},
-    {"formato":"Prox","loja":"B47-MA Marquês Sá Bandeira, Avenidas Novas"},
-    {"formato":"Prox","loja":"B48-MA Almirante Barroso, Arroios"},
-    {"formato":"Prox","loja":"B50-MA Ricardo Reis, Odivelas"},
-    {"formato":"Prox","loja":"B51-MA Rui Gomes Silva, Chamusca"},
-    {"formato":"Prox","loja":"B52-MA Rui Costa Lopes, Silveira"},
-    {"formato":"Prox","loja":"B53-MA Est Benfica 212, S Domingos Benfica"},
-    {"formato":"Prox","loja":"B54-MA Luciano Cordeiro, Sto António"},
-    {"formato":"Prox","loja":"B55-MA Dr João Santos, Odivelas"},
-    {"formato":"Prox","loja":"B56-MA Fontes Pereira Melo, Avenidas Novas"},
-    {"formato":"Prox","loja":"B57-MA Almirante Reis 114, Arroios"},
-    {"formato":"Prox","loja":"B58-MA Lapa, Estrela"},
-    {"formato":"Prox","loja":"B59-MA Helena Vaz Silva, Lumiar"},
-    {"formato":"Prox","loja":"B60-MA Virgílio Correia, S Domingos Benfica"},
-    {"formato":"Super","loja":"B61-SU Dr Virgílio Vieira Cunha, Leiria"},
-    {"formato":"Super","loja":"B62-SU Pau Queimado, Montijo"},
-    {"formato":"Super","loja":"B63-SU Dias Neiva, Torres Vedras"},
-    {"formato":"Super","loja":"B64-SU D João IV, Abrantes"},
-    {"formato":"Super","loja":"B65-SU Est Salgueiro, Castelo Branco"},
-    {"formato":"Super","loja":"B66-SU Timor Lorosae, Caldas Rainha"},
-    {"formato":"Super","loja":"B67-SU Casal Queimado, Cascais"},
-    {"formato":"Super","loja":"B68-SU Porto Pesca, Peniche"},
-    {"formato":"Prox","loja":"B70-MA Dona Mariana Vitória, Belas"},
-    {"formato":"Super","loja":"B71-SU Est Mem Martins 6, Algueirão"},
-    {"formato":"Super","loja":"B72-SU Bombeiros Voluntários, Moura"},
-    {"formato":"Super","loja":"B74-SU Est S Domingos, Santarém"},
-    {"formato":"Super","loja":"B75-SU Alto Camacha, Ericeira"},
-    {"formato":"Super","loja":"B76-SU Dr José Henr Vareda, Marinha Grande"},
-    {"formato":"Super","loja":"B77-SU Dr António Sousa Dias, Benavente"},
-    {"formato":"Super","loja":"B78-SU Vale Paraíso, Albufeira"},
-    {"formato":"Super","loja":"B79-SU Operários Conserveiros, Quelfes"},
-    {"formato":"Super","loja":"B80-SU N246, Portalegre"},
-    {"formato":"Super","loja":"B81-SU Dr Henrique Barros, Algueirão"},
-    {"formato":"Super","loja":"B82-SU Máximo Silva, Rio Mouro"},
-    {"formato":"Super","loja":"B83-SU Baluarte, Bacelo"},
-    {"formato":"Super","loja":"B84-SU Forças Armadas, Sintra Centro"},
-    {"formato":"Super","loja":"B85-SU Mercado Santos, Avenidas Novas"},
-    {"formato":"Super","loja":"B86-SU Luís Camões, Águas Livres"},
-    {"formato":"Prox","loja":"B87-MA Fernão Magalhães, Bonfim"},
-    {"formato":"Prox","loja":"B88-MA 25 Abril, Ílhavo"},
-    {"formato":"Prox","loja":"B89-MA Est Benfica 402, S Domingos Benfica"},
-    {"formato":"Prox","loja":"B90-MA Pedreiras, Belém"},
-    {"formato":"Super","loja":"B92-SU NSra Piedade, Alfena"},
-    {"formato":"Prox","loja":"B93-MA Lugar Qta Granja, Carquere"},
-    {"formato":"Prox","loja":"B94-MA Noruega, Vila Pouca Aguiar"},
-    {"formato":"Prox","loja":"B95-MA Camões, Campelo"},
-    {"formato":"Super","loja":"B96-SU Francisco Sá Carneiro, Rebordosa"},
-    {"formato":"Prox","loja":"B97-MA Direita Dafundo, Carnaxide"},
-    {"formato":"Prox","loja":"B98-MA Dr Ricardo Jorge, Porto Centro"},
-    {"formato":"Prox","loja":"B99-MA Alfredo Cunha, Matosinhos Centro"},
-    {"formato":"Servicos","loja":"Sede"},
-    {"formato":"Prox","loja":"Teste"}
-  ],
-  assistentes: [
-    {"formato":"*","loja":"*","nome":"AuchanAI","label":"AuchanAI","url":"https://genai-platform.auchan.com/#/chat","icone":"AuchanAI.jpg"},
-    {"formato":"*","loja":"*","nome":"Coach","label":"Coach","url":"https://genai-platform.auchan.com","icone":"Coach.jpg"},
-    {"formato":"Servicos","loja":"*","nome":"Contratos","label":"Contratos","url":"https://genai-platform.auchan.com/#/share/6e5f9252-e132-4d4c-a308-3fc7ee54fddf","icone":"Contratos.jpg"},
-    {"formato":"Hiper","loja":"012-Almada","nome":"Echo","label":"Echo","url":"https://genai-platform.auchan.com/#/share/e706fd1e-b79b-42cd-b369-14ac335302d5","icone":"Echo.jpg"},
-    {"formato":"Hiper","loja":"018-Paço de Arcos","nome":"Echo","label":"Echo","url":"https://genai-platform.auchan.com/#/share/e706fd1e-b79b-42cd-b369-14ac335302d5","icone":"Echo.jpg"},
-    {"formato":"Servicos","loja":"*","nome":"Estudos(Compra)","label":"Estudos(Compra)","url":"URL","icone":"Estudos-Compra.jpg"},
-    {"formato":"Servicos","loja":"*","nome":"Estudos(Oferta)","label":"Estudos(Oferta)","url":"https://genai-platform.auchan.com/#/share/f50fe60a-7306-4427-8de9-7bf15f4643db","icone":"Estudos-Oferta.jpg"},
-    {"formato":"Servicos","loja":"*","nome":"Estudos(Operações)","label":"Estudos(Operações)","url":"https://genai-platform.auchan.com/#/share/598e9e9e-b591-4705-bdbe-52f19d7eedc4","icone":"Estudos-Operações.jpg"},
-    {"formato":"Hiper","loja":"019-Coina","nome":"Faisca","label":"Faisca","url":"https://genai-platform.auchan.com/#/share/a389a983-adb8-42ab-b72e-31c56bfab267","icone":"Faisca.jpg"},
-    {"formato":"Hiper","loja":"027-Setúbal","nome":"Faisca","label":"Faisca","url":"https://genai-platform.auchan.com/#/share/a389a983-adb8-42ab-b72e-31c56bfab267","icone":"Faisca.jpg"},
-    {"formato":"Servicos","loja":"*","nome":"Ficha de Produto","label":"Ficha de Produto","url":"https://genai-platform.auchan.com/#/share/cb9d6925-ef73-41f2-a2ac-e92c4d4893c5","icone":"Ficha-de-Produto.jpg"},
-    {"formato":"Servicos","loja":"*","nome":"Folhetos","label":"Folhetos","url":"https://genai-platform.auchan.com/#/share/d40417b7-1d75-48d5-b8b1-48e5b318d6db","icone":"Folhetos.jpg"},
-    {"formato":"*","loja":"*","nome":"Gabriela","label":"Gabriela","url":"Https://www.google.com","icone":"Teste.jpg"},
-    {"formato":"Hiper","loja":"*","nome":"Jade","label":"Jade","url":"https://genai-platform.auchan.com/#/share/dcd986cf-ca6e-41df-bb4e-8dc387eb0906","icone":"Jade.jpg"},
-    {"formato":"Prox","loja":"*","nome":"MySafira","label":"MySafira","url":"https://genai-platform.auchan.com/#/share/e7f3fdbd-7456-40d6-8f00-02c0f47c6344","icone":"MySafira.jpg"},
-    {"formato":"Super","loja":"*","nome":"MySafira","label":"MySafira","url":"https://genai-platform.auchan.com/#/share/e7f3fdbd-7456-40d6-8f00-02c0f47c6344","icone":"MySafira.jpg"},
-    {"formato":"Servicos","loja":"*","nome":"Reunião com Fornecedor","label":"Reunião com Fornecedor","url":"https://genai-platform.auchan.com/#/share/a73adc68-2cd2-4a63-bf23-0747d914d5a5","icone":"Reunião-Fornecedor.jpg"},
-    {"formato":"*","loja":"*","nome":"Violeta","label":"Violeta","url":"https://genai-platform.auchan.com/#/share/17fb9d00-4091-4c3f-91ac-6dfebabfecd6","icone":"Violeta.jpg"},
-    {"formato":"Hiper","loja":"018-Paço de Arcos","nome":"Wally","label":"Wally","url":"https://genai-platform.auchan.com/#/share/7f236c5d-c8de-4e6f-a8a3-19a542f68c51","icone":"wally-512.jpg"},
-    {"formato":"Hiper","loja":"012-Almada","nome":"Wally","label":"Wally","url":"https://genai-platform.auchan.com/#/share/e8eedf3c-7c3c-4eb4-95f0-8a583ac828fb","icone":"wally-512.jpg"}
-  ]
-};
-
-
-/*******************************************************
- * ⬆️ ÁREA DE CONFIGURAÇÃO - TERMINA AQUI ⬆️
- *******************************************************/
-
   </script>
 </body>
 </html>
