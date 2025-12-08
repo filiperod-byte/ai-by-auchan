@@ -6,7 +6,13 @@
   <title>AI by Auchan - App & Admin</title>
   <link rel="manifest" href="manifest.json">
 
-  <script src="config.js?v=1.1"></script>
+  /*<script src="config.js?v=1.1"></script>*/
+  <script>
+  // Cria um número único baseado no tempo atual (agora!)
+  var versaoUnica = new Date().getTime(); 
+  // Escreve o script na página forçando o download novo
+  document.write('<script src="config.js?v=' + versaoUnica + '"><\/script>');
+</script>
 
   <style>
     /* --- ESTILOS GERAIS --- */
