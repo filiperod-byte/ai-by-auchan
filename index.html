@@ -21,8 +21,10 @@
     .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25); background: rgba(255, 255, 255, 0.18); }
     .btn img { width: 100%; max-width: 150px; object-fit: contain; border-radius: 14px; user-select: none; }
     .label { font-size: .9rem; font-weight: bold; color: #fff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25); }
-    .app-footer { margin-top: 20px; font-size: 0.7rem; opacity: 0.6; font-family: monospace; }
     
+    .app-footer { margin-top: 20px; font-size: 0.7rem; opacity: 0.8; font-family: sans-serif; display: flex; justify-content: center; gap: 15px; align-items: center; }
+    .help-link { cursor: pointer; text-decoration: underline; font-weight: bold; color: #fff; }
+
     /* OVERLAYS */
     .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 999; overflow-y: auto; }
     .overlay-box { background: #ffffff; color: #333; border-radius: 18px; padding: 1.5rem 1.2rem; width: min(380px, 90%); box-shadow: 0 10px 25px rgba(0,0,0,.35); text-align: center; margin: 2rem 0; }
@@ -33,6 +35,11 @@
     .overlay-box button.danger { background: #ff4444; color: white; }
     .overlay-box button.cancel { background: #777; color: white; }
     .file-btn { width: auto !important; padding: 0.6rem 1rem !important; background: #666 !important; white-space: nowrap; }
+
+    /* Estilos da Ajuda */
+    .tutorial-step { text-align: left; margin-bottom: 15px; display: flex; align-items: flex-start; gap: 10px; font-size: 0.9rem; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .tutorial-icon { font-size: 1.5rem; line-height: 1; }
+    .ios-share-icon { width: 20px; height: 20px; vertical-align: middle; display: inline-block; }
 
     /* ADMIN TABS */
     .admin-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 1rem; }
@@ -71,6 +78,41 @@
       </select>
       <button onclick="guardarLoja()">Guardar</button>
       <small>Podes mudar depois em “Loja: … (alterar)”</small>
+    </div>
+  </div>
+
+  <div id="help-overlay" class="overlay">
+    <div class="overlay-box">
+        <h2>📲 Instalar App</h2>
+        
+        <div id="help-ios">
+            <p style="margin-bottom:15px; font-weight:bold; color:#666;">iPhone / iPad (iOS)</p>
+            <div class="tutorial-step">
+                <span class="tutorial-icon">1️⃣</span>
+                <span>Toca no botão de <b>Partilha</b> (quadrado com seta) na barra inferior do Safari.<br>
+                <svg class="ios-share-icon" viewBox="0 0 50 50" style="width:24px; margin-top:5px;"><path d="M30.3 13.7L25 8.4l-5.3 5.3-1.4-1.4L25 5.6l6.7 6.7z"/><path d="M24 7h2v21h-2z"/><path d="M35 40H15c-1.7 0-3-1.3-3-3V19c0-1.7 1.3-3 3-3h7v2h-7c-0.6 0-1 0.4-1 1v18c0 0.6 0.4 1 1 1h20c0.6 0 1-0.4 1-1V19c0-0.6-0.4-1-1-1h-7v-2h7c1.7 0 3 1.3 3 3v18c0 1.7-1.3 3-3 3z"/></svg>
+                </span>
+            </div>
+            <div class="tutorial-step">
+                <span class="tutorial-icon">2️⃣</span>
+                <span>Rola para baixo e escolhe a opção <b>"Adicionar ao Ecrã Principal"</b> (Add to Home Screen).</span>
+            </div>
+            <div class="tutorial-step">
+                <span class="tutorial-icon">3️⃣</span>
+                <span>Clica em <b>Adicionar</b> no topo direito.</span>
+            </div>
+        </div>
+
+        <hr style="margin: 15px 0; opacity: 0.3;">
+
+        <div id="help-android">
+            <p style="margin-bottom:15px; font-weight:bold; color:#666;">Android (Chrome)</p>
+            <div class="tutorial-step">
+                <span>Toca nos 3 pontinhos (⋮) e escolhe <b>"Instalar Aplicação"</b> ou "Adicionar ao Ecrã Principal".</span>
+            </div>
+        </div>
+
+        <button class="secondary" onclick="document.getElementById('help-overlay').style.display='none'">Entendi</button>
     </div>
   </div>
 
@@ -157,7 +199,11 @@
         </div>
         <div class="grid"></div>
     </div>
-    <div class="app-footer" id="app-footer-version">Carregando...</div>
+    
+    <div class="app-footer">
+        <span class="help-link" onclick="document.getElementById('help-overlay').style.display='flex'">📲 Instalar App</span>
+        <span id="app-footer-version" style="opacity:0.7">...</span>
+    </div>
   </div>
 
   <script>
