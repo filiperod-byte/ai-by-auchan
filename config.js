@@ -1,5 +1,5 @@
 // Ficheiro de Configuração Gerado Automaticamente
-const STORAGE_DATA_KEY = "appConfigData_v2.0";
+const STORAGE_DATA_KEY = "appConfigData_v2.0.1";
 
 const DADOS_PADRAO = {
   lojas: [
