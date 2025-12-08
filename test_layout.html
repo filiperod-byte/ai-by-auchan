@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI by Auchan - App & Admin</title>
+
+  <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* --- ESTILOS GERAIS --- */
+    body {
+      margin: 0;
+      font-family: "Roboto", Arial, sans-serif;
+      background: linear-gradient(135deg, #d63a3e 0%, #6a1b9a 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      color: #fff;
+    }
+
+    .app {
+      width: min(420px, 95%);
+      padding: 1rem;
+      box-sizing: border-box;
+      text-align: center;
+    }
+
+    .logo {
+      width: 180px;
+      margin: 0 auto 0.8rem auto;
+      display: block;
+      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25));
+      cursor: pointer;
+    }
+
+    .loja-info {
+      font-size: .85rem;
+      margin-bottom: 0.8rem;
+      opacity: 0.9;
+    }
+
+    .change-store {
+      font-size: .75rem;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: .5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .4rem;
+      cursor: pointer;
+      transition: transform .15s ease-in-out, box-shadow .15s;
+      min-height: 160px;
+      backdrop-filter: blur(8px);
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .btn img {
+      width: 100%;
+      max-width: 150px;
+      object-fit: contain;
+      border-radius: 14px;
+      user-select: none;
+    }
+
+    .label {
+      font-size: .9rem;
+      font-weight: bold;
+      color: #fff;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+    }
+
+    /* --- OVERLAYS --- */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+      overflow-y: auto;
+    }
+
+    .overlay-box {
+      background: #ffffff;
+      color: #333;
+      border-radius: 18px;
+      padding: 1.5rem 1.2rem;
+      width: min(380px, 90%);
+      box-shadow: 0 10px 25px rgba(0,0,0,.35);
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .overlay-box h2 {
+      margin-top: 0;
+      margin-bottom: .8rem;
+      font-size: 1.2rem;
+      color: #d63a3e;
+    }
+
+    .overlay-box select, .overlay-box input {
+      width: 100%;
+      padding: .6rem;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: .95rem;
+      margin-bottom: 0.8rem;
+      box-sizing: border-box;
+    }
+
+    .overlay-box button {
+      width: 100%;
+      padding: .6rem;
+      border-radius: 999px;
+      border: none;
+      font-size: 1rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #d63a3e, #6a1b9a);
+      color: #fff;
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+    }
+
+    .overlay-box button.secondary { background: #eee; color: #333; }
+    .overlay-box button.danger { background: #ff4444; color: white; }
+
+    /* --- ADMIN TABS --- */
+    .admin-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 1rem; }
+    .admin-tab { padding: 5px 10px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; }
+    .admin-tab.active { border-bottom: 2px solid #d63a3e; color: #d63a3e; }
+    .admin-list { text-align: left; max-height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px; font-size: 0.85rem; }
+    .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 5px; border-bottom: 1px solid #eee; }
+    .admin-item button { width: auto; padding: 2px 8px; font-size: 0.7rem; margin: 0; background: #ff4444; }
+    #admin-export-area { display: none; margin-top: 10px; }
+    #export-textarea { width: 100%; height: 100px; font-size: 0.7rem; }
+  </style>
+</head>
+<body>
+
+  <div id="loja-overlay" class="overlay">
+    <div class="overlay-box">
+      <h2>Escolhe formato e loja</h2>
+      <select id="formato-select" onchange="atualizarSelectLojas()">
+        <option value="" disabled selected>Seleciona o formato…</option>
+      </select>
+      <select id="loja-select">
+        <option value="" disabled selected>Seleciona a loja…</option>
+      </select>
+      <button onclick="guardarLoja()">Guardar</button>
+      <small>Podes mudar depois em “Loja: … (alterar)”</small>
+    </div>
+  </div>
+
+  <div id="admin-overlay" class="overlay">
+    <div class="overlay-box" style="width: min(450px, 95%);">
+      <h2>Painel de Administração</h2>
+      <div class="admin-tabs">
+        <div class="admin-tab active" onclick="switchAdminTab('lojas')">Lojas</div>
+        <div class="admin-tab" onclick="switchAdminTab('assistentes')">Assistentes</div>
+        <div class="admin-tab" onclick="switchAdminTab('exportar')">Guardar/Exportar</div>
+      </div>
+
+      <div id="admin-tab-lojas">
+        <div class="admin-list" id="admin-lojas-list"></div>
+        <h3>Adicionar Loja</h3>
+        <select id="admin-novo-formato">
+          <option value="Hiper">Hiper</option>
+          <option value="Super">Super</option>
+          <option value="Prox">Prox</option>
+          <option value="Servicos">Serviços</option>
+        </select>
+        <input type="text" id="admin-nova-loja" placeholder="Nome da Loja">
+        <button onclick="adminAddLoja()">Adicionar Loja</button>
+      </div>
+
+      <div id="admin-tab-assistentes" style="display:none;">
+        <div class="admin-list" id="admin-assistentes-list"></div>
+        <h3>Adicionar Assistente</h3>
+        <input type="text" id="admin-ast-nome" placeholder="ID Interno">
+        <input type="text" id="admin-ast-label" placeholder="Nome no Botão">
+        <input type="text" id="admin-ast-url" placeholder="URL Destino">
+        <input type="text" id="admin-ast-icone" placeholder="Nome Imagem (ex: wally.jpg)">
+        <div style="display:flex; gap:5px;">
+           <input type="text" id="admin-ast-formato" placeholder="Formato (*)" value="*">
+           <input type="text" id="admin-ast-loja" placeholder="Loja (*)" value="*">
+        </div>
+        <button onclick="adminAddAssistente()">Adicionar Assistente</button>
+      </div>
+
+      <div id="admin-tab-exportar" style="display:none;">
+        <p>As alterações estão gravadas no navegador. Para gravar permanentemente, copia este código e cola no final do index.html.</p>
+        <button onclick="gerarExportacao()">Gerar Código JSON</button>
+        <textarea id="export-textarea"></textarea>
+        <button class="danger" onclick="limparTudoAdmin()">⚠️ Resetar Fábrica</button>
+      </div>
+
+      <hr>
+      <button class="secondary" onclick="fecharAdmin()">Fechar Admin</button>
+    </div>
+  </div>
+
+  <div class="app">
+    <img src="AibyAuchan.png" alt="AI by Auchan" class="logo" id="logo-trigger">
+    <div class="loja-info">
+      Loja: <span id="loja-nome">a definir…</span>
+      <span class="change-store" onclick="forcarEscolhaLoja()">(alterar)</span>
+    </div>
+    <div class="grid"></div>
+  </div>
+
+  <script>
+    /*******************************************************
+     * SECÇÃO LÓGICA DO SISTEMA
+     * (Não mexer aqui a menos que saibas programação)
+     *******************************************************/
+    
+    // Constants internas
+    const FORM_BASE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeGFYjlrXC27y-a8sXgdnxKD4XzT8yImmL_0CZRXP26NwjQhQ/formResponse';
+    const ENTRY_LOJA = 'entry.1749648688';
+    const ENTRY_ASSISTENTE = 'entry.182917282';
+    const FORMATO_KEY = 'formatoSelecionado';
+    const LOJA_KEY = 'lojaSelecionada';
+
+    let STATE = { lojas: [], assistentes: [] };
+
+    // -- Init --
+    window.addEventListener('load', () => {
+      carregarDados();
+      // SW
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('service-worker.js')
+          .then(() => console.log('SW ok')).catch(console.log);
+      }
+    });
+
+    // -- Load/Save Logic --
+    function carregarDados() {
+      // Tenta ler localmente
+      const dadosLocais = localStorage.getItem(STORAGE_DATA_KEY);
+      if (dadosLocais) {
+        STATE = JSON.parse(dadosLocais);
+      } else {
+        // Se não houver dados locais, carrega os dados PADRÃO (definidos no fundo do ficheiro)
+        STATE = JSON.parse(JSON.stringify(DADOS_PADRAO));
+      }
+      renderizarApp();
+    }
+
+    function guardarDadosLocais() {
+      localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(STATE));
+      renderizarApp();
+    }
+
+    // -- Render UI --
+    function renderizarApp() {
+      atualizarSelectFormato();
+      atualizarUILoja();
+    }
+
+    function atualizarSelectFormato() {
+      const formatosUnicos = [...new Set(STATE.lojas.map(l => l.formato))];
+      const select = document.getElementById('formato-select');
+      const valAtual = select.value;
+      select.innerHTML = '<option value="" disabled selected>Seleciona o formato…</option>';
+      formatosUnicos.forEach(fmt => {
+        const opt = document.createElement('option');
+        opt.value = fmt;
+        opt.textContent = fmt;
+        select.appendChild(opt);
+      });
+      if (valAtual) select.value = valAtual;
+    }
+
+    function atualizarSelectLojas() {
+      const formato = document.getElementById('formato-select').value;
+      const selectLoja = document.getElementById('loja-select');
+      selectLoja.innerHTML = '<option value="" disabled selected>Seleciona a loja…</option>';
+      if (!formato) return;
+
+      const formatoNorm = formato.toUpperCase();
+      const lojasDoFormato = STATE.lojas.filter(l => (l.formato || '').toUpperCase() === formatoNorm);
+      
+      // Ordena alfabeticamente
+      lojasDoFormato.sort((a, b) => a.loja.localeCompare(b.loja));
+
+      lojasDoFormato.forEach(item => {
+        const opt = document.createElement('option');
+        opt.value = item.loja;
+        opt.textContent = item.loja;
+        selectLoja.appendChild(opt);
+      });
+    }
+
+    function atualizarUILoja() {
+      const formato = localStorage.getItem(FORMATO_KEY);
+      const loja = localStorage.getItem(LOJA_KEY);
+      const span = document.getElementById('loja-nome');
+      const overlay = document.getElementById('loja-overlay');
+
+      if (formato && loja) {
+        span.textContent = `${formato} – ${loja}`;
+        overlay.style.display = 'none';
+        renderizarGridAssistentes(formato, loja);
+      } else {
+        span.textContent = 'a definir…';
+        overlay.style.display = 'flex';
+        document.querySelector('.grid').innerHTML = '';
+      }
+    }
+
+    function renderizarGridAssistentes(formatoUser, lojaUser) {
+      const grid = document.querySelector('.grid');
+      grid.innerHTML = '';
+      const formatoNorm = formatoUser.toUpperCase();
+      const lojaNorm = lojaUser.toUpperCase();
+
+      const matches = STATE.assistentes.filter(a => {
+        const f = (a.formato || '').toUpperCase();
+        const l = (a.loja || '').toUpperCase();
+        const formatoOk = (f === '*' || f === formatoNorm);
+        const lojaOk = (l === '*' || l === lojaNorm);
+        return formatoOk && lojaOk;
+      });
+
+      if(matches.length === 0) {
+        grid.innerHTML = '<p style="grid-column: span 2; opacity: 0.7;">Nenhum assistente disponível.</p>';
+        return;
+      }
+
+      matches.forEach(a => {
+        const btn = document.createElement('div');
+        btn.className = 'btn';
+        btn.onclick = () => abrirAssistente(a.nome, a.url);
+
+        const img = document.createElement('img');
+        img.src = a.icone || 'AibyAuchan.png';
+        img.onerror = function() { this.src = 'AibyAuchan.png'; }; 
+        img.alt = a.nome;
+
+        const lbl = document.createElement('div');
+        lbl.className = 'label';
+        lbl.textContent = a.label || a.nome;
+
+        btn.appendChild(img);
+        btn.appendChild(lbl);
+        grid.appendChild(btn);
+      });
+    }
+
+    function guardarLoja() {
+      const formato = document.getElementById('formato-select').value;
+      const loja = document.getElementById('loja-select').value;
+      if (!formato || !loja) return alert('Escolhe formato e loja.');
+      localStorage.setItem(FORMATO_KEY, formato);
+      localStorage.setItem(LOJA_KEY, loja);
+      atualizarUILoja();
+    }
+
+    function forcarEscolhaLoja() {
+      const overlay = document.getElementById('loja-overlay');
+      document.getElementById('formato-select').value = "";
+      document.getElementById('loja-select').innerHTML = '<option value="" disabled selected>Seleciona a loja…</option>';
+      overlay.style.display = 'flex';
+    }
+
+    function abrirAssistente(nomeInterno, urlDestino) {
+      const loja = localStorage.getItem(LOJA_KEY) || 'Sem loja';
+      const payload = new URLSearchParams();
+      payload.append(ENTRY_LOJA, loja);
+      payload.append(ENTRY_ASSISTENTE, nomeInterno);
+      fetch(FORM_BASE_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: payload.toString() }).catch(e=>console.log(e));
+      window.location.href = urlDestino;
+    }
+
+    // -- Admin Logic --
+    let logoClicks = 0;
+    document.getElementById('logo-trigger').addEventListener('click', () => {
+      logoClicks++;
+      if (logoClicks === 5) {
+        logoClicks = 0;
+        if (prompt("Senha:") === ADMIN_PASSWORD) abrirAdmin();
+        else alert("Senha incorreta.");
+      }
+    });
+
+    function abrirAdmin() {
+      document.getElementById('admin-overlay').style.display = 'flex';
+      renderizarAdminListas();
+    }
+    function fecharAdmin() { document.getElementById('admin-overlay').style.display = 'none'; }
+    function switchAdminTab(t
