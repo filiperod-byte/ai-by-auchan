@@ -453,4 +453,57 @@
         let v = "1.0";
         if(typeof STORAGE_DATA_KEY !== 'undefined') v = STORAGE_DATA_KEY.split('_v')[1] || "1.0";
         document.getElementById('lbl-versao-atual').textContent = "v" + v;
-        let p = v.split('.').map(Number); if(p.length===2) p.push(0
+        let p = v.split('.').map(Number); if(p.length===2) p.push(0);
+        p[p.length-1]++;
+        document.getElementById('input-nova-versao').value = "v" + p.join('.');
+    }
+
+    function baixarConfiguracao() {
+      let vUser = document.getElementById('input-nova-versao').value.trim();
+      if(vUser.startsWith('v')) vUser = vUser.substring(1);
+      const newKey = "appConfigData_v" + vUser;
+
+      STATE.lojas.forEach(l => { if(l.formato) l.formato = formatarTextoBonito(l.formato); });
+      STATE.assistentes.forEach(a => { if(a.formato && a.formato!=='*') a.formato = formatarTextoBonito(a.formato); });
+      STATE.lojas.sort(ordenarLojas);
+      STATE.assistentes.sort((a,b)=>a.label.localeCompare(b.label));
+
+      let content = `// Ficheiro de Configuração Gerado Automaticamente\n`;
+      content += `const STORAGE_DATA_KEY = "${newKey}";\n\n`;
+      content += `const DADOS_PADRAO = {\n`;
+      content += `  lojas: [\n`;
+      STATE.lojas.forEach((l, i) => {
+          let line = JSON.stringify(l);
+          if(i < STATE.lojas.length - 1) line += ",";
+          content += `    ${line}\n`;
+      });
+      content += `  ],\n`;
+      content += `  assistentes: [\n`;
+      STATE.assistentes.forEach((a, i) => {
+          let block = JSON.stringify(a, null, 4);
+          block = block.split('\n').map(line => "    " + line).join('\n');
+          if(i < STATE.assistentes.length - 1) block += ",";
+          content += `${block}\n`;
+      });
+      content += `  ]\n`;
+      content += `};\n`;
+
+      const blob = new Blob([content], { type: "text/javascript" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "config.js";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      alert("Ficheiro config.js baixado!\nFaz upload dele para a pasta do GitHub.");
+    }
+
+    function limparTudoAdmin() {
+      if(confirm("Resetar Fábrica?")) { localStorage.removeItem(STORAGE_DATA_KEY); location.reload(); }
+    }
+  </script>
+</body>
+</html>
