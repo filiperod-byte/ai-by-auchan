@@ -73,7 +73,7 @@
       <select id="formato-select" onchange="atualizarSelectLojas()">
         <option value="" disabled selected>Seleciona o formato…</option>
       </select>
-      <select id="loja-select">
+      <select id="loja-select" onchange="this.blur()">
         <option value="" disabled selected>Seleciona a loja…</option>
       </select>
       <button onclick="guardarLoja()">Guardar</button>
