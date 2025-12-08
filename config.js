@@ -1,5 +1,5 @@
 // Ficheiro de Configuração Gerado Automaticamente
-const STORAGE_DATA_KEY = "appConfigData_v2.1";
+const STORAGE_DATA_KEY = "appConfigData_v2.1.1";
 
 const DADOS_PADRAO = {
   lojas: [
@@ -354,6 +354,14 @@ const DADOS_PADRAO = {
     {
         "formato": "Hiper",
         "loja": "027-Setúbal",
+        "nome": "Faisca",
+        "label": "Faisca",
+        "url": "https://genai-platform.auchan.com/#/share/a389a983-adb8-42ab-b72e-31c56bfab267",
+        "icone": "Faisca.jpg"
+    },
+    {
+        "formato": "Hiper",
+        "loja": "038-Sintra",
         "nome": "Faisca",
         "label": "Faisca",
         "url": "https://genai-platform.auchan.com/#/share/a389a983-adb8-42ab-b72e-31c56bfab267",
