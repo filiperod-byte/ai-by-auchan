@@ -26,10 +26,8 @@
 
     /* OVERLAYS */
     .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 999; overflow-y: auto; }
-    
-    /* Adicionado position relative para o botão de fechar funcionar */
+    /* Position relative adicionado para o botão X funcionar */
     .overlay-box { position: relative; background: #ffffff; color: #333; border-radius: 18px; padding: 1.5rem 1.2rem; width: min(380px, 90%); box-shadow: 0 10px 25px rgba(0,0,0,.35); text-align: center; margin: 2rem 0; }
-    
     .overlay-box h2 { margin-top: 0; margin-bottom: .8rem; font-size: 1.2rem; color: #d63a3e; }
     .overlay-box select, .overlay-box input { width: 100%; padding: .6rem; border-radius: 10px; border: 1px solid #ccc; font-size: .95rem; margin-bottom: 0.8rem; box-sizing: border-box; }
     .overlay-box button { width: 100%; padding: .6rem; border-radius: 999px; border: none; font-size: 1rem; font-weight: 600; background: linear-gradient(135deg, #d63a3e, #6a1b9a); color: #fff; cursor: pointer; margin-bottom: 0.5rem; }
@@ -75,6 +73,8 @@
 
   <div id="login-overlay" class="overlay">
     <div class="overlay-box" style="width: min(300px, 80%);">
+        <span class="close-overlay-btn" onclick="fecharLogin()">✕</span>
+        
         <h2>Área Reservada</h2>
         <p style="font-size:0.9rem; color:#666; margin-bottom:15px;">Insere a senha de administrador</p>
         <input type="password" id="login-password-input" placeholder="Senha" onkeyup="if(event.key === 'Enter') verificarSenhaLogin()">
@@ -86,7 +86,6 @@
   <div id="loja-overlay" class="overlay">
     <div class="overlay-box">
       <span class="close-overlay-btn" onclick="fecharLojaOverlay()">✕</span>
-      
       <h2>Escolhe formato e loja</h2>
       <select id="formato-select" onchange="atualizarSelectLojas()">
         <option value="" disabled selected>Seleciona o formato…</option>
@@ -310,7 +309,10 @@
       if(matches.length === 0) { grid.innerHTML = '<p style="grid-column: span 2; opacity: 0.7;">Nenhum assistente disponível.</p>'; return; }
       matches.forEach(a => {
         const btn = document.createElement('div'); btn.className = 'btn';
+        
+        // CORREÇÃO AQUI: Abrir em nova aba (_blank)
         btn.onclick = () => abrirAssistente(a.nome, a.url);
+        
         const img = document.createElement('img'); img.src = a.icone || 'AibyAuchan.png'; img.onerror = function() { this.src = 'AibyAuchan.png'; };
         const lbl = document.createElement('div'); lbl.className = 'label'; lbl.textContent = a.label || a.nome;
         btn.appendChild(img); btn.appendChild(lbl); grid.appendChild(btn);
@@ -326,11 +328,16 @@
       document.getElementById('formato-select').value = ""; document.getElementById('loja-select').innerHTML = '<option value="" disabled selected>Seleciona a loja…</option>';
       document.getElementById('loja-overlay').style.display = 'flex';
     }
+    
     function abrirAssistente(n, u) {
       const l = localStorage.getItem(LOJA_KEY) || 'Sem loja';
       const p = new URLSearchParams(); p.append(ENTRY_LOJA, l); p.append(ENTRY_ASSISTENTE, n);
+      
+      // Envia os dados para o Google Forms em segundo plano
       fetch(FORM_BASE_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: p.toString() }).catch(e=>{});
-      window.location.href = u;
+      
+      // Abre o assistente NUMA NOVA ABA
+      window.open(u, '_blank');
     }
 
     /* --- ADMIN --- */
