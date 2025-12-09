@@ -1,9 +1,10 @@
 // Ficheiro de Configuração Gerado Automaticamente
-const STORAGE_DATA_KEY = "appConfigData_v2.0";
+const STORAGE_DATA_KEY = "appConfigData_v2.0.1";
 
 const DADOS_PADRAO = {
   lojas: [
     {"formato":"Hiper","loja":"001-Teste"},
+    {"formato":"Hiper","loja":"002-Teste2"},
     {"formato":"Hiper","loja":"008-Gaia"},
     {"formato":"Hiper","loja":"009-Coimbra"},
     {"formato":"Hiper","loja":"010-Viseu"},
@@ -288,7 +289,7 @@ const DADOS_PADRAO = {
         "icone": "AuchanAI.jpg"
     },
     {
-        "formato": "*",
+        "formato": "Prox",
         "loja": "*",
         "nome": "Coach",
         "label": "Coach",
