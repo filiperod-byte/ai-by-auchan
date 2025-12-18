@@ -1,5 +1,5 @@
 // Ficheiro de Configuração Gerado Automaticamente
-const STORAGE_DATA_KEY = "appConfigData_v2.0.1";
+const STORAGE_DATA_KEY = "appConfigData_v2.0.2";
 
 const DADOS_PADRAO = {
   lojas: [
@@ -289,11 +289,11 @@ const DADOS_PADRAO = {
         "icone": "AuchanAI.jpg"
     },
     {
-        "formato": "Prox",
-        "loja": "*",
+        "formato": "Hiper",
+        "loja": "025-Alfragide",
         "nome": "Coach",
         "label": "Coach",
-        "url": "https://genai-platform.auchan.com",
+        "url": "https://genai-platform.auchan.com/#/share/30a0ad45-9568-4c37-956e-a36f7cb17ac6",
         "icone": "Coach.jpg"
     },
     {
