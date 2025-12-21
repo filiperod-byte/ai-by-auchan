@@ -1,697 +1,747 @@
-diff --git a/index.html b/index.html
-index 770f773ece8206acfa741788a71f53b58c658544..3f2c54be8a9889b7e066c24130cb6413561d1565 100644
---- a/index.html
-+++ b/index.html
-@@ -12,51 +12,52 @@
-   // Escreve o script na página forçando o download novo
-   document.write('<script src="config.js?v=' + versaoUnica + '"><\/script>');
- </script>
- 
-   <style>
-     /* --- ESTILOS GERAIS --- */
-     body { margin: 0; font-family: "Roboto", Arial, sans-serif; background: linear-gradient(135deg, #d63a3e 0%, #6a1b9a 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #fff; }
-     .app { width: min(420px, 95%); padding: 1rem; box-sizing: border-box; text-align: center; display: flex; flex-direction: column; min-height: 90vh; }
-     .content-wrap { flex: 1; }
-     .logo { width: 180px; margin: 0 auto 0.8rem auto; display: block; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25)); cursor: pointer; }
-     .loja-info { font-size: .85rem; margin-bottom: 0.8rem; opacity: 0.9; }
-     .change-store { font-size: .75rem; text-decoration: underline; cursor: pointer; }
-     .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; }
-     .btn { background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: .5rem; display: flex; flex-direction: column; align-items: center; gap: .4rem; cursor: pointer; transition: transform .15s ease-in-out, box-shadow .15s; min-height: 160px; backdrop-filter: blur(8px); }
-     .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25); background: rgba(255, 255, 255, 0.18); }
-     .btn img { width: 100%; max-width: 150px; object-fit: contain; border-radius: 14px; user-select: none; }
-     .label { font-size: .9rem; font-weight: bold; color: #fff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25); }
-     .app-footer { margin-top: 20px; font-size: 0.7rem; opacity: 0.8; font-family: sans-serif; display: flex; justify-content: center; gap: 15px; align-items: center; }
-     .help-link { cursor: pointer; text-decoration: underline; font-weight: bold; color: #fff; }
- 
-     /* OVERLAYS */
-     .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 999; overflow-y: auto; }
-     /* Position relative adicionado para o botão X funcionar */
-     .overlay-box { position: relative; background: #ffffff; color: #333; border-radius: 18px; padding: 1.5rem 1.2rem; width: min(380px, 90%); box-shadow: 0 10px 25px rgba(0,0,0,.35); text-align: center; margin: 2rem 0; }
-     .overlay-box h2 { margin-top: 0; margin-bottom: .8rem; font-size: 1.2rem; color: #d63a3e; }
--    .overlay-box select, .overlay-box input { width: 100%; padding: .6rem; border-radius: 10px; border: 1px solid #ccc; font-size: .95rem; margin-bottom: 0.8rem; box-sizing: border-box; }
-+    .overlay-box select, .overlay-box input, .overlay-box textarea { width: 100%; padding: .6rem; border-radius: 10px; border: 1px solid #ccc; font-size: .95rem; margin-bottom: 0.8rem; box-sizing: border-box; }
-+    .overlay-box textarea { resize: vertical; min-height: 80px; }
-     .overlay-box button { width: 100%; padding: .6rem; border-radius: 999px; border: none; font-size: 1rem; font-weight: 600; background: linear-gradient(135deg, #d63a3e, #6a1b9a); color: #fff; cursor: pointer; margin-bottom: 0.5rem; }
-     .overlay-box button.secondary { background: #eee; color: #333; }
-     .overlay-box button.danger { background: #ff4444; color: white; }
-     .overlay-box button.cancel { background: #777; color: white; }
-     .file-btn { width: auto !important; padding: 0.6rem 1rem !important; background: #666 !important; white-space: nowrap; }
- 
-     /* Botão de Fechar Overlay (X) */
-     .close-overlay-btn {
-         position: absolute;
-         top: 10px;
-         right: 15px;
-         font-size: 1.2rem;
-         font-weight: bold;
-         color: #999;
-         cursor: pointer;
-         padding: 5px;
-         line-height: 1;
-     }
-     .close-overlay-btn:hover { color: #d63a3e; }
- 
-     /* ADMIN TABS */
-     .admin-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 1rem; }
-     .admin-tab { padding: 5px 10px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; }
-     .admin-tab.active { border-bottom: 2px solid #d63a3e; color: #d63a3e; }
-     .admin-list { text-align: left; max-height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px; font-size: 0.85rem; }
-@@ -147,52 +148,53 @@
-         <div class="admin-tab" onclick="switchAdminTab('assistentes')">Assistentes</div>
-         <div class="admin-tab" onclick="switchAdminTab('exportar')">Guardar</div>
-       </div>
- 
-       <div id="admin-tab-lojas">
-         <div class="admin-list" id="admin-lojas-list"></div>
-         <h3>Adicionar Loja</h3>
-         <select id="admin-novo-formato">
-           <option value="Hiper">Hiper</option>
-           <option value="Super">Super</option>
-           <option value="Prox">Prox</option>
-           <option value="Servicos">Serviços</option>
-         </select>
-         <div style="display:flex; gap:5px;">
-             <input type="text" id="admin-nova-loja-cod" placeholder="Cod" maxlength="3" style="width: 80px;">
-             <input type="text" id="admin-nova-loja-nome" placeholder="Nome da Loja" style="flex:1;">
-         </div>
-         <button onclick="adminAddLoja()">Adicionar Loja</button>
-       </div>
- 
-       <div id="admin-tab-assistentes" style="display:none;">
-         <div class="admin-list" id="admin-assistentes-list"></div>
-         <h3 id="admin-ast-title">Adicionar Assistente</h3>
-         <small style="display:block; margin-bottom:10px; color:#666;">Clica na lista acima para editar</small>
-         
--        <input type="text" id="admin-ast-label" placeholder="Nome no Botão (Label)">
--        <input type="text" id="admin-ast-url" placeholder="URL Destino">
-+        <input type="text" id="admin-ast-label" placeholder="Nome no Botão (Label)">
-+        <input type="text" id="admin-ast-url" placeholder="URL Destino">
-+        <textarea id="admin-ast-descricao" placeholder="Descrição"></textarea>
-         
-         <div style="display:flex; gap:5px; align-items:center;">
-             <input type="text" id="admin-ast-icone" placeholder="Nome Imagem (ex: wally.jpg)" style="margin-bottom:0.8rem; flex:1;">
-             <input type="file" id="admin-file-picker" style="display:none" onchange="selecionarImagemArquivo()">
-             <button class="file-btn" onclick="document.getElementById('admin-file-picker').click()" style="margin-bottom:0.8rem;" title="Escolher ficheiro">📂</button>
-         </div>
-         <div style="display:flex; gap:5px; margin-bottom: 0.8rem;">
-            <select id="admin-ast-formato" style="margin-bottom:0;" onchange="atualizarSelectLojasAdmin()">
-                 <option value="*">Qualquer Formato (*)</option>
-            </select>
-            <select id="admin-ast-loja" style="margin-bottom:0;">
-                 <option value="*">Qualquer Loja (*)</option>
-            </select>
-         </div>
-         <div style="display: flex; gap: 5px;">
-             <button onclick="adminSaveAssistente()" id="btn-save-ast">Adicionar Assistente</button>
-             <button onclick="cancelarEdicao()" id="btn-cancel-ast" class="cancel" style="display:none;">Cancelar</button>
-         </div>
-       </div>
- 
-       <div id="admin-tab-exportar" style="display:none;">
-         <p style="font-size: 0.85rem; margin-bottom: 10px;">
-             Gera e baixa o ficheiro <b>config.js</b>. Depois, faz upload apenas deste ficheiro para o GitHub.
-         </p>
-         
-@@ -211,178 +213,234 @@
-       <hr>
-       <button class="secondary" onclick="fecharAdmin()">Fechar Admin</button>
-     </div>
-   </div>
- 
-   <div class="app">
-     <div class="content-wrap">
-         <img src="AibyAuchan.png" alt="AI by Auchan" class="logo" id="logo-trigger">
-         <div class="loja-info">
-           Loja: <span id="loja-nome">a definir…</span>
-           <span class="change-store" onclick="forcarEscolhaLoja()">(alterar)</span>
-         </div>
-         <div class="grid"></div>
-     </div>
-     <div class="app-footer">
-         <span class="help-link" onclick="document.getElementById('help-overlay').style.display='flex'">📲 Instalar App</span>
-         <span id="app-footer-version" style="opacity:0.7">...</span>
-     </div>
-   </div>
- 
-   <script>
-     /* --- LÓGICA PRINCIPAL --- */
-     const FORM_BASE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeGFYjlrXC27y-a8sXgdnxKD4XzT8yImmL_0CZRXP26NwjQhQ/formResponse';
-     const ENTRY_LOJA = 'entry.1749648688';
-     const ENTRY_ASSISTENTE = 'entry.182917282';
--    const FORMATO_KEY = 'formatoSelecionado';
--    const LOJA_KEY = 'lojaSelecionada';
-+    const FORMATO_KEY = 'formatoSelecionado';
-+    const LOJA_KEY = 'lojaSelecionada';
-+    const QR_PARAM_ASSISTENTE = 'assistente';
-+    const QR_PARAM_FORMATO = 'formato';
-+    const QR_PARAM_LOJA = 'loja';
-     const ADMIN_PASSWORD = "9602"; 
- 
-     let STATE = { lojas: [], assistentes: [] };
-     let editingAssistenteIndex = -1; 
-     let DADOS_PADRAO_FALLBACK = { lojas: [], assistentes: [] };
- 
--    window.addEventListener('load', () => {
--      carregarDados();
--      if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(console.log);
--    });
-+    window.addEventListener('load', () => {
-+      carregarDados();
-+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(console.log);
-+      inicializarAdminQRCodes();
-+      processarQRCodeParams();
-+    });
- 
-     function carregarDados() {
-       if (typeof DADOS_PADRAO === 'undefined') {
-           console.warn("Ficheiro config.js não encontrado.");
-           DADOS_PADRAO = DADOS_PADRAO_FALLBACK;
-           STORAGE_DATA_KEY = "v0.0";
-       }
-       const dadosLocais = localStorage.getItem(STORAGE_DATA_KEY);
-       if (dadosLocais) { STATE = JSON.parse(dadosLocais); } 
-       else { STATE = JSON.parse(JSON.stringify(DADOS_PADRAO)); }
-       renderizarApp();
-       atualizarVersaoRodape();
-     }
- 
-     function atualizarVersaoRodape() {
-         let versao = "Desconhecida";
-         if (typeof STORAGE_DATA_KEY !== 'undefined') { versao = STORAGE_DATA_KEY.split('_')[1] || 'vX.X'; }
-         document.getElementById('app-footer-version').textContent = `Powered By G2G IAD3.0 ${versao.toUpperCase()}`;
-     }
- 
-     function guardarDadosLocais() { localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(STATE)); renderizarApp(); }
-     function renderizarApp() { atualizarSelectFormato(); atualizarUILoja(); }
-     function formatarTextoBonito(t) { if (!t || t === "*") return t; return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase(); }
-     function ordenarLojas(a, b) { return a.loja.localeCompare(b.loja, undefined, { numeric: true, sensitivity: 'base' }); }
-     function obterFormatosUnicos() { 
-         const raw = STATE.lojas.map(l => l.formato ? formatarTextoBonito(l.formato) : "");
-         return [...new Set(raw)].filter(f => f !== "").sort();
-     }
- 
-     function atualizarSelectFormato() {
-       const s = document.getElementById('formato-select'); const val = s.value;
-       s.innerHTML = '<option value="" disabled selected>Seleciona o formato…</option>';
-       obterFormatosUnicos().forEach(f => { const o = document.createElement('option'); o.value = f; o.textContent = f; s.appendChild(o); });
-       if (val) s.value = val;
-     }
- 
-     function atualizarSelectLojas() {
-       const fmt = document.getElementById('formato-select').value;
-       const s = document.getElementById('loja-select');
-       s.innerHTML = '<option value="" disabled selected>Seleciona a loja…</option>';
-       if (!fmt) return;
-       const fmtN = fmt.toUpperCase();
-       const ljs = STATE.lojas.filter(l => (l.formato || '').toUpperCase() === fmtN);
-       ljs.sort(ordenarLojas);
-       ljs.forEach(l => { const o = document.createElement('option'); o.value = l.loja; o.textContent = l.loja; s.appendChild(o); });
-     }
- 
--    function atualizarUILoja() {
--      const f = localStorage.getItem(FORMATO_KEY); const l = localStorage.getItem(LOJA_KEY);
--      const span = document.getElementById('loja-nome'); const over = document.getElementById('loja-overlay');
--      if (f && l) { span.textContent = `${formatarTextoBonito(f)} – ${l}`; over.style.display = 'none'; renderizarGridAssistentes(f, l); } 
--      else { span.textContent = 'a definir…'; over.style.display = 'flex'; document.querySelector('.grid').innerHTML = ''; }
--    }
-+    function atualizarUILoja() {
-+      const f = localStorage.getItem(FORMATO_KEY); const l = localStorage.getItem(LOJA_KEY);
-+      const span = document.getElementById('loja-nome'); const over = document.getElementById('loja-overlay');
-+      if (f && l) { span.textContent = `${formatarTextoBonito(f)} – ${l}`; over.style.display = 'none'; renderizarGridAssistentes(f, l); } 
-+      else { span.textContent = 'a definir…'; over.style.display = 'flex'; document.querySelector('.grid').innerHTML = ''; }
-+    }
- 
-     function fecharLojaOverlay() {
-         document.getElementById('loja-overlay').style.display = 'none';
-     }
- 
--    function renderizarGridAssistentes(uf, ul) {
--      const grid = document.querySelector('.grid'); grid.innerHTML = '';
--      const ufN = uf.toUpperCase(); const ulN = ul.toUpperCase();
--      const matches = STATE.assistentes.filter(a => {
--        const f = (a.formato || '').toUpperCase(); const l = (a.loja || '').toUpperCase();
--        return (f === '*' || f === ufN) && (l === '*' || l === ulN);
--      });
--      matches.sort((a, b) => a.label.localeCompare(b.label));
--      if(matches.length === 0) { grid.innerHTML = '<p style="grid-column: span 2; opacity: 0.7;">Nenhum assistente disponível.</p>'; return; }
--      matches.forEach(a => {
-+    function filtrarAssistentesPorSelecao(uf, ul) {
-+      const ufN = (uf || '').toUpperCase();
-+      const ulN = (ul || '').toUpperCase();
-+      return STATE.assistentes.filter(a => {
-+        const f = (a.formato || '').toUpperCase();
-+        const l = (a.loja || '').toUpperCase();
-+        return (f === '*' || f === ufN) && (l === '*' || l === ulN);
-+      });
-+    }
-+
-+    function renderizarGridAssistentes(uf, ul) {
-+      const grid = document.querySelector('.grid'); grid.innerHTML = '';
-+      const matches = filtrarAssistentesPorSelecao(uf, ul);
-+      matches.sort((a, b) => a.label.localeCompare(b.label));
-+      if(matches.length === 0) { grid.innerHTML = '<p style="grid-column: span 2; opacity: 0.7;">Nenhum assistente disponível.</p>'; return; }
-+      matches.forEach(a => {
-         const btn = document.createElement('div'); btn.className = 'btn';
-         
-         // CORREÇÃO AQUI: Abrir em nova aba (_blank)
-         btn.onclick = () => abrirAssistente(a.nome, a.url);
-         
-         const img = document.createElement('img'); img.src = a.icone || 'AibyAuchan.png'; img.onerror = function() { this.src = 'AibyAuchan.png'; };
-         const lbl = document.createElement('div'); lbl.className = 'label'; lbl.textContent = a.label || a.nome;
-         btn.appendChild(img); btn.appendChild(lbl); grid.appendChild(btn);
-       });
-     }
- 
-     function guardarLoja() {
-       const f = document.getElementById('formato-select').value; const l = document.getElementById('loja-select').value;
-       if (!f || !l) return alert('Escolhe formato e loja.');
-       localStorage.setItem(FORMATO_KEY, f); localStorage.setItem(LOJA_KEY, l); atualizarUILoja();
-     }
-     function forcarEscolhaLoja() {
-       document.getElementById('formato-select').value = ""; document.getElementById('loja-select').innerHTML = '<option value="" disabled selected>Seleciona a loja…</option>';
-       document.getElementById('loja-overlay').style.display = 'flex';
-     }
-     
--    function abrirAssistente(n, u) {
--      const l = localStorage.getItem(LOJA_KEY) || 'Sem loja';
--      const p = new URLSearchParams(); p.append(ENTRY_LOJA, l); p.append(ENTRY_ASSISTENTE, n);
--      
--      // Envia os dados para o Google Forms em segundo plano
-+    function abrirAssistente(n, u) {
-+      const l = localStorage.getItem(LOJA_KEY) || 'Sem loja';
-+      const p = new URLSearchParams(); p.append(ENTRY_LOJA, l); p.append(ENTRY_ASSISTENTE, n);
-+      
-+      // Envia os dados para o Google Forms em segundo plano
-       fetch(FORM_BASE_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: p.toString() }).catch(e=>{});
-       
-       // Abre o assistente NUMA NOVA ABA
--      window.open(u, '_blank');
--    }
-+      window.open(u, '_blank');
-+    }
-+
-+    function processarQRCodeParams() {
-+      const params = new URLSearchParams(window.location.search);
-+      if (!params.has(QR_PARAM_ASSISTENTE)) return;
-+      const assistenteParam = params.get(QR_PARAM_ASSISTENTE);
-+      const formatoParam = params.get(QR_PARAM_FORMATO);
-+      const lojaParam = params.get(QR_PARAM_LOJA);
-+      if (formatoParam) localStorage.setItem(FORMATO_KEY, formatoParam);
-+      if (lojaParam) localStorage.setItem(LOJA_KEY, lojaParam);
-+
-+      const assistente = STATE.assistentes.find(a => a.nome === assistenteParam || a.label === assistenteParam);
-+      if (!assistente) {
-+        alert("Assistente não encontrado.");
-+        return;
-+      }
-+
-+      const lojaFinal = lojaParam || localStorage.getItem(LOJA_KEY) || 'Sem loja';
-+      const payload = new URLSearchParams();
-+      payload.append(ENTRY_LOJA, lojaFinal);
-+      payload.append(ENTRY_ASSISTENTE, assistente.nome || assistente.label);
-+
-+      const body = payload.toString();
-+      if (navigator.sendBeacon) {
-+        navigator.sendBeacon(FORM_BASE_URL, new Blob([body], { type: 'application/x-www-form-urlencoded' }));
-+        window.location.replace(assistente.url);
-+        return;
-+      }
-+
-+      fetch(FORM_BASE_URL, {
-+        method: 'POST',
-+        mode: 'no-cors',
-+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-+        body,
-+        keepalive: true
-+      }).finally(() => {
-+        window.location.replace(assistente.url);
-+      });
-+    }
- 
-     /* --- ADMIN --- */
-     let lc = 0;
-     document.getElementById('logo-trigger').addEventListener('click', () => { lc++; if (lc === 5) { lc=0; abrirLogin(); } });
-     function abrirLogin() { document.getElementById('login-overlay').style.display = 'flex'; setTimeout(()=>document.getElementById('login-password-input').focus(),100); }
-     function fecharLogin() { document.getElementById('login-overlay').style.display = 'none'; document.getElementById('login-password-input').value=''; }
-     function verificarSenhaLogin() { if(document.getElementById('login-password-input').value === ADMIN_PASSWORD) { fecharLogin(); abrirAdmin(); } else { alert("Senha incorreta."); } }
--    function abrirAdmin() { document.getElementById('admin-overlay').style.display = 'flex'; renderizarAdminListas(); atualizarDropdownsAdminInicial(); }
--    function fecharAdmin() { document.getElementById('admin-overlay').style.display = 'none'; cancelarEdicao(); }
--    function switchAdminTab(t) {
--      document.querySelectorAll('.admin-tab').forEach(x => x.classList.remove('active'));
--      ['lojas','assistentes','exportar'].forEach(id => document.getElementById(`admin-tab-${id}`).style.display='none');
--      document.getElementById(`admin-tab-${t}`).style.display='block';
--      if(t==='lojas') document.querySelectorAll('.admin-tab')[0].classList.add('active');
--      if(t==='assistentes') { document.querySelectorAll('.admin-tab')[1].classList.add('active'); atualizarDropdownsAdminInicial(); }
--      if(t==='exportar') { document.querySelectorAll('.admin-tab')[2].classList.add('active'); atualizarSugestaoVersao(); }
--    }
-+    function abrirAdmin() { document.getElementById('admin-overlay').style.display = 'flex'; renderizarAdminListas(); atualizarDropdownsAdminInicial(); atualizarResumoQRCodeAdmin(); }
-+    function fecharAdmin() { document.getElementById('admin-overlay').style.display = 'none'; cancelarEdicao(); }
-+    function switchAdminTab(t) {
-+      document.querySelectorAll('.admin-tab').forEach(x => x.classList.remove('active'));
-+      ['lojas','assistentes','exportar','qrcodes'].forEach(id => {
-+        const tab = document.getElementById(`admin-tab-${id}`);
-+        if (tab) tab.style.display = 'none';
-+      });
-+      const tabAtual = document.getElementById(`admin-tab-${t}`);
-+      if (tabAtual) tabAtual.style.display = 'block';
-+      const tabs = ['lojas','assistentes','exportar','qrcodes'];
-+      const idx = tabs.indexOf(t);
-+      if (idx >= 0) document.querySelectorAll('.admin-tab')[idx].classList.add('active');
-+      if(t==='assistentes') { atualizarDropdownsAdminInicial(); }
-+      if(t==='exportar') { atualizarSugestaoVersao(); }
-+      if(t==='qrcodes') { atualizarResumoQRCodeAdmin(); }
-+    }
- 
-     function renderizarAdminListas() {
-       const ll = document.getElementById('admin-lojas-list'); ll.innerHTML = '';
-       const lSorted = [...STATE.lojas].sort(ordenarLojas);
-       lSorted.forEach(l => {
-         const idx = STATE.lojas.indexOf(l);
-         const d = document.createElement('div'); d.className='admin-item';
-         d.innerHTML = `<span>${formatarTextoBonito(l.formato)} - ${l.loja}</span><button onclick="adminRemoverLoja(${idx})">X</button>`;
-         ll.appendChild(d);
-       });
-       const al = document.getElementById('admin-assistentes-list'); al.innerHTML = '';
-       const aSorted = [...STATE.assistentes].sort((a,b)=>a.label.localeCompare(b.label));
-       aSorted.forEach(a => {
-         const idx = STATE.assistentes.indexOf(a);
-         const d = document.createElement('div'); d.className='admin-item';
-         d.innerHTML = `<div class="admin-item-text" onclick="prepararEdicao(${idx})">${a.label} <small style="opacity:0.7">(${a.formato})(${a.loja})</small></div><button onclick="adminRemoverAssistente(event, ${idx})">X</button>`;
-         al.appendChild(d);
-       });
-     }
- 
-     function atualizarDropdownsAdminInicial() {
-        const s = document.getElementById('admin-ast-formato'); const prev = s.value;
-        s.innerHTML = '<option value="*">Qualquer Formato (*)</option>';
-        obterFormatosUnicos().forEach(f => { const o = document.createElement('option'); o.value=f; o.textContent=f; s.appendChild(o); });
-        if(prev) s.value = prev;
-@@ -395,84 +453,86 @@
-        if(sf.value === '*') list = [...STATE.lojas];
-        else list = STATE.lojas.filter(l => (l.formato||'').toUpperCase() === sf.value.toUpperCase());
-        list.sort(ordenarLojas);
-        list.forEach(l => { const o = document.createElement('option'); o.value=l.loja; o.textContent=l.loja; sl.appendChild(o); });
-        sl.value = (Array.from(sl.options).some(o=>o.value===prev)) ? prev : '*';
-     }
- 
-     function selecionarImagemArquivo() {
-         const i = document.getElementById('admin-file-picker');
-         if (i.files && i.files[0]) document.getElementById('admin-ast-icone').value = i.files[0].name;
-     }
- 
-     function adminAddLoja() {
-         let f = document.getElementById('admin-novo-formato').value;
-         const c = document.getElementById('admin-nova-loja-cod').value.trim();
-         const n = document.getElementById('admin-nova-loja-nome').value.trim();
-         if(!c || !n) return alert("Preenche código e nome.");
-         f = formatarTextoBonito(f); const lc = `${c}-${n}`;
-         if(STATE.lojas.some(l=>l.formato===f && l.loja===lc)) return alert("Loja já existe.");
-         STATE.lojas.push({formato:f, loja:lc});
-         guardarDadosLocais(); renderizarAdminListas(); atualizarDropdownsAdminInicial();
-         document.getElementById('admin-nova-loja-cod').value=''; document.getElementById('admin-nova-loja-nome').value='';
-     }
-     function adminRemoverLoja(i) { if(confirm("Apagar?")) { STATE.lojas.splice(i,1); guardarDadosLocais(); renderizarAdminListas(); atualizarDropdownsAdminInicial(); } }
- 
--    function prepararEdicao(i) {
--        editingAssistenteIndex = i; const a = STATE.assistentes[i];
--        document.getElementById('admin-ast-label').value = a.label;
--        document.getElementById('admin-ast-url').value = a.url;
--        document.getElementById('admin-ast-icone').value = a.icone;
--        document.getElementById('admin-ast-formato').value = formatarTextoBonito(a.formato);
--        atualizarSelectLojasAdmin();
--        document.getElementById('admin-ast-loja').value = a.loja;
-+    function prepararEdicao(i) {
-+        editingAssistenteIndex = i; const a = STATE.assistentes[i];
-+        document.getElementById('admin-ast-label').value = a.label;
-+        document.getElementById('admin-ast-url').value = a.url;
-+        document.getElementById('admin-ast-icone').value = a.icone;
-+        document.getElementById('admin-ast-descricao').value = a.descricao || '';
-+        document.getElementById('admin-ast-formato').value = formatarTextoBonito(a.formato);
-+        atualizarSelectLojasAdmin();
-+        document.getElementById('admin-ast-loja').value = a.loja;
-         document.getElementById('admin-ast-title').innerText = "Editar Assistente";
-         document.getElementById('btn-save-ast').innerText = "Atualizar";
-         document.getElementById('btn-cancel-ast').style.display = "block";
-     }
--    function cancelarEdicao() {
--        editingAssistenteIndex = -1;
--        ['admin-ast-label','admin-ast-url','admin-ast-icone'].forEach(id=>document.getElementById(id).value='');
--        document.getElementById('admin-ast-formato').value='*'; atualizarSelectLojasAdmin();
--        document.getElementById('admin-ast-title').innerText="Adicionar Assistente";
--        document.getElementById('btn-save-ast').innerText="Adicionar";
-+    function cancelarEdicao() {
-+        editingAssistenteIndex = -1;
-+        ['admin-ast-label','admin-ast-url','admin-ast-icone','admin-ast-descricao'].forEach(id=>document.getElementById(id).value='');
-+        document.getElementById('admin-ast-formato').value='*'; atualizarSelectLojasAdmin();
-+        document.getElementById('admin-ast-title').innerText="Adicionar Assistente";
-+        document.getElementById('btn-save-ast').innerText="Adicionar";
-         document.getElementById('btn-cancel-ast').style.display="none";
-     }
--    function adminSaveAssistente() {
--        const l = document.getElementById('admin-ast-label').value.trim();
--        const n = l;
--        const u = document.getElementById('admin-ast-url').value.trim();
--        const i = document.getElementById('admin-ast-icone').value.trim();
--        let f = document.getElementById('admin-ast-formato').value || '*';
--        const loj = document.getElementById('admin-ast-loja').value || '*';
--        if(f !== '*') f = formatarTextoBonito(f);
--        if(!l || !u) return alert("Falta Nome ou URL");
--        
--        const novo = {formato:f, loja:loj, nome:n, label:l, url:u, icone:i};
--        const dup = STATE.assistentes.some((a, idx) => {
--            if(editingAssistenteIndex === idx) return false;
--            return a.nome===novo.nome && a.label===novo.label && a.url===novo.url && a.formato===novo.formato && a.loja===novo.loja;
-+    function adminSaveAssistente() {
-+        const l = document.getElementById('admin-ast-label').value.trim();
-+        const n = l;
-+        const u = document.getElementById('admin-ast-url').value.trim();
-+        const i = document.getElementById('admin-ast-icone').value.trim();
-+        const d = document.getElementById('admin-ast-descricao').value.trim();
-+        let f = document.getElementById('admin-ast-formato').value || '*';
-+        const loj = document.getElementById('admin-ast-loja').value || '*';
-+        if(f !== '*') f = formatarTextoBonito(f);
-+        if(!l || !u) return alert("Falta Nome ou URL");
-+        
-+        const novo = {formato:f, loja:loj, nome:n, label:l, url:u, icone:i, descricao:d};
-+        const dup = STATE.assistentes.some((a, idx) => {
-+            if(editingAssistenteIndex === idx) return false;
-+            return a.nome===novo.nome && a.label===novo.label && a.url===novo.url && a.formato===novo.formato && a.loja===novo.loja;
-         });
-         if(dup) return alert("Assistente duplicado!");
- 
-         if(editingAssistenteIndex >= 0) STATE.assistentes[editingAssistenteIndex] = novo;
-         else STATE.assistentes.push(novo);
-         guardarDadosLocais(); renderizarAdminListas(); cancelarEdicao();
-     }
-     function adminRemoverAssistente(e, i) { e.stopPropagation(); if(confirm("Apagar?")) { STATE.assistentes.splice(i,1); guardarDadosLocais(); renderizarAdminListas(); if(editingAssistenteIndex===i) cancelarEdicao(); } }
- 
-     /* --- EXPORTAR CONFIG.JS --- */
-     function atualizarSugestaoVersao() {
-         let v = "1.0";
-         if(typeof STORAGE_DATA_KEY !== 'undefined') v = STORAGE_DATA_KEY.split('_v')[1] || "1.0";
-         document.getElementById('lbl-versao-atual').textContent = "v" + v;
-         let p = v.split('.').map(Number); if(p.length===2) p.push(0);
-         p[p.length-1]++;
-         document.getElementById('input-nova-versao').value = "v" + p.join('.');
-     }
- 
-     function baixarConfiguracao() {
-       let vUser = document.getElementById('input-nova-versao').value.trim();
-       if(vUser.startsWith('v')) vUser = vUser.substring(1);
-       const newKey = "appConfigData_v" + vUser;
- 
-       STATE.lojas.forEach(l => { if(l.formato) l.formato = formatarTextoBonito(l.formato); });
-@@ -491,31 +551,186 @@
-       });
-       content += `  ],\n`;
-       content += `  assistentes: [\n`;
-       STATE.assistentes.forEach((a, i) => {
-           let block = JSON.stringify(a, null, 4);
-           block = block.split('\n').map(line => "    " + line).join('\n');
-           if(i < STATE.assistentes.length - 1) block += ",";
-           content += `${block}\n`;
-       });
-       content += `  ]\n`;
-       content += `};\n`;
- 
-       const blob = new Blob([content], { type: "text/javascript" });
-       const url = URL.createObjectURL(blob);
-       const a = document.createElement("a");
-       a.href = url;
-       a.download = "config.js";
-       document.body.appendChild(a);
-       a.click();
-       document.body.removeChild(a);
-       URL.revokeObjectURL(url);
-       
-       alert("Ficheiro config.js baixado!\nFaz upload dele para a pasta do GitHub.");
-     }
- 
--    function limparTudoAdmin() {
--      if(confirm("Resetar Fábrica?")) { localStorage.removeItem(STORAGE_DATA_KEY); location.reload(); }
--    }
--  </script>
--</body>
--</html>
-\ No newline at end of file
-+    function limparTudoAdmin() {
-+      if(confirm("Resetar Fábrica?")) { localStorage.removeItem(STORAGE_DATA_KEY); location.reload(); }
-+    }
-+
-+    function inicializarAdminQRCodes() {
-+      const tabsContainer = document.querySelector('.admin-tabs');
-+      if (!tabsContainer || document.getElementById('admin-tab-qrcodes')) return;
-+
-+      const tab = document.createElement('div');
-+      tab.className = 'admin-tab';
-+      tab.textContent = 'QRCodes';
-+      tab.onclick = () => switchAdminTab('qrcodes');
-+      tabsContainer.appendChild(tab);
-+
-+      const overlayBox = document.querySelector('#admin-overlay .overlay-box');
-+      const exportarTab = document.getElementById('admin-tab-exportar');
-+      const qrcodesTab = document.createElement('div');
-+      qrcodesTab.id = 'admin-tab-qrcodes';
-+      qrcodesTab.style.display = 'none';
-+      qrcodesTab.innerHTML = `
-+        <p style="font-size: 0.85rem; margin-bottom: 10px;">
-+          Gera um PDF A5 com 1 página por assistente para a seleção atual da app.
-+        </p>
-+        <div class="version-control" style="margin-bottom: 10px;">
-+          <label>Seleção atual:</label>
-+          <strong id="admin-qrcodes-selecao" style="color:#333;">...</strong>
-+          <div id="admin-qrcodes-resumo" style="margin-top:8px; font-size:0.8rem; color:#666;"></div>
-+        </div>
-+        <button onclick="gerarPDFQRCodes()">📄 Gerar PDF QRCodes</button>
-+      `;
-+      overlayBox.insertBefore(qrcodesTab, exportarTab.nextSibling);
-+    }
-+
-+    function atualizarResumoQRCodeAdmin() {
-+      const selecao = document.getElementById('admin-qrcodes-selecao');
-+      const resumo = document.getElementById('admin-qrcodes-resumo');
-+      if (!selecao || !resumo) return;
-+      const formato = localStorage.getItem(FORMATO_KEY);
-+      const loja = localStorage.getItem(LOJA_KEY);
-+      if (!formato || !loja) {
-+        selecao.textContent = 'Sem seleção';
-+        resumo.textContent = 'Escolhe o formato e a loja na app antes de gerar o PDF.';
-+        return;
-+      }
-+      selecao.textContent = `${formatarTextoBonito(formato)} – ${loja}`;
-+      const assistentes = filtrarAssistentesPorSelecao(formato, loja);
-+      resumo.textContent = `Assistentes disponíveis: ${assistentes.length}`;
-+    }
-+
-+    function carregarScript(src) {
-+      return new Promise((resolve, reject) => {
-+        const s = document.createElement('script');
-+        s.src = src;
-+        s.onload = resolve;
-+        s.onerror = reject;
-+        document.head.appendChild(s);
-+      });
-+    }
-+
-+    async function garantirPdfLib() {
-+      if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF;
-+      await carregarScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
-+      return window.jspdf.jsPDF;
-+    }
-+
-+    function criarUrlQRCode(assistente, formato, loja) {
-+      const base = `${window.location.origin}${window.location.pathname}`;
-+      const params = new URLSearchParams();
-+      params.set(QR_PARAM_ASSISTENTE, assistente.nome || assistente.label);
-+      if (formato) params.set(QR_PARAM_FORMATO, formato);
-+      if (loja) params.set(QR_PARAM_LOJA, loja);
-+      return `${base}?${params.toString()}`;
-+    }
-+
-+    async function carregarImagemComoDataURL(src) {
-+      return new Promise((resolve, reject) => {
-+        const img = new Image();
-+        img.crossOrigin = 'anonymous';
-+        img.onload = () => {
-+          const canvas = document.createElement('canvas');
-+          canvas.width = img.naturalWidth;
-+          canvas.height = img.naturalHeight;
-+          const ctx = canvas.getContext('2d');
-+          ctx.drawImage(img, 0, 0);
-+          resolve(canvas.toDataURL('image/png'));
-+        };
-+        img.onerror = reject;
-+        img.src = src;
-+      });
-+    }
-+
-+    async function gerarQRCodeDataURL(texto) {
-+      const api = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(texto)}`;
-+      const res = await fetch(api);
-+      const blob = await res.blob();
-+      return new Promise(resolve => {
-+        const reader = new FileReader();
-+        reader.onload = () => resolve(reader.result);
-+        reader.readAsDataURL(blob);
-+      });
-+    }
-+
-+    async function gerarPDFQRCodes() {
-+      const formato = localStorage.getItem(FORMATO_KEY);
-+      const loja = localStorage.getItem(LOJA_KEY);
-+      if (!formato || !loja) {
-+        alert('Seleciona formato e loja na app antes de gerar o PDF.');
-+        return;
-+      }
-+      const assistentes = filtrarAssistentesPorSelecao(formato, loja);
-+      if (assistentes.length === 0) {
-+        alert('Nenhum assistente disponível para esta seleção.');
-+        return;
-+      }
-+
-+      const jsPDF = await garantirPdfLib();
-+      const doc = new jsPDF({ format: 'a5', unit: 'mm' });
-+      const pageWidth = doc.internal.pageSize.getWidth();
-+      const margin = 12;
-+      const imageSize = 70;
-+      const qrSize = 60;
-+
-+      for (let idx = 0; idx < assistentes.length; idx++) {
-+        const a = assistentes[idx];
-+        if (idx > 0) doc.addPage('a5', 'p');
-+
-+        const imgSrc = a.icone || 'AibyAuchan.png';
-+        let imgData = null;
-+        try {
-+          imgData = await carregarImagemComoDataURL(imgSrc);
-+        } catch (e) {
-+          imgData = await carregarImagemComoDataURL('AibyAuchan.png');
-+        }
-+
-+        const qrUrl = criarUrlQRCode(a, formato, loja);
-+        const qrData = await gerarQRCodeDataURL(qrUrl);
-+
-+        const imgX = (pageWidth - imageSize) / 2;
-+        doc.addImage(imgData, 'PNG', imgX, 12, imageSize, imageSize);
-+
-+        doc.setFontSize(14);
-+        doc.setTextColor(40);
-+        doc.text(a.label || a.nome, pageWidth / 2, 95, { align: 'center' });
-+
-+        doc.setFontSize(10);
-+        doc.setTextColor(80);
-+        const descricao = a.descricao || '';
-+        const texto = descricao ? descricao : '';
-+        if (texto) {
-+          doc.text(texto, pageWidth / 2, 105, { align: 'center', maxWidth: pageWidth - (margin * 2) });
-+        }
-+
-+        const qrX = (pageWidth - qrSize) / 2;
-+        doc.addImage(qrData, 'PNG', qrX, 130, qrSize, qrSize);
-+      }
-+
-+      doc.save(`qrcodes_${formatarTextoBonito(formato)}_${loja}.pdf`);
-+    }
-+  </script>
-+</body>
-+</html>
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI by Auchan - App & Admin</title>
+  <link rel="manifest" href="manifest.json">
+
+  <script>
+  // Cria um número único baseado no tempo atual (agora!)
+  var versaoUnica = new Date().getTime(); 
+  // Escreve o script na página forçando o download novo
+  document.write('<script src="config.js?v=' + versaoUnica + '"><\/script>');
+</script>
+
+  <style>
+    /* --- ESTILOS GERAIS --- */
+    body { margin: 0; font-family: "Roboto", Arial, sans-serif; background: linear-gradient(135deg, #d63a3e 0%, #6a1b9a 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; color: #fff; }
+    .app { width: min(420px, 95%); padding: 1rem; box-sizing: border-box; text-align: center; display: flex; flex-direction: column; min-height: 90vh; }
+    .content-wrap { flex: 1; }
+    .logo { width: 180px; margin: 0 auto 0.8rem auto; display: block; filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.25)); cursor: pointer; }
+    .loja-info { font-size: .85rem; margin-bottom: 0.8rem; opacity: 0.9; }
+    .change-store { font-size: .75rem; text-decoration: underline; cursor: pointer; }
+    .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem; }
+    .btn { background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px; padding: .5rem; display: flex; flex-direction: column; align-items: center; gap: .4rem; cursor: pointer; transition: transform .15s ease-in-out, box-shadow .15s; min-height: 160px; backdrop-filter: blur(8px); }
+    .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25); background: rgba(255, 255, 255, 0.18); }
+    .btn img { width: 100%; max-width: 150px; object-fit: contain; border-radius: 14px; user-select: none; }
+    .label { font-size: .9rem; font-weight: bold; color: #fff; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.25); }
+    .app-footer { margin-top: 20px; font-size: 0.7rem; opacity: 0.8; font-family: sans-serif; display: flex; justify-content: center; gap: 15px; align-items: center; }
+    .help-link { cursor: pointer; text-decoration: underline; font-weight: bold; color: #fff; }
+
+    /* OVERLAYS */
+    .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 999; overflow-y: auto; }
+    /* Position relative adicionado para o botão X funcionar */
+    .overlay-box { position: relative; background: #ffffff; color: #333; border-radius: 18px; padding: 1.5rem 1.2rem; width: min(380px, 90%); box-shadow: 0 10px 25px rgba(0,0,0,.35); text-align: center; margin: 2rem 0; }
+    .overlay-box h2 { margin-top: 0; margin-bottom: .8rem; font-size: 1.2rem; color: #d63a3e; }
+    .overlay-box select, .overlay-box input, .overlay-box textarea { width: 100%; padding: .6rem; border-radius: 10px; border: 1px solid #ccc; font-size: .95rem; margin-bottom: 0.8rem; box-sizing: border-box; }
+    .overlay-box textarea { resize: vertical; min-height: 80px; }
+    .overlay-box button { width: 100%; padding: .6rem; border-radius: 999px; border: none; font-size: 1rem; font-weight: 600; background: linear-gradient(135deg, #d63a3e, #6a1b9a); color: #fff; cursor: pointer; margin-bottom: 0.5rem; }
+    .overlay-box button.secondary { background: #eee; color: #333; }
+    .overlay-box button.danger { background: #ff4444; color: white; }
+    .overlay-box button.cancel { background: #777; color: white; }
+    .file-btn { width: auto !important; padding: 0.6rem 1rem !important; background: #666 !important; white-space: nowrap; }
+
+    /* Botão de Fechar Overlay (X) */
+    .close-overlay-btn {
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #999;
+        cursor: pointer;
+        padding: 5px;
+        line-height: 1;
+    }
+    .close-overlay-btn:hover { color: #d63a3e; }
+
+    /* ADMIN TABS */
+    .admin-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 1rem; }
+    .admin-tab { padding: 5px 10px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; }
+    .admin-tab.active { border-bottom: 2px solid #d63a3e; color: #d63a3e; }
+    .admin-list { text-align: left; max-height: 200px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px; font-size: 0.85rem; }
+    .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee; }
+    .admin-item-text { flex-grow: 1; cursor: pointer; }
+    .admin-item-text:hover { color: #d63a3e; font-weight: bold; }
+    .admin-item button { width: auto; padding: 2px 8px; font-size: 0.7rem; margin: 0; background: #ff4444; margin-left: 10px;}
+    
+    .version-control { background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: left; border: 1px solid #eee; }
+    .version-control label { font-size: 0.8rem; color: #666; display: block; margin-bottom: 3px; }
+    
+    /* Tutorial */
+    .tutorial-step { text-align: left; margin-bottom: 15px; display: flex; align-items: flex-start; gap: 10px; font-size: 0.9rem; border-bottom: 1px solid #eee; padding-bottom: 10px; }
+    .tutorial-icon { font-size: 1.5rem; line-height: 1; }
+    .ios-share-icon { width: 20px; height: 20px; vertical-align: middle; display: inline-block; }
+  </style>
+</head>
+<body>
+
+  <div id="login-overlay" class="overlay">
+    <div class="overlay-box" style="width: min(300px, 80%);">
+        <span class="close-overlay-btn" onclick="fecharLogin()">✕</span>
+        
+        <h2>Área Reservada</h2>
+        <p style="font-size:0.9rem; color:#666; margin-bottom:15px;">Insere a senha de administrador</p>
+        <input type="password" id="login-password-input" placeholder="Senha" onkeyup="if(event.key === 'Enter') verificarSenhaLogin()">
+        <button onclick="verificarSenhaLogin()">Entrar</button>
+        <button class="secondary" onclick="fecharLogin()">Cancelar</button>
+    </div>
+  </div>
+
+  <div id="loja-overlay" class="overlay">
+    <div class="overlay-box">
+      <span class="close-overlay-btn" onclick="fecharLojaOverlay()">✕</span>
+      <h2>Escolhe formato e loja</h2>
+      <select id="formato-select" onchange="atualizarSelectLojas()">
+        <option value="" disabled selected>Seleciona o formato…</option>
+      </select>
+      <select id="loja-select" onchange="this.blur()">
+        <option value="" disabled selected>Seleciona a loja…</option>
+      </select>
+      <button onclick="guardarLoja()">Guardar</button>
+      <small>Podes mudar depois em “Loja: … (alterar)”</small>
+    </div>
+  </div>
+
+  <div id="help-overlay" class="overlay">
+    <div class="overlay-box">
+        <span class="close-overlay-btn" onclick="document.getElementById('help-overlay').style.display='none'">✕</span>
+        <h2>📲 Instalar App</h2>
+        
+        <div id="help-ios">
+            <p style="margin-bottom:15px; font-weight:bold; color:#666;">iPhone / iPad (iOS)</p>
+            <div class="tutorial-step">
+                <span class="tutorial-icon">1️⃣</span>
+                <span>Toca no botão de <b>Partilha</b> (quadrado com seta) na barra inferior do Safari.<br>
+                <svg class="ios-share-icon" viewBox="0 0 50 50" style="width:24px; margin-top:5px;"><path d="M30.3 13.7L25 8.4l-5.3 5.3-1.4-1.4L25 5.6l6.7 6.7z"/><path d="M24 7h2v21h-2z"/><path d="M35 40H15c-1.7 0-3-1.3-3-3V19c0-1.7 1.3-3 3-3h7v2h-7c-0.6 0-1 0.4-1 1v18c0 0.6 0.4 1 1 1h20c0.6 0 1-0.4 1-1V19c0-0.6-0.4-1-1-1h-7v-2h7c1.7 0 3 1.3 3 3v18c0 1.7-1.3 3-3 3z"/></svg>
+                </span>
+            </div>
+            <div class="tutorial-step">
+                <span class="tutorial-icon">2️⃣</span>
+                <span>Rola para baixo e escolhe a opção <b>"Adicionar ao Ecrã Principal"</b> (Add to Home Screen).</span>
+            </div>
+            <div class="tutorial-step">
+                <span class="tutorial-icon">3️⃣</span>
+                <span>Clica em <b>Adicionar</b> no topo direito.</span>
+            </div>
+        </div>
+
+        <hr style="margin: 15px 0; opacity: 0.3;">
+
+        <div id="help-android">
+            <p style="margin-bottom:15px; font-weight:bold; color:#666;">Android (Chrome)</p>
+            <div class="tutorial-step">
+                <span>Toca nos 3 pontinhos (⋮) e escolhe <b>"Instalar Aplicação"</b> ou "Adicionar ao Ecrã Principal".</span>
+            </div>
+        </div>
+
+        <button class="secondary" onclick="document.getElementById('help-overlay').style.display='none'">Entendi</button>
+    </div>
+  </div>
+
+  <div id="admin-overlay" class="overlay">
+    <div class="overlay-box" style="width: min(450px, 95%);">
+      <h2>Painel de Administração</h2>
+      <div class="admin-tabs">
+        <div class="admin-tab active" onclick="switchAdminTab('lojas')">Lojas</div>
+        <div class="admin-tab" onclick="switchAdminTab('assistentes')">Assistentes</div>
+        <div class="admin-tab" onclick="switchAdminTab('exportar')">Guardar</div>
+      </div>
+
+      <div id="admin-tab-lojas">
+        <div class="admin-list" id="admin-lojas-list"></div>
+        <h3>Adicionar Loja</h3>
+        <select id="admin-novo-formato">
+          <option value="Hiper">Hiper</option>
+          <option value="Super">Super</option>
+          <option value="Prox">Prox</option>
+          <option value="Servicos">Serviços</option>
+        </select>
+        <div style="display:flex; gap:5px;">
+            <input type="text" id="admin-nova-loja-cod" placeholder="Cod" maxlength="3" style="width: 80px;">
+            <input type="text" id="admin-nova-loja-nome" placeholder="Nome da Loja" style="flex:1;">
+        </div>
+        <button onclick="adminAddLoja()">Adicionar Loja</button>
+      </div>
+
+      <div id="admin-tab-assistentes" style="display:none;">
+        <div class="admin-list" id="admin-assistentes-list"></div>
+        <h3 id="admin-ast-title">Adicionar Assistente</h3>
+        <small style="display:block; margin-bottom:10px; color:#666;">Clica na lista acima para editar</small>
+        
+        <input type="text" id="admin-ast-label" placeholder="Nome no Botão (Label)">
+        <input type="text" id="admin-ast-url" placeholder="URL Destino">
+        <textarea id="admin-ast-descricao" placeholder="Descrição"></textarea>
+        
+        <div style="display:flex; gap:5px; align-items:center;">
+            <input type="text" id="admin-ast-icone" placeholder="Nome Imagem (ex: wally.jpg)" style="margin-bottom:0.8rem; flex:1;">
+            <input type="file" id="admin-file-picker" style="display:none" onchange="selecionarImagemArquivo()">
+            <button class="file-btn" onclick="document.getElementById('admin-file-picker').click()" style="margin-bottom:0.8rem;" title="Escolher ficheiro">📂</button>
+        </div>
+        <div style="display:flex; gap:5px; margin-bottom: 0.8rem;">
+           <select id="admin-ast-formato" style="margin-bottom:0;" onchange="atualizarSelectLojasAdmin()">
+                <option value="*">Qualquer Formato (*)</option>
+           </select>
+           <select id="admin-ast-loja" style="margin-bottom:0;">
+                <option value="*">Qualquer Loja (*)</option>
+           </select>
+        </div>
+        <div style="display: flex; gap: 5px;">
+            <button onclick="adminSaveAssistente()" id="btn-save-ast">Adicionar Assistente</button>
+            <button onclick="cancelarEdicao()" id="btn-cancel-ast" class="cancel" style="display:none;">Cancelar</button>
+        </div>
+      </div>
+
+      <div id="admin-tab-exportar" style="display:none;">
+        <p style="font-size: 0.85rem; margin-bottom: 10px;">
+            Gera e baixa o ficheiro <b>config.js</b>. Depois, faz upload apenas deste ficheiro para o GitHub.
+        </p>
+        
+        <div class="version-control">
+            <label>Versão Atual:</label>
+            <strong id="lbl-versao-atual" style="color:#333;">...</strong>
+            <br><br>
+            <label>Nova Versão (sugestão):</label>
+            <input type="text" id="input-nova-versao" style="width: 100%; margin-bottom:0;" placeholder="Ex: v1.1.1">
+        </div>
+
+        <button onclick="baixarConfiguracao()">📥 Download Ficheiro de Configuração</button>
+        <button class="danger" onclick="limparTudoAdmin()">⚠️ Reset de Fábrica</button>
+      </div>
+
+      <hr>
+      <button class="secondary" onclick="fecharAdmin()">Fechar Admin</button>
+    </div>
+  </div>
+
+  <div class="app">
+    <div class="content-wrap">
+        <img src="AibyAuchan.png" alt="AI by Auchan" class="logo" id="logo-trigger">
+        <div class="loja-info">
+          Loja: <span id="loja-nome">a definir…</span>
+          <span class="change-store" onclick="forcarEscolhaLoja()">(alterar)</span>
+        </div>
+        <div class="grid"></div>
+    </div>
+    <div class="app-footer">
+        <span class="help-link" onclick="document.getElementById('help-overlay').style.display='flex'">📲 Instalar App</span>
+        <span id="app-footer-version" style="opacity:0.7">...</span>
+    </div>
+  </div>
+
+  <script>
+    /* --- LÓGICA PRINCIPAL --- */
+    const FORM_BASE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeGFYjlrXC27y-a8sXgdnxKD4XzT8yImmL_0CZRXP26NwjQhQ/formResponse';
+    const ENTRY_LOJA = 'entry.1749648688';
+    const ENTRY_ASSISTENTE = 'entry.182917282';
+    const FORMATO_KEY = 'formatoSelecionado';
+    const LOJA_KEY = 'lojaSelecionada';
+    const QR_PARAM_ASSISTENTE = 'assistente';
+    const QR_PARAM_FORMATO = 'formato';
+    const QR_PARAM_LOJA = 'loja';
+    const ADMIN_PASSWORD = "9602"; 
+
+    let STATE = { lojas: [], assistentes: [] };
+    let editingAssistenteIndex = -1; 
+    let DADOS_PADRAO_FALLBACK = { lojas: [], assistentes: [] };
+
+    window.addEventListener('load', () => {
+      carregarDados();
+      if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(console.log);
+      inicializarAdminQRCodes();
+      processarQRCodeParams();
+    });
+
+    function carregarDados() {
+      if (typeof DADOS_PADRAO === 'undefined') {
+          console.warn("Ficheiro config.js não encontrado.");
+          DADOS_PADRAO = DADOS_PADRAO_FALLBACK;
+          STORAGE_DATA_KEY = "v0.0";
+      }
+      const dadosLocais = localStorage.getItem(STORAGE_DATA_KEY);
+      if (dadosLocais) { STATE = JSON.parse(dadosLocais); } 
+      else { STATE = JSON.parse(JSON.stringify(DADOS_PADRAO)); }
+      renderizarApp();
+      atualizarVersaoRodape();
+    }
+
+    function atualizarVersaoRodape() {
+        let versao = "Desconhecida";
+        if (typeof STORAGE_DATA_KEY !== 'undefined') { versao = STORAGE_DATA_KEY.split('_')[1] || 'vX.X'; }
+        document.getElementById('app-footer-version').textContent = `Powered By G2G IAD3.0 ${versao.toUpperCase()}`;
+    }
+
+    function guardarDadosLocais() { localStorage.setItem(STORAGE_DATA_KEY, JSON.stringify(STATE)); renderizarApp(); }
+    function renderizarApp() { atualizarSelectFormato(); atualizarUILoja(); }
+    function formatarTextoBonito(t) { if (!t || t === "*") return t; return t.charAt(0).toUpperCase() + t.slice(1).toLowerCase(); }
+    function ordenarLojas(a, b) { return a.loja.localeCompare(b.loja, undefined, { numeric: true, sensitivity: 'base' }); }
+    function obterFormatosUnicos() { 
+        const raw = STATE.lojas.map(l => l.formato ? formatarTextoBonito(l.formato) : "");
+        return [...new Set(raw)].filter(f => f !== "").sort();
+    }
+
+    function atualizarSelectFormato() {
+      const s = document.getElementById('formato-select'); const val = s.value;
+      s.innerHTML = '<option value="" disabled selected>Seleciona o formato…</option>';
+      obterFormatosUnicos().forEach(f => { const o = document.createElement('option'); o.value = f; o.textContent = f; s.appendChild(o); });
+      if (val) s.value = val;
+    }
+
+    function atualizarSelectLojas() {
+      const fmt = document.getElementById('formato-select').value;
+      const s = document.getElementById('loja-select');
+      s.innerHTML = '<option value="" disabled selected>Seleciona a loja…</option>';
+      if (!fmt) return;
+      const fmtN = fmt.toUpperCase();
+      const ljs = STATE.lojas.filter(l => (l.formato || '').toUpperCase() === fmtN);
+      ljs.sort(ordenarLojas);
+      ljs.forEach(l => { const o = document.createElement('option'); o.value = l.loja; o.textContent = l.loja; s.appendChild(o); });
+    }
+
+    function atualizarUILoja() {
+      const f = localStorage.getItem(FORMATO_KEY); const l = localStorage.getItem(LOJA_KEY);
+      const span = document.getElementById('loja-nome'); const over = document.getElementById('loja-overlay');
+      if (f && l) { span.textContent = `${formatarTextoBonito(f)} – ${l}`; over.style.display = 'none'; renderizarGridAssistentes(f, l); } 
+      else { span.textContent = 'a definir…'; over.style.display = 'flex'; document.querySelector('.grid').innerHTML = ''; }
+    }
+
+    function fecharLojaOverlay() {
+        document.getElementById('loja-overlay').style.display = 'none';
+    }
+
+    function filtrarAssistentesPorSelecao(uf, ul) {
+      const ufN = (uf || '').toUpperCase();
+      const ulN = (ul || '').toUpperCase();
+      return STATE.assistentes.filter(a => {
+        const f = (a.formato || '').toUpperCase();
+        const l = (a.loja || '').toUpperCase();
+        return (f === '*' || f === ufN) && (l === '*' || l === ulN);
+      });
+    }
+
+    function renderizarGridAssistentes(uf, ul) {
+      const grid = document.querySelector('.grid'); grid.innerHTML = '';
+      const matches = filtrarAssistentesPorSelecao(uf, ul);
+      matches.sort((a, b) => a.label.localeCompare(b.label));
+      if(matches.length === 0) { grid.innerHTML = '<p style="grid-column: span 2; opacity: 0.7;">Nenhum assistente disponível.</p>'; return; }
+      matches.forEach(a => {
+        const btn = document.createElement('div'); btn.className = 'btn';
+        
+        // CORREÇÃO AQUI: Abrir em nova aba (_blank)
+        btn.onclick = () => abrirAssistente(a.nome, a.url);
+        
+        const img = document.createElement('img'); img.src = a.icone || 'AibyAuchan.png'; img.onerror = function() { this.src = 'AibyAuchan.png'; };
+        const lbl = document.createElement('div'); lbl.className = 'label'; lbl.textContent = a.label || a.nome;
+        btn.appendChild(img); btn.appendChild(lbl); grid.appendChild(btn);
+      });
+    }
+
+    function guardarLoja() {
+      const f = document.getElementById('formato-select').value; const l = document.getElementById('loja-select').value;
+      if (!f || !l) return alert('Escolhe formato e loja.');
+      localStorage.setItem(FORMATO_KEY, f); localStorage.setItem(LOJA_KEY, l); atualizarUILoja();
+    }
+    function forcarEscolhaLoja() {
+      document.getElementById('formato-select').value = ""; document.getElementById('loja-select').innerHTML = '<option value="" disabled selected>Seleciona a loja…</option>';
+      document.getElementById('loja-overlay').style.display = 'flex';
+    }
+    
+    function abrirAssistente(n, u) {
+      const l = localStorage.getItem(LOJA_KEY) || 'Sem loja';
+      const p = new URLSearchParams(); p.append(ENTRY_LOJA, l); p.append(ENTRY_ASSISTENTE, n);
+      
+      // Envia os dados para o Google Forms em segundo plano
+      fetch(FORM_BASE_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: p.toString() }).catch(e=>{});
+      
+      // Abre o assistente NUMA NOVA ABA
+      window.open(u, '_blank');
+    }
+
+    function processarQRCodeParams() {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has(QR_PARAM_ASSISTENTE)) return;
+      const assistenteParam = params.get(QR_PARAM_ASSISTENTE);
+      const formatoParam = params.get(QR_PARAM_FORMATO);
+      const lojaParam = params.get(QR_PARAM_LOJA);
+      if (formatoParam) localStorage.setItem(FORMATO_KEY, formatoParam);
+      if (lojaParam) localStorage.setItem(LOJA_KEY, lojaParam);
+
+      const assistente = STATE.assistentes.find(a => a.nome === assistenteParam || a.label === assistenteParam);
+      if (!assistente) {
+        alert("Assistente não encontrado.");
+        return;
+      }
+
+      const lojaFinal = lojaParam || localStorage.getItem(LOJA_KEY) || 'Sem loja';
+      const payload = new URLSearchParams();
+      payload.append(ENTRY_LOJA, lojaFinal);
+      payload.append(ENTRY_ASSISTENTE, assistente.nome || assistente.label);
+
+      const body = payload.toString();
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(FORM_BASE_URL, new Blob([body], { type: 'application/x-www-form-urlencoded' }));
+        window.location.replace(assistente.url);
+        return;
+      }
+
+      fetch(FORM_BASE_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+        keepalive: true
+      }).finally(() => {
+        window.location.replace(assistente.url);
+      });
+    }
+
+    /* --- ADMIN --- */
+    let lc = 0;
+    document.getElementById('logo-trigger').addEventListener('click', () => { lc++; if (lc === 5) { lc=0; abrirLogin(); } });
+    function abrirLogin() { document.getElementById('login-overlay').style.display = 'flex'; setTimeout(()=>document.getElementById('login-password-input').focus(),100); }
+    function fecharLogin() { document.getElementById('login-overlay').style.display = 'none'; document.getElementById('login-password-input').value=''; }
+    function verificarSenhaLogin() { if(document.getElementById('login-password-input').value === ADMIN_PASSWORD) { fecharLogin(); abrirAdmin(); } else { alert("Senha incorreta."); } }
+    function abrirAdmin() { document.getElementById('admin-overlay').style.display = 'flex'; renderizarAdminListas(); atualizarDropdownsAdminInicial(); atualizarResumoQRCodeAdmin(); }
+    function fecharAdmin() { document.getElementById('admin-overlay').style.display = 'none'; cancelarEdicao(); }
+    function switchAdminTab(t) {
+      document.querySelectorAll('.admin-tab').forEach(x => x.classList.remove('active'));
+      ['lojas','assistentes','exportar','qrcodes'].forEach(id => {
+        const tab = document.getElementById(`admin-tab-${id}`);
+        if (tab) tab.style.display = 'none';
+      });
+      const tabAtual = document.getElementById(`admin-tab-${t}`);
+      if (tabAtual) tabAtual.style.display = 'block';
+      const tabs = ['lojas','assistentes','exportar','qrcodes'];
+      const idx = tabs.indexOf(t);
+      if (idx >= 0) document.querySelectorAll('.admin-tab')[idx].classList.add('active');
+      if(t==='assistentes') { atualizarDropdownsAdminInicial(); }
+      if(t==='exportar') { atualizarSugestaoVersao(); }
+      if(t==='qrcodes') { atualizarResumoQRCodeAdmin(); }
+    }
+
+    function renderizarAdminListas() {
+      const ll = document.getElementById('admin-lojas-list'); ll.innerHTML = '';
+      const lSorted = [...STATE.lojas].sort(ordenarLojas);
+      lSorted.forEach(l => {
+        const idx = STATE.lojas.indexOf(l);
+        const d = document.createElement('div'); d.className='admin-item';
+        d.innerHTML = `<span>${formatarTextoBonito(l.formato)} - ${l.loja}</span><button onclick="adminRemoverLoja(${idx})">X</button>`;
+        ll.appendChild(d);
+      });
+      const al = document.getElementById('admin-assistentes-list'); al.innerHTML = '';
+      const aSorted = [...STATE.assistentes].sort((a,b)=>a.label.localeCompare(b.label));
+      aSorted.forEach(a => {
+        const idx = STATE.assistentes.indexOf(a);
+        const d = document.createElement('div'); d.className='admin-item';
+        d.innerHTML = `<div class="admin-item-text" onclick="prepararEdicao(${idx})">${a.label} <small style="opacity:0.7">(${a.formato})(${a.loja})</small></div><button onclick="adminRemoverAssistente(event, ${idx})">X</button>`;
+        al.appendChild(d);
+      });
+    }
+
+    function atualizarDropdownsAdminInicial() {
+       const s = document.getElementById('admin-ast-formato'); const prev = s.value;
+       s.innerHTML = '<option value="*">Qualquer Formato (*)</option>';
+       obterFormatosUnicos().forEach(f => { const o = document.createElement('option'); o.value=f; o.textContent=f; s.appendChild(o); });
+       if(prev) s.value = prev;
+       atualizarSelectLojasAdmin();
+    }
+    function atualizarSelectLojasAdmin() {
+       const sf = document.getElementById('admin-ast-formato'); const sl = document.getElementById('admin-ast-loja');
+       const prev = sl.value; sl.innerHTML = '<option value="*">Qualquer Loja (*)</option>';
+       let list = [];
+       if(sf.value === '*') list = [...STATE.lojas];
+       else list = STATE.lojas.filter(l => (l.formato||'').toUpperCase() === sf.value.toUpperCase());
+       list.sort(ordenarLojas);
+       list.forEach(l => { const o = document.createElement('option'); o.value=l.loja; o.textContent=l.loja; sl.appendChild(o); });
+       sl.value = (Array.from(sl.options).some(o=>o.value===prev)) ? prev : '*';
+    }
+
+    function selecionarImagemArquivo() {
+        const i = document.getElementById('admin-file-picker');
+        if (i.files && i.files[0]) document.getElementById('admin-ast-icone').value = i.files[0].name;
+    }
+
+    function adminAddLoja() {
+        let f = document.getElementById('admin-novo-formato').value;
+        const c = document.getElementById('admin-nova-loja-cod').value.trim();
+        const n = document.getElementById('admin-nova-loja-nome').value.trim();
+        if(!c || !n) return alert("Preenche código e nome.");
+        f = formatarTextoBonito(f); const lc = `${c}-${n}`;
+        if(STATE.lojas.some(l=>l.formato===f && l.loja===lc)) return alert("Loja já existe.");
+        STATE.lojas.push({formato:f, loja:lc});
+        guardarDadosLocais(); renderizarAdminListas(); atualizarDropdownsAdminInicial();
+        document.getElementById('admin-nova-loja-cod').value=''; document.getElementById('admin-nova-loja-nome').value='';
+    }
+    function adminRemoverLoja(i) { if(confirm("Apagar?")) { STATE.lojas.splice(i,1); guardarDadosLocais(); renderizarAdminListas(); atualizarDropdownsAdminInicial(); } }
+
+    function prepararEdicao(i) {
+        editingAssistenteIndex = i; const a = STATE.assistentes[i];
+        document.getElementById('admin-ast-label').value = a.label;
+        document.getElementById('admin-ast-url').value = a.url;
+        document.getElementById('admin-ast-icone').value = a.icone;
+        document.getElementById('admin-ast-descricao').value = a.descricao || '';
+        document.getElementById('admin-ast-formato').value = formatarTextoBonito(a.formato);
+        atualizarSelectLojasAdmin();
+        document.getElementById('admin-ast-loja').value = a.loja;
+        document.getElementById('admin-ast-title').innerText = "Editar Assistente";
+        document.getElementById('btn-save-ast').innerText = "Atualizar";
+        document.getElementById('btn-cancel-ast').style.display = "block";
+    }
+    function cancelarEdicao() {
+        editingAssistenteIndex = -1;
+        ['admin-ast-label','admin-ast-url','admin-ast-icone','admin-ast-descricao'].forEach(id=>document.getElementById(id).value='');
+        document.getElementById('admin-ast-formato').value='*'; atualizarSelectLojasAdmin();
+        document.getElementById('admin-ast-title').innerText="Adicionar Assistente";
+        document.getElementById('btn-save-ast').innerText="Adicionar";
+        document.getElementById('btn-cancel-ast').style.display="none";
+    }
+    function adminSaveAssistente() {
+        const l = document.getElementById('admin-ast-label').value.trim();
+        const n = l;
+        const u = document.getElementById('admin-ast-url').value.trim();
+        const i = document.getElementById('admin-ast-icone').value.trim();
+        const d = document.getElementById('admin-ast-descricao').value.trim();
+        let f = document.getElementById('admin-ast-formato').value || '*';
+        const loj = document.getElementById('admin-ast-loja').value || '*';
+        if(f !== '*') f = formatarTextoBonito(f);
+        if(!l || !u) return alert("Falta Nome ou URL");
+        
+        const novo = {formato:f, loja:loj, nome:n, label:l, url:u, icone:i, descricao:d};
+        const dup = STATE.assistentes.some((a, idx) => {
+            if(editingAssistenteIndex === idx) return false;
+            return a.nome===novo.nome && a.label===novo.label && a.url===novo.url && a.formato===novo.formato && a.loja===novo.loja;
+        });
+        if(dup) return alert("Assistente duplicado!");
+
+        if(editingAssistenteIndex >= 0) STATE.assistentes[editingAssistenteIndex] = novo;
+        else STATE.assistentes.push(novo);
+        guardarDadosLocais(); renderizarAdminListas(); cancelarEdicao();
+    }
+    function adminRemoverAssistente(e, i) { e.stopPropagation(); if(confirm("Apagar?")) { STATE.assistentes.splice(i,1); guardarDadosLocais(); renderizarAdminListas(); if(editingAssistenteIndex===i) cancelarEdicao(); } }
+
+    /* --- EXPORTAR CONFIG.JS --- */
+    function atualizarSugestaoVersao() {
+        let v = "1.0";
+        if(typeof STORAGE_DATA_KEY !== 'undefined') v = STORAGE_DATA_KEY.split('_v')[1] || "1.0";
+        document.getElementById('lbl-versao-atual').textContent = "v" + v;
+        let p = v.split('.').map(Number); if(p.length===2) p.push(0);
+        p[p.length-1]++;
+        document.getElementById('input-nova-versao').value = "v" + p.join('.');
+    }
+
+    function baixarConfiguracao() {
+      let vUser = document.getElementById('input-nova-versao').value.trim();
+      if(vUser.startsWith('v')) vUser = vUser.substring(1);
+      const newKey = "appConfigData_v" + vUser;
+
+      STATE.lojas.forEach(l => { if(l.formato) l.formato = formatarTextoBonito(l.formato); });
+      STATE.assistentes.forEach(a => { if(a.formato && a.formato!=='*') a.formato = formatarTextoBonito(a.formato); });
+      STATE.lojas.sort(ordenarLojas);
+      STATE.assistentes.sort((a,b)=>a.label.localeCompare(b.label));
+
+      let content = `// Ficheiro de Configuração Gerado Automaticamente
+`;
+      content += `const STORAGE_DATA_KEY = "${newKey}";
+
+`;
+      content += `const DADOS_PADRAO = {
+`;
+      content += `  lojas: [
+`;
+      STATE.lojas.forEach((l, i) => {
+          let line = JSON.stringify(l);
+          if(i < STATE.lojas.length - 1) line += ",";
+          content += `    ${line}
+`;
+      });
+      content += `  ],
+`;
+      content += `  assistentes: [
+`;
+      STATE.assistentes.forEach((a, i) => {
+          let block = JSON.stringify(a, null, 4);
+          block = block.split('\n').map(line => "    " + line).join('\n');
+          if(i < STATE.assistentes.length - 1) block += ",";
+          content += `${block}
+`;
+      });
+      content += `  ]
+`;
+      content += `};
+`;
+
+      const blob = new Blob([content], { type: "text/javascript" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "config.js";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      alert("Ficheiro config.js baixado!\nFaz upload dele para a pasta do GitHub.");
+    }
+
+    function limparTudoAdmin() {
+      if(confirm("Resetar Fábrica?")) { localStorage.removeItem(STORAGE_DATA_KEY); location.reload(); }
+    }
+
+    function inicializarAdminQRCodes() {
+      const tabsContainer = document.querySelector('.admin-tabs');
+      if (!tabsContainer || document.getElementById('admin-tab-qrcodes')) return;
+
+      const tab = document.createElement('div');
+      tab.className = 'admin-tab';
+      tab.textContent = 'QRCodes';
+      tab.onclick = () => switchAdminTab('qrcodes');
+      tabsContainer.appendChild(tab);
+
+      const overlayBox = document.querySelector('#admin-overlay .overlay-box');
+      const exportarTab = document.getElementById('admin-tab-exportar');
+      const qrcodesTab = document.createElement('div');
+      qrcodesTab.id = 'admin-tab-qrcodes';
+      qrcodesTab.style.display = 'none';
+      qrcodesTab.innerHTML = `
+        <p style="font-size: 0.85rem; margin-bottom: 10px;">
+          Gera um PDF A5 com 1 página por assistente para a seleção atual da app.
+        </p>
+        <div class="version-control" style="margin-bottom: 10px;">
+          <label>Seleção atual:</label>
+          <strong id="admin-qrcodes-selecao" style="color:#333;">...</strong>
+          <div id="admin-qrcodes-resumo" style="margin-top:8px; font-size:0.8rem; color:#666;"></div>
+        </div>
+        <button onclick="gerarPDFQRCodes()">📄 Gerar PDF QRCodes</button>
+      `;
+      overlayBox.insertBefore(qrcodesTab, exportarTab.nextSibling);
+    }
+
+    function atualizarResumoQRCodeAdmin() {
+      const selecao = document.getElementById('admin-qrcodes-selecao');
+      const resumo = document.getElementById('admin-qrcodes-resumo');
+      if (!selecao || !resumo) return;
+      const formato = localStorage.getItem(FORMATO_KEY);
+      const loja = localStorage.getItem(LOJA_KEY);
+      if (!formato || !loja) {
+        selecao.textContent = 'Sem seleção';
+        resumo.textContent = 'Escolhe o formato e a loja na app antes de gerar o PDF.';
+        return;
+      }
+      selecao.textContent = `${formatarTextoBonito(formato)} – ${loja}`;
+      const assistentes = filtrarAssistentesPorSelecao(formato, loja);
+      resumo.textContent = `Assistentes disponíveis: ${assistentes.length}`;
+    }
+
+    function carregarScript(src) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    async function garantirPdfLib() {
+      if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF;
+      await carregarScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
+      return window.jspdf.jsPDF;
+    }
+
+    function criarUrlQRCode(assistente, formato, loja) {
+      const base = `${window.location.origin}${window.location.pathname}`;
+      const params = new URLSearchParams();
+      params.set(QR_PARAM_ASSISTENTE, assistente.nome || assistente.label);
+      if (formato) params.set(QR_PARAM_FORMATO, formato);
+      if (loja) params.set(QR_PARAM_LOJA, loja);
+      return `${base}?${params.toString()}`;
+    }
+
+    async function carregarImagemComoDataURL(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    async function gerarQRCodeDataURL(texto) {
+      const api = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(texto)}`;
+      const res = await fetch(api);
+      const blob = await res.blob();
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    async function gerarPDFQRCodes() {
+      const formato = localStorage.getItem(FORMATO_KEY);
+      const loja = localStorage.getItem(LOJA_KEY);
+      if (!formato || !loja) {
+        alert('Seleciona formato e loja na app antes de gerar o PDF.');
+        return;
+      }
+      const assistentes = filtrarAssistentesPorSelecao(formato, loja);
+      if (assistentes.length === 0) {
+        alert('Nenhum assistente disponível para esta seleção.');
+        return;
+      }
+
+      const jsPDF = await garantirPdfLib();
+      const doc = new jsPDF({ format: 'a5', unit: 'mm' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 12;
+      const imageSize = 70;
+      const qrSize = 60;
+
+      for (let idx = 0; idx < assistentes.length; idx++) {
+        const a = assistentes[idx];
+        if (idx > 0) doc.addPage('a5', 'p');
+
+        const imgSrc = a.icone || 'AibyAuchan.png';
+        let imgData = null;
+        try {
+          imgData = await carregarImagemComoDataURL(imgSrc);
+        } catch (e) {
+          imgData = await carregarImagemComoDataURL('AibyAuchan.png');
+        }
+
+        const qrUrl = criarUrlQRCode(a, formato, loja);
+        const qrData = await gerarQRCodeDataURL(qrUrl);
+
+        const imgX = (pageWidth - imageSize) / 2;
+        doc.addImage(imgData, 'PNG', imgX, 12, imageSize, imageSize);
+
+        doc.setFontSize(14);
+        doc.setTextColor(40);
+        doc.text(a.label || a.nome, pageWidth / 2, 95, { align: 'center' });
+
+        doc.setFontSize(10);
+        doc.setTextColor(80);
+        const descricao = a.descricao || '';
+        const texto = descricao ? descricao : '';
+        if (texto) {
+          doc.text(texto, pageWidth / 2, 105, { align: 'center', maxWidth: pageWidth - (margin * 2) });
+        }
+
+        const qrX = (pageWidth - qrSize) / 2;
+        doc.addImage(qrData, 'PNG', qrX, 130, qrSize, qrSize);
+      }
+
+      doc.save(`qrcodes_${formatarTextoBonito(formato)}_${loja}.pdf`);
+    }
+  </script>
+</body>
+</html>
