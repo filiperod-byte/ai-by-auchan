@@ -649,6 +649,12 @@
       return window.jspdf.jsPDF;
     }
 
+    async function garantirQrLib() {
+      if (window.QRCode && window.QRCode.toDataURL) return window.QRCode;
+      await carregarScript('https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js');
+      return window.QRCode;
+    }
+
     function criarUrlQRCode(assistente, formato, loja) {
       const base = `${window.location.origin}${window.location.pathname}`;
       const params = new URLSearchParams();
@@ -676,14 +682,74 @@
     }
 
     async function gerarQRCodeDataURL(texto) {
-      const api = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(texto)}`;
-      const res = await fetch(api);
-      const blob = await res.blob();
-      return new Promise(resolve => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.readAsDataURL(blob);
-      });
+      const qr = await garantirQrLib();
+      return qr.toDataURL(texto, { errorCorrectionLevel: 'M', margin: 2, width: 700 });
+    }
+
+    function garantirModalDescricao() {
+      if (document.getElementById('missing-desc-overlay')) return;
+      const overlay = document.createElement('div');
+      overlay.id = 'missing-desc-overlay';
+      overlay.className = 'overlay';
+      overlay.innerHTML = `
+        <div class="overlay-box" style="width:min(520px,95%); text-align:left;">
+          <span class="close-overlay-btn" onclick="document.getElementById('missing-desc-overlay').style.display='none'">✕</span>
+          <h2>Faltam descrições 😅</h2>
+          <p style="margin-top:0; font-size:.9rem; color:#666;">
+            Preenche as descrições em falta. Sem isso, não dá para gerar o PDF.
+          </p>
+          <div id="missing-desc-list" style="max-height:45vh; overflow:auto; border:1px solid #eee; border-radius:10px; padding:10px; background:#fafafa;"></div>
+          <div style="display:flex; gap:10px; margin-top:12px;">
+            <button onclick="window.__missingDescSaveAndContinue()">Guardar e Continuar</button>
+            <button class="secondary" onclick="document.getElementById('missing-desc-overlay').style.display='none'">Cancelar</button>
+          </div>
+          <div id="missing-desc-error" style="margin-top:10px; font-size:.85rem; color:#d63a3e; font-weight:600;"></div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    function abrirModalDescricaoEmFalta(lista, onDone) {
+      garantirModalDescricao();
+      const overlay = document.getElementById('missing-desc-overlay');
+      const list = document.getElementById('missing-desc-list');
+      const err = document.getElementById('missing-desc-error');
+      err.textContent = '';
+      list.innerHTML = lista.map(a => `
+        <div style="margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #eee;">
+          <div style="font-weight:700; color:#333; margin-bottom:6px;">
+            ${a.label || a.nome}
+          </div>
+          <textarea
+            data-missing-desc="1"
+            data-ast-index="${a.__index}"
+            placeholder="Descrição (2-3 linhas)"
+            style="width:100%; box-sizing:border-box; padding:.6rem; border-radius:10px; border:1px solid #ccc; min-height:72px; resize:vertical;"
+          >${(a.descricao || '').trim()}</textarea>
+        </div>
+      `).join('');
+
+      window.__missingDescSaveAndContinue = function () {
+        err.textContent = '';
+        const tas = [...list.querySelectorAll('textarea[data-missing-desc="1"]')];
+        const faltam = tas.some(ta => !(ta.value || '').trim());
+        if (faltam) {
+          err.textContent = 'Ainda faltam descrições. Preenche tudo para continuar.';
+          return;
+        }
+        tas.forEach(ta => {
+          const idx = Number(ta.getAttribute('data-ast-index'));
+          const val = (ta.value || '').trim();
+          if (!Number.isNaN(idx) && STATE.assistentes[idx]) {
+            STATE.assistentes[idx].descricao = val;
+          }
+        });
+        guardarDadosLocais();
+        overlay.style.display = 'none';
+        if (onDone) onDone();
+      };
+
+      overlay.style.display = 'flex';
     }
 
     async function gerarPDFQRCodes() {
@@ -693,18 +759,29 @@
         alert('Seleciona formato e loja na app antes de gerar o PDF.');
         return;
       }
-      const assistentes = filtrarAssistentesPorSelecao(formato, loja);
+      const assistentes = filtrarAssistentesPorSelecao(formato, loja)
+        .map((a, idx) => ({ ...a, __index: idx }));
       if (assistentes.length === 0) {
         alert('Nenhum assistente disponível para esta seleção.');
+        return;
+      }
+
+      const semDescricao = assistentes.filter(a => !(a.descricao && a.descricao.trim()));
+      if (semDescricao.length) {
+        abrirModalDescricaoEmFalta(semDescricao, () => gerarPDFQRCodes());
         return;
       }
 
       const jsPDF = await garantirPdfLib();
       const doc = new jsPDF({ format: 'a5', unit: 'mm' });
       const pageWidth = doc.internal.pageSize.getWidth();
-      const margin = 12;
-      const imageSize = 70;
-      const qrSize = 60;
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 10;
+      const imageWidth = pageWidth - (margin * 2);
+      const imageHeight = 108;
+      const qrSize = 55;
+      const qrX = (pageWidth - qrSize) / 2;
+      const qrY = pageHeight - margin - qrSize;
 
       for (let idx = 0; idx < assistentes.length; idx++) {
         const a = assistentes[idx];
@@ -721,23 +798,33 @@
         const qrUrl = criarUrlQRCode(a, formato, loja);
         const qrData = await gerarQRCodeDataURL(qrUrl);
 
-        const imgX = (pageWidth - imageSize) / 2;
-        doc.addImage(imgData, 'PNG', imgX, 12, imageSize, imageSize);
+        doc.addImage(imgData, 'PNG', margin, margin, imageWidth, imageHeight);
 
-        doc.setFontSize(14);
-        doc.setTextColor(40);
-        doc.text(a.label || a.nome, pageWidth / 2, 95, { align: 'center' });
-
-        doc.setFontSize(10);
-        doc.setTextColor(80);
-        const descricao = a.descricao || '';
-        const texto = descricao ? descricao : '';
-        if (texto) {
-          doc.text(texto, pageWidth / 2, 105, { align: 'center', maxWidth: pageWidth - (margin * 2) });
+        const descricao = (a.descricao || '').trim();
+        const textTop = margin + imageHeight + 8;
+        const textBottom = qrY - 6;
+        const availableHeight = textBottom - textTop;
+        let fontSize = 11;
+        doc.setFontSize(fontSize);
+        doc.setTextColor(0);
+        let lines = doc.splitTextToSize(descricao, imageWidth);
+        let lineHeight = 5;
+        let totalHeight = lines.length * lineHeight;
+        if (totalHeight > availableHeight) {
+          fontSize = 10;
+          doc.setFontSize(fontSize);
+          lines = doc.splitTextToSize(descricao, imageWidth);
+          lineHeight = 4.6;
+          totalHeight = lines.length * lineHeight;
         }
+        while (totalHeight > availableHeight && lines.length > 2) {
+          lines.pop();
+          lines[lines.length - 1] = `${lines[lines.length - 1].replace(/\s*$/, '')}…`;
+          totalHeight = lines.length * lineHeight;
+        }
+        doc.text(lines, pageWidth / 2, textTop + 1, { align: 'center' });
 
-        const qrX = (pageWidth - qrSize) / 2;
-        doc.addImage(qrData, 'PNG', qrX, 130, qrSize, qrSize);
+        doc.addImage(qrData, 'PNG', qrX, qrY, qrSize, qrSize);
       }
 
       doc.save(`qrcodes_${formatarTextoBonito(formato)}_${loja}.pdf`);
