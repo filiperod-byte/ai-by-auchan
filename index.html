@@ -594,7 +594,7 @@
       // 👇 obrigatório (assim não levas “PDF não gera” mais tarde)
       if (!d) return alert("A descrição é obrigatória (senão o PDF não dá 😅).");
 
-      const novo = {formato:f, loja:loj, nome:n, label:l, url:u, icone:i, descricao:d};
+      const novo = {formato:f, loja:loj, nome:n, label:l, url:u, icone:i, descricao:d, desc:d};
 
       const dup = STATE.assistentes.some((a, idx) => {
         if (editingAssistenteIndex === idx) return false;
@@ -640,6 +640,13 @@
       STATE.assistentes.forEach(a => { if(a.formato && a.formato!=='*') a.formato = formatarTextoBonito(a.formato); });
 
       STATE.lojas.sort(ordenarLojas);
+      // Garantir que todos os assistentes exportam SEMPRE "descricao"
+      STATE.assistentes.forEach(a => {
+      const d = (a.descricao || a.desc || '').trim();
+      a.descricao = d;          // chave oficial
+      // opcional: manter compatibilidade com configs antigas
+      // a.desc = d;
+      });
       STATE.assistentes.sort((a,b)=>a.label.localeCompare(b.label));
 
       let content = `// Ficheiro de Configuração Gerado Automaticamente\n`;
@@ -845,13 +852,30 @@
         }
 
         tas.forEach(ta => {
-          const idx = Number(ta.getAttribute('data-ast-index'));
-          const val = (ta.value || '').trim();
-          if (!Number.isNaN(idx) && STATE.assistentes[idx]) {
-            STATE.assistentes[idx].descricao = val;
-            if (STATE.assistentes[idx].desc) STATE.assistentes[idx].desc = val;
-          }
-        });
+        const idx = Number(ta.getAttribute('data-ast-index'));
+  const val = (ta.value || '').trim();
+  if (Number.isNaN(idx) || !STATE.assistentes[idx]) return;
+
+  const ref = STATE.assistentes[idx];
+
+  // 🧠 Regra de "mesmo assistente":
+  // usa URL como identificador principal (é o mais estável)
+  const refUrl = (ref.url || '').trim();
+
+  // Atualiza o registo atual
+  ref.descricao = val;
+  if (ref.desc) ref.desc = val;
+
+  // ✅ Propaga para todas as entradas do mesmo assistente (mesma URL)
+  if (refUrl) {
+    STATE.assistentes.forEach(a => {
+      if (((a.url || '').trim()) === refUrl) {
+        a.descricao = val;
+        if (a.desc) a.desc = val;
+      }
+    });
+  }
+});
 
         guardarDadosLocais();
         overlay.style.display = 'none';
@@ -978,3 +1002,4 @@
   </script>
 </body>
 </html>
+
