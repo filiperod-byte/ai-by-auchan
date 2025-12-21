@@ -645,15 +645,15 @@
       resumo.textContent = `Assistentes disponíveis: ${assistentes.length}`;
     }
 
-    function carregarScript(src) {
-      return new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = src;
-        s.onload = resolve;
-        s.onerror = reject;
-        document.head.appendChild(s);
-      });
-    }
+function carregarScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('Falha ao carregar biblioteca: ' + src));
+    document.head.appendChild(s);
+  });
+}
 
     async function garantirPdfLib() {
       if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF;
@@ -852,13 +852,21 @@
         }
 
         doc.save(`qrcodes_${formatarTextoBonito(formato)}_${loja}.pdf`);
-      } catch (error) {
-        console.error(error);
-        const msg = (error && error.message) ? error.message : 'Erro desconhecido';
-        alert(`Falhou a geração do PDF. Detalhe: ${msg}`);
-      }
+     } catch (error) {
+  console.error('PDF ERROR:', error);
+
+  let detalhe = 'Erro desconhecido';
+  if (error) {
+    if (typeof error === 'string') detalhe = error;
+    else if (error.message) detalhe = error.message;
+    else if (error.toString) detalhe = error.toString();
+  }
+
+  alert('Falhou a geração do PDF. Detalhe: ' + detalhe);
+}
     }
   </script>
 </body>
 </html>
+
 
