@@ -759,8 +759,15 @@
         alert('Seleciona formato e loja na app antes de gerar o PDF.');
         return;
       }
-      const assistentes = filtrarAssistentesPorSelecao(formato, loja)
-        .map((a, idx) => ({ ...a, __index: idx }));
+      const assistentes = STATE.assistentes
+        .map((a, idx) => ({ ...a, __index: idx }))
+        .filter(a => {
+          const f = (a.formato || '').toUpperCase();
+          const l = (a.loja || '').toUpperCase();
+          const ufN = (formato || '').toUpperCase();
+          const ulN = (loja || '').toUpperCase();
+          return (f === '*' || f === ufN) && (l === '*' || l === ulN);
+        });
       if (assistentes.length === 0) {
         alert('Nenhum assistente disponível para esta seleção.');
         return;
