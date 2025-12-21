@@ -850,24 +850,37 @@ function adminSaveAssistente() {
       overlayBox.insertBefore(qrcodesTab, exportarTab.nextSibling);
     }
 
-    function atualizarResumoQRCodeAdmin() {
-      const selecao = document.getElementById('admin-qrcodes-selecao');
-      const resumo = document.getElementById('admin-qrcodes-resumo');
-      if (!selecao || !resumo) return;
+function atualizarResumoQRCodeAdmin() {
+  const selecao = document.getElementById('admin-qrcodes-selecao');
+  const resumo = document.getElementById('admin-qrcodes-resumo');
+  if (!selecao || !resumo) return;
 
-      const formato = localStorage.getItem(FORMATO_KEY);
-      const loja = localStorage.getItem(LOJA_KEY);
+  const formato = localStorage.getItem(FORMATO_KEY);
+  const loja = localStorage.getItem(LOJA_KEY);
 
-      if (!formato || !loja) {
-        selecao.textContent = 'Sem seleção';
-        resumo.textContent = 'Escolhe o formato e a loja na app antes de gerar o PDF.';
-        return;
-      }
+  if (!formato || !loja) {
+    selecao.textContent = 'Sem seleção';
+    resumo.textContent = 'Escolhe o formato e a loja na app antes de gerar o PDF.';
+    return;
+  }
 
-      selecao.textContent = `${formatarTextoBonito(formato)} – ${loja}`;
-      const assistentes = filtrarAssistentesPorSelecao(formato, loja);
-      resumo.textContent = `Assistentes disponíveis: ${assistentes.length}`;
+  selecao.textContent = `${formatarTextoBonito(formato)} – ${loja}`;
+
+  const assistentes = filtrarAssistentesPorSelecao(formato, loja);
+  const changes = contarAlteracoesDescricaoNaoPublicadas_(assistentes);
+
+  resumo.innerHTML = `
+    <div>Assistentes disponíveis: <b>${assistentes.length}</b></div>
+    ${changes.count > 0
+      ? `<div style="margin-top:6px; color:#d63a3e; font-weight:700;">
+           ⚠️ Existem alterações de descrição por publicar (${changes.count}). Vai à aba <b>Guardar</b> e faz download do <b>config.js</b>.
+         </div>`
+      : `<div style="margin-top:6px; color:#2e7d32; font-weight:700;">
+           ✅ Descrições alinhadas com a versão publicada.
+         </div>`
     }
+  `;
+}
 
     function carregarScript(src) {
       return new Promise((resolve, reject) => {
@@ -1017,120 +1030,295 @@ function adminSaveAssistente() {
       overlay.style.display = 'flex';
     }
 
-    async function gerarPDFQRCodes() {
-      try {
-        const formato = localStorage.getItem(FORMATO_KEY);
-        const loja = localStorage.getItem(LOJA_KEY);
+function normalizarUrl_(u) {
+  return (u || '').trim();
+}
 
-        if (!formato || !loja) {
-          alert('Seleciona formato e loja na app antes de gerar o PDF.');
-          return;
-        }
+function normalizarDesc_(d) {
+  return (d || '').trim();
+}
 
-        const assistentes = STATE.assistentes
-          .map((a, idx) => ({ ...a, __index: idx }))
-          .filter(a => {
-            const f = (a.formato || '').toUpperCase();
-            const l = (a.loja || '').toUpperCase();
-            const ufN = (formato || '').toUpperCase();
-            const ulN = (loja || '').toUpperCase();
-            return (f === '*' || f === ufN) && (l === '*' || l === ulN);
-          });
+// Cria um "mapa" url -> descricao (primeira descrição não vazia que encontrar)
+// Nota: como tu propagas descrições por URL, isto bate certo com a tua lógica atual.
+function mapUrlParaDescricao_(arr) {
+  const m = new Map();
+  (arr || []).forEach(a => {
+    const url = normalizarUrl_(a.url);
+    const desc = normalizarDesc_(a.descricao || a.desc);
+    if (!url) return;
+    if (!m.has(url)) m.set(url, desc || '');
+    // se já existia vazio e agora aparece um valor, atualiza
+    if (m.get(url) === '' && desc) m.set(url, desc);
+  });
+  return m;
+}
 
-        if (assistentes.length === 0) {
-          alert('Nenhum assistente disponível para esta seleção.');
-          return;
-        }
+// Conta quantas descrições (por URL) estão diferentes da "publicada" no config.js
+function contarAlteracoesDescricaoNaoPublicadas_(assistentesFiltrados) {
+  const publicados = (typeof DADOS_PADRAO !== 'undefined' && DADOS_PADRAO && Array.isArray(DADOS_PADRAO.assistentes))
+    ? DADOS_PADRAO.assistentes
+    : [];
 
-        // ✅ bloqueia se faltar descrição
-        const semDescricao = assistentes.filter(a => !(a.descricao || a.desc || '').trim());
-        if (semDescricao.length) {
-          abrirModalDescricaoEmFalta(semDescricao, () => gerarPDFQRCodes());
-          return;
-        }
+  const mapPub = mapUrlParaDescricao_(publicados);
+  const mapLocal = mapUrlParaDescricao_(assistentesFiltrados);
 
-        const jsPDF = await garantirPdfLib();
-        const doc = new jsPDF({ format: 'a5', unit: 'mm' });
+  let count = 0;
+  const detalhes = [];
 
-        const pageWidth = doc.internal.pageSize.getWidth();
-        const pageHeight = doc.internal.pageSize.getHeight();
-
-        const margin = 10;
-
-        // Imagem maior (full width)
-        const imageWidth = pageWidth - (margin * 2);
-        const imageHeight = 108;
-
-        // QR em baixo
-        const qrSize = 55;
-        const qrX = (pageWidth - qrSize) / 2;
-        const qrY = pageHeight - margin - qrSize;
-
-        for (let idx = 0; idx < assistentes.length; idx++) {
-          const a = assistentes[idx];
-          if (idx > 0) doc.addPage('a5', 'p');
-
-          const imgSrc = a.icone || 'AibyAuchan.png';
-          let imgData = null;
-
-          try {
-            imgData = await carregarImagemComoDataURL(imgSrc);
-          } catch {
-            imgData = await carregarImagemComoDataURL('AibyAuchan.png');
-          }
-
-          const qrUrl = criarUrlQRCode(a, formato, loja);
-          const qrData = await gerarQRCodeDataURL(qrUrl);
-
-          // IMAGEM
-          doc.addImage(imgData, 'PNG', margin, margin, imageWidth, imageHeight);
-
-          // TÍTULO (Nome do assistente)
-          const titleY = margin + imageHeight + 10;
-          doc.setTextColor(0);
-          doc.setFontSize(16);
-          doc.text((a.label || a.nome || '').trim(), pageWidth / 2, titleY, { align: 'center' });
-
-          // DESCRIÇÃO
-          const descricao = (a.descricao || a.desc || '').trim();
-          const descTop = titleY + 8;
-          const textBottom = qrY - 6;
-          const availableHeight = textBottom - descTop;
-
-          let fontSize = 11;
-          doc.setFontSize(fontSize);
-
-          let lines = doc.splitTextToSize(descricao, imageWidth);
-          let lineHeight = 5;
-          let totalHeight = lines.length * lineHeight;
-
-          if (totalHeight > availableHeight) {
-            fontSize = 10;
-            doc.setFontSize(fontSize);
-            lines = doc.splitTextToSize(descricao, imageWidth);
-            lineHeight = 4.6;
-            totalHeight = lines.length * lineHeight;
-          }
-
-          while (totalHeight > availableHeight && lines.length > 2) {
-            lines.pop();
-            lines[lines.length - 1] = `${lines[lines.length - 1].replace(/\s*$/, '')}…`;
-            totalHeight = lines.length * lineHeight;
-          }
-
-          doc.text(lines, pageWidth / 2, descTop, { align: 'center' });
-
-          // QR
-          doc.addImage(qrData, 'PNG', qrX, qrY, qrSize, qrSize);
-        }
-
-        doc.save(`qrcodes_${formatarTextoBonito(formato)}_${loja}.pdf`);
-      } catch (error) {
-        console.error('PDF ERROR:', error);
-        const detalhe = (error && (error.message || String(error))) || 'Erro desconhecido';
-        alert('Falhou a geração do PDF. Detalhe: ' + detalhe);
-      }
+  mapLocal.forEach((descLocal, url) => {
+    const descPub = mapPub.has(url) ? (mapPub.get(url) || '') : null; // null = não existia publicado
+    if (descPub === null) {
+      count++;
+      detalhes.push({ url, tipo: 'novo', pub: '', local: descLocal });
+      return;
     }
+    if (normalizarDesc_(descPub) !== normalizarDesc_(descLocal)) {
+      count++;
+      detalhes.push({ url, tipo: 'alterado', pub: descPub, local: descLocal });
+    }
+  });
+
+  return { count, detalhes };
+}
+
+function garantirModalSelecaoAssistentes_() {
+  if (document.getElementById('select-ast-overlay')) return;
+
+  const overlay = document.createElement('div');
+  overlay.id = 'select-ast-overlay';
+  overlay.className = 'overlay';
+  overlay.innerHTML = `
+    <div class="overlay-box" style="width:min(560px,95%); text-align:left;">
+      <span class="close-overlay-btn" onclick="document.getElementById('select-ast-overlay').style.display='none'">✕</span>
+      <h2>Selecionar assistentes para imprimir</h2>
+
+      <div id="select-ast-warning" style="margin:-4px 0 10px 0; font-size:.9rem;"></div>
+
+      <div style="display:flex; gap:10px; margin-bottom:10px;">
+        <button id="btn-select-all" class="secondary" style="flex:1; padding:.55rem;">Selecionar tudo</button>
+        <button id="btn-deselect-all" class="secondary" style="flex:1; padding:.55rem;">Desselecionar tudo</button>
+      </div>
+
+      <div id="select-ast-list"
+           style="max-height:45vh; overflow:auto; border:1px solid #eee; border-radius:10px; padding:10px; background:#fafafa;">
+      </div>
+
+      <div id="select-ast-error" style="margin-top:10px; font-size:.85rem; color:#d63a3e; font-weight:700;"></div>
+
+      <div style="display:flex; gap:10px; margin-top:12px;">
+        <button id="btn-print-selected" style="flex:1;">📄 Imprimir selecionados</button>
+        <button class="secondary" id="btn-cancel-select" style="flex:1;">Cancelar</button>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+}
+
+function abrirModalSelecaoAssistentes_(assistentes, changesInfo, onDone) {
+  garantirModalSelecaoAssistentes_();
+
+  const overlay = document.getElementById('select-ast-overlay');
+  const list = document.getElementById('select-ast-list');
+  const warn = document.getElementById('select-ast-warning');
+  const err = document.getElementById('select-ast-error');
+
+  err.textContent = '';
+
+  if (changesInfo && changesInfo.count > 0) {
+    warn.innerHTML = `
+      <div style="color:#d63a3e; font-weight:800;">
+        ⚠️ Detectei <b>${changesInfo.count}</b> descrições novas/alteradas.
+        Depois de imprimires, lembra-te de ir à aba <b>Guardar</b> e fazer download do <b>config.js</b> para atualizar a app.
+      </div>
+    `;
+  } else {
+    warn.innerHTML = `<div style="color:#2e7d32; font-weight:800;">✅ Tudo sincronizado com a versão publicada.</div>`;
+  }
+
+  list.innerHTML = assistentes.map(a => {
+    const label = (a.label || a.nome || '').trim();
+    const scope = `(${a.formato || '—'})(${a.loja || '—'})`;
+    return `
+      <label style="display:flex; gap:10px; align-items:flex-start; padding:10px; border-bottom:1px solid #eee; cursor:pointer;">
+        <input type="checkbox" data-idx="${a.__index}" checked style="margin-top:3px;">
+        <div style="flex:1;">
+          <div style="font-weight:800; color:#333;">${label}</div>
+          <div style="font-size:.8rem; color:#666;">${scope}</div>
+        </div>
+      </label>
+    `;
+  }).join('');
+
+  const btnAll = document.getElementById('btn-select-all');
+  const btnNone = document.getElementById('btn-deselect-all');
+  const btnPrint = document.getElementById('btn-print-selected');
+  const btnCancel = document.getElementById('btn-cancel-select');
+
+  btnAll.onclick = () => {
+    list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = true);
+  };
+  btnNone.onclick = () => {
+    list.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+  };
+
+  btnCancel.onclick = () => { overlay.style.display = 'none'; };
+
+  btnPrint.onclick = () => {
+    const selected = [...list.querySelectorAll('input[type="checkbox"]:checked')]
+      .map(cb => Number(cb.getAttribute('data-idx')))
+      .filter(x => !Number.isNaN(x));
+
+    if (selected.length === 0) {
+      err.textContent = 'Seleciona pelo menos 1 assistente para imprimir.';
+      return;
+    }
+
+    overlay.style.display = 'none';
+    if (onDone) onDone(selected);
+  };
+
+  overlay.style.display = 'flex';
+}
+
+
+
+async function gerarPDFQRCodes(selectedIdxs) {
+  try {
+    const formato = localStorage.getItem(FORMATO_KEY);
+    const loja = localStorage.getItem(LOJA_KEY);
+
+    if (!formato || !loja) {
+      alert('Seleciona formato e loja na app antes de gerar o PDF.');
+      return;
+    }
+
+    // lista filtrada (candidatos)
+    const candidatos = STATE.assistentes
+      .map((a, idx) => ({ ...a, __index: idx }))
+      .filter(a => {
+        const f = (a.formato || '').toUpperCase();
+        const l = (a.loja || '').toUpperCase();
+        const ufN = (formato || '').toUpperCase();
+        const ulN = (loja || '').toUpperCase();
+        return (f === '*' || f === ufN) && (l === '*' || l === ulN);
+      });
+
+    if (candidatos.length === 0) {
+      alert('Nenhum assistente disponível para esta seleção.');
+      return;
+    }
+
+    // ⚠️ aviso de alterações por publicar (por URL)
+    const changesInfo = contarAlteracoesDescricaoNaoPublicadas_(candidatos);
+
+    // ✅ antes de imprimir: modal com checkboxes (só na primeira chamada)
+    if (!Array.isArray(selectedIdxs)) {
+      abrirModalSelecaoAssistentes_(candidatos, changesInfo, (selected) => gerarPDFQRCodes(selected));
+      return;
+    }
+
+    // filtra apenas os selecionados
+    const setSel = new Set(selectedIdxs);
+    const assistentes = candidatos.filter(a => setSel.has(a.__index));
+
+    if (assistentes.length === 0) {
+      alert('Nenhum assistente selecionado.');
+      return;
+    }
+
+    // ✅ bloqueia se faltar descrição (mas só nos selecionados)
+    const semDescricao = assistentes.filter(a => !(a.descricao || a.desc || '').trim());
+    if (semDescricao.length) {
+      abrirModalDescricaoEmFalta(semDescricao, () => gerarPDFQRCodes(selectedIdxs));
+      return;
+    }
+
+    const jsPDF = await garantirPdfLib();
+    const doc = new jsPDF({ format: 'a5', unit: 'mm' });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 10;
+
+    const imageWidth = pageWidth - (margin * 2);
+    const imageHeight = 108;
+
+    const qrSize = 55;
+    const qrX = (pageWidth - qrSize) / 2;
+    const qrY = pageHeight - margin - qrSize;
+
+    for (let idx = 0; idx < assistentes.length; idx++) {
+      const a = assistentes[idx];
+      if (idx > 0) doc.addPage('a5', 'p');
+
+      const imgSrc = a.icone || 'AibyAuchan.png';
+      let imgData = null;
+
+      try {
+        imgData = await carregarImagemComoDataURL(imgSrc);
+      } catch {
+        imgData = await carregarImagemComoDataURL('AibyAuchan.png');
+      }
+
+      const qrUrl = criarUrlQRCode(a, formato, loja);
+      const qrData = await gerarQRCodeDataURL(qrUrl);
+
+      // IMAGEM
+      doc.addImage(imgData, 'PNG', margin, margin, imageWidth, imageHeight);
+
+      // TÍTULO
+      const titleY = margin + imageHeight + 10;
+      doc.setTextColor(0);
+      doc.setFontSize(16);
+      doc.text((a.label || a.nome || '').trim(), pageWidth / 2, titleY, { align: 'center' });
+
+      // DESCRIÇÃO
+      const descricao = (a.descricao || a.desc || '').trim();
+      const descTop = titleY + 8;
+      const textBottom = qrY - 6;
+      const availableHeight = textBottom - descTop;
+
+      let fontSize = 11;
+      doc.setFontSize(fontSize);
+
+      let lines = doc.splitTextToSize(descricao, imageWidth);
+      let lineHeight = 5;
+      let totalHeight = lines.length * lineHeight;
+
+      if (totalHeight > availableHeight) {
+        fontSize = 10;
+        doc.setFontSize(fontSize);
+        lines = doc.splitTextToSize(descricao, imageWidth);
+        lineHeight = 4.6;
+        totalHeight = lines.length * lineHeight;
+      }
+
+      while (totalHeight > availableHeight && lines.length > 2) {
+        lines.pop();
+        lines[lines.length - 1] = `${lines[lines.length - 1].replace(/\s*$/, '')}…`;
+        totalHeight = lines.length * lineHeight;
+      }
+
+      doc.text(lines, pageWidth / 2, descTop, { align: 'center' });
+
+      // QR
+      doc.addImage(qrData, 'PNG', qrX, qrY, qrSize, qrSize);
+    }
+
+    // ✅ se havia alterações, avisa no fim também (para não “esquecerem”)
+    if (changesInfo.count > 0) {
+      alert(`⚠️ Atenção: existem ${changesInfo.count} descrições novas/alteradas por publicar.\nDepois de imprimires, vai à aba Guardar e faz download do config.js para atualizar a app.`);
+    }
+
+    doc.save(`qrcodes_${formatarTextoBonito(formato)}_${loja}.pdf`);
+  } catch (error) {
+    console.error('PDF ERROR:', error);
+    const detalhe = (error && (error.message || String(error))) || 'Erro desconhecido';
+    alert('Falhou a geração do PDF. Detalhe: ' + detalhe);
+  }
+}
+
   </script>
 </body>
 </html>
