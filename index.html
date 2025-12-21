@@ -34,7 +34,8 @@
     /* Position relative adicionado para o botão X funcionar */
     .overlay-box { position: relative; background: #ffffff; color: #333; border-radius: 18px; padding: 1.5rem 1.2rem; width: min(380px, 90%); box-shadow: 0 10px 25px rgba(0,0,0,.35); text-align: center; margin: 2rem 0; }
     .overlay-box h2 { margin-top: 0; margin-bottom: .8rem; font-size: 1.2rem; color: #d63a3e; }
-    .overlay-box select, .overlay-box input { width: 100%; padding: .6rem; border-radius: 10px; border: 1px solid #ccc; font-size: .95rem; margin-bottom: 0.8rem; box-sizing: border-box; }
+    .overlay-box select, .overlay-box input, .overlay-box textarea { width: 100%; padding: .6rem; border-radius: 10px; border: 1px solid #ccc; font-size: .95rem; margin-bottom: 0.8rem; box-sizing: border-box; }
+    .overlay-box textarea { resize: vertical; min-height: 80px; }
     .overlay-box button { width: 100%; padding: .6rem; border-radius: 999px; border: none; font-size: 1rem; font-weight: 600; background: linear-gradient(135deg, #d63a3e, #6a1b9a); color: #fff; cursor: pointer; margin-bottom: 0.5rem; }
     .overlay-box button.secondary { background: #eee; color: #333; }
     .overlay-box button.danger { background: #ff4444; color: white; }
@@ -171,6 +172,7 @@
         
         <input type="text" id="admin-ast-label" placeholder="Nome no Botão (Label)">
         <input type="text" id="admin-ast-url" placeholder="URL Destino">
+        <textarea id="admin-ast-descricao" placeholder="Descrição"></textarea>
         
         <div style="display:flex; gap:5px; align-items:center;">
             <input type="text" id="admin-ast-icone" placeholder="Nome Imagem (ex: wally.jpg)" style="margin-bottom:0.8rem; flex:1;">
@@ -235,6 +237,9 @@
     const ENTRY_ASSISTENTE = 'entry.182917282';
     const FORMATO_KEY = 'formatoSelecionado';
     const LOJA_KEY = 'lojaSelecionada';
+    const QR_PARAM_ASSISTENTE = 'assistente';
+    const QR_PARAM_FORMATO = 'formato';
+    const QR_PARAM_LOJA = 'loja';
     const ADMIN_PASSWORD = "9602"; 
 
     let STATE = { lojas: [], assistentes: [] };
@@ -244,6 +249,8 @@
     window.addEventListener('load', () => {
       carregarDados();
       if ('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(console.log);
+      inicializarAdminQRCodes();
+      processarQRCodeParams();
     });
 
     function carregarDados() {
@@ -303,13 +310,19 @@
         document.getElementById('loja-overlay').style.display = 'none';
     }
 
-    function renderizarGridAssistentes(uf, ul) {
-      const grid = document.querySelector('.grid'); grid.innerHTML = '';
-      const ufN = uf.toUpperCase(); const ulN = ul.toUpperCase();
-      const matches = STATE.assistentes.filter(a => {
-        const f = (a.formato || '').toUpperCase(); const l = (a.loja || '').toUpperCase();
+    function filtrarAssistentesPorSelecao(uf, ul) {
+      const ufN = (uf || '').toUpperCase();
+      const ulN = (ul || '').toUpperCase();
+      return STATE.assistentes.filter(a => {
+        const f = (a.formato || '').toUpperCase();
+        const l = (a.loja || '').toUpperCase();
         return (f === '*' || f === ufN) && (l === '*' || l === ulN);
       });
+    }
+
+    function renderizarGridAssistentes(uf, ul) {
+      const grid = document.querySelector('.grid'); grid.innerHTML = '';
+      const matches = filtrarAssistentesPorSelecao(uf, ul);
       matches.sort((a, b) => a.label.localeCompare(b.label));
       if(matches.length === 0) { grid.innerHTML = '<p style="grid-column: span 2; opacity: 0.7;">Nenhum assistente disponível.</p>'; return; }
       matches.forEach(a => {
@@ -345,21 +358,66 @@
       window.open(u, '_blank');
     }
 
+    function processarQRCodeParams() {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has(QR_PARAM_ASSISTENTE)) return;
+      const assistenteParam = params.get(QR_PARAM_ASSISTENTE);
+      const formatoParam = params.get(QR_PARAM_FORMATO);
+      const lojaParam = params.get(QR_PARAM_LOJA);
+      if (formatoParam) localStorage.setItem(FORMATO_KEY, formatoParam);
+      if (lojaParam) localStorage.setItem(LOJA_KEY, lojaParam);
+
+      const assistente = STATE.assistentes.find(a => a.nome === assistenteParam || a.label === assistenteParam);
+      if (!assistente) {
+        alert("Assistente não encontrado.");
+        return;
+      }
+
+      const lojaFinal = lojaParam || localStorage.getItem(LOJA_KEY) || 'Sem loja';
+      const payload = new URLSearchParams();
+      payload.append(ENTRY_LOJA, lojaFinal);
+      payload.append(ENTRY_ASSISTENTE, assistente.nome || assistente.label);
+
+      const body = payload.toString();
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(FORM_BASE_URL, new Blob([body], { type: 'application/x-www-form-urlencoded' }));
+        window.location.replace(assistente.url);
+        return;
+      }
+
+      fetch(FORM_BASE_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+        keepalive: true
+      }).finally(() => {
+        window.location.replace(assistente.url);
+      });
+    }
+
     /* --- ADMIN --- */
     let lc = 0;
     document.getElementById('logo-trigger').addEventListener('click', () => { lc++; if (lc === 5) { lc=0; abrirLogin(); } });
     function abrirLogin() { document.getElementById('login-overlay').style.display = 'flex'; setTimeout(()=>document.getElementById('login-password-input').focus(),100); }
     function fecharLogin() { document.getElementById('login-overlay').style.display = 'none'; document.getElementById('login-password-input').value=''; }
     function verificarSenhaLogin() { if(document.getElementById('login-password-input').value === ADMIN_PASSWORD) { fecharLogin(); abrirAdmin(); } else { alert("Senha incorreta."); } }
-    function abrirAdmin() { document.getElementById('admin-overlay').style.display = 'flex'; renderizarAdminListas(); atualizarDropdownsAdminInicial(); }
+    function abrirAdmin() { document.getElementById('admin-overlay').style.display = 'flex'; renderizarAdminListas(); atualizarDropdownsAdminInicial(); atualizarResumoQRCodeAdmin(); }
     function fecharAdmin() { document.getElementById('admin-overlay').style.display = 'none'; cancelarEdicao(); }
     function switchAdminTab(t) {
       document.querySelectorAll('.admin-tab').forEach(x => x.classList.remove('active'));
-      ['lojas','assistentes','exportar'].forEach(id => document.getElementById(`admin-tab-${id}`).style.display='none');
-      document.getElementById(`admin-tab-${t}`).style.display='block';
-      if(t==='lojas') document.querySelectorAll('.admin-tab')[0].classList.add('active');
-      if(t==='assistentes') { document.querySelectorAll('.admin-tab')[1].classList.add('active'); atualizarDropdownsAdminInicial(); }
-      if(t==='exportar') { document.querySelectorAll('.admin-tab')[2].classList.add('active'); atualizarSugestaoVersao(); }
+      ['lojas','assistentes','exportar','qrcodes'].forEach(id => {
+        const tab = document.getElementById(`admin-tab-${id}`);
+        if (tab) tab.style.display = 'none';
+      });
+      const tabAtual = document.getElementById(`admin-tab-${t}`);
+      if (tabAtual) tabAtual.style.display = 'block';
+      const tabs = ['lojas','assistentes','exportar','qrcodes'];
+      const idx = tabs.indexOf(t);
+      if (idx >= 0) document.querySelectorAll('.admin-tab')[idx].classList.add('active');
+      if(t==='assistentes') { atualizarDropdownsAdminInicial(); }
+      if(t==='exportar') { atualizarSugestaoVersao(); }
+      if(t==='qrcodes') { atualizarResumoQRCodeAdmin(); }
     }
 
     function renderizarAdminListas() {
@@ -422,6 +480,7 @@
         document.getElementById('admin-ast-label').value = a.label;
         document.getElementById('admin-ast-url').value = a.url;
         document.getElementById('admin-ast-icone').value = a.icone;
+        document.getElementById('admin-ast-descricao').value = a.descricao || '';
         document.getElementById('admin-ast-formato').value = formatarTextoBonito(a.formato);
         atualizarSelectLojasAdmin();
         document.getElementById('admin-ast-loja').value = a.loja;
@@ -431,7 +490,7 @@
     }
     function cancelarEdicao() {
         editingAssistenteIndex = -1;
-        ['admin-ast-label','admin-ast-url','admin-ast-icone'].forEach(id=>document.getElementById(id).value='');
+        ['admin-ast-label','admin-ast-url','admin-ast-icone','admin-ast-descricao'].forEach(id=>document.getElementById(id).value='');
         document.getElementById('admin-ast-formato').value='*'; atualizarSelectLojasAdmin();
         document.getElementById('admin-ast-title').innerText="Adicionar Assistente";
         document.getElementById('btn-save-ast').innerText="Adicionar";
@@ -442,12 +501,13 @@
         const n = l;
         const u = document.getElementById('admin-ast-url').value.trim();
         const i = document.getElementById('admin-ast-icone').value.trim();
+        const d = document.getElementById('admin-ast-descricao').value.trim();
         let f = document.getElementById('admin-ast-formato').value || '*';
         const loj = document.getElementById('admin-ast-loja').value || '*';
         if(f !== '*') f = formatarTextoBonito(f);
         if(!l || !u) return alert("Falta Nome ou URL");
         
-        const novo = {formato:f, loja:loj, nome:n, label:l, url:u, icone:i};
+        const novo = {formato:f, loja:loj, nome:n, label:l, url:u, icone:i, descricao:d};
         const dup = STATE.assistentes.some((a, idx) => {
             if(editingAssistenteIndex === idx) return false;
             return a.nome===novo.nome && a.label===novo.label && a.url===novo.url && a.formato===novo.formato && a.loja===novo.loja;
@@ -515,6 +575,161 @@
 
     function limparTudoAdmin() {
       if(confirm("Resetar Fábrica?")) { localStorage.removeItem(STORAGE_DATA_KEY); location.reload(); }
+    }
+
+    function inicializarAdminQRCodes() {
+      const tabsContainer = document.querySelector('.admin-tabs');
+      if (!tabsContainer || document.getElementById('admin-tab-qrcodes')) return;
+
+      const tab = document.createElement('div');
+      tab.className = 'admin-tab';
+      tab.textContent = 'QRCodes';
+      tab.onclick = () => switchAdminTab('qrcodes');
+      tabsContainer.appendChild(tab);
+
+      const overlayBox = document.querySelector('#admin-overlay .overlay-box');
+      const exportarTab = document.getElementById('admin-tab-exportar');
+      const qrcodesTab = document.createElement('div');
+      qrcodesTab.id = 'admin-tab-qrcodes';
+      qrcodesTab.style.display = 'none';
+      qrcodesTab.innerHTML = `
+        <p style="font-size: 0.85rem; margin-bottom: 10px;">
+          Gera um PDF A5 com 1 página por assistente para a seleção atual da app.
+        </p>
+        <div class="version-control" style="margin-bottom: 10px;">
+          <label>Seleção atual:</label>
+          <strong id="admin-qrcodes-selecao" style="color:#333;">...</strong>
+          <div id="admin-qrcodes-resumo" style="margin-top:8px; font-size:0.8rem; color:#666;"></div>
+        </div>
+        <button onclick="gerarPDFQRCodes()">📄 Gerar PDF QRCodes</button>
+      `;
+      overlayBox.insertBefore(qrcodesTab, exportarTab.nextSibling);
+    }
+
+    function atualizarResumoQRCodeAdmin() {
+      const selecao = document.getElementById('admin-qrcodes-selecao');
+      const resumo = document.getElementById('admin-qrcodes-resumo');
+      if (!selecao || !resumo) return;
+      const formato = localStorage.getItem(FORMATO_KEY);
+      const loja = localStorage.getItem(LOJA_KEY);
+      if (!formato || !loja) {
+        selecao.textContent = 'Sem seleção';
+        resumo.textContent = 'Escolhe o formato e a loja na app antes de gerar o PDF.';
+        return;
+      }
+      selecao.textContent = `${formatarTextoBonito(formato)} – ${loja}`;
+      const assistentes = filtrarAssistentesPorSelecao(formato, loja);
+      resumo.textContent = `Assistentes disponíveis: ${assistentes.length}`;
+    }
+
+    function carregarScript(src) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }
+
+    async function garantirPdfLib() {
+      if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF;
+      await carregarScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
+      return window.jspdf.jsPDF;
+    }
+
+    function criarUrlQRCode(assistente, formato, loja) {
+      const base = `${window.location.origin}${window.location.pathname}`;
+      const params = new URLSearchParams();
+      params.set(QR_PARAM_ASSISTENTE, assistente.nome || assistente.label);
+      if (formato) params.set(QR_PARAM_FORMATO, formato);
+      if (loja) params.set(QR_PARAM_LOJA, loja);
+      return `${base}?${params.toString()}`;
+    }
+
+    async function carregarImagemComoDataURL(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = reject;
+        img.src = src;
+      });
+    }
+
+    async function gerarQRCodeDataURL(texto) {
+      const api = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(texto)}`;
+      const res = await fetch(api);
+      const blob = await res.blob();
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.readAsDataURL(blob);
+      });
+    }
+
+    async function gerarPDFQRCodes() {
+      const formato = localStorage.getItem(FORMATO_KEY);
+      const loja = localStorage.getItem(LOJA_KEY);
+      if (!formato || !loja) {
+        alert('Seleciona formato e loja na app antes de gerar o PDF.');
+        return;
+      }
+      const assistentes = filtrarAssistentesPorSelecao(formato, loja);
+      if (assistentes.length === 0) {
+        alert('Nenhum assistente disponível para esta seleção.');
+        return;
+      }
+
+      const jsPDF = await garantirPdfLib();
+      const doc = new jsPDF({ format: 'a5', unit: 'mm' });
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const margin = 12;
+      const imageSize = 70;
+      const qrSize = 60;
+
+      for (let idx = 0; idx < assistentes.length; idx++) {
+        const a = assistentes[idx];
+        if (idx > 0) doc.addPage('a5', 'p');
+
+        const imgSrc = a.icone || 'AibyAuchan.png';
+        let imgData = null;
+        try {
+          imgData = await carregarImagemComoDataURL(imgSrc);
+        } catch (e) {
+          imgData = await carregarImagemComoDataURL('AibyAuchan.png');
+        }
+
+        const qrUrl = criarUrlQRCode(a, formato, loja);
+        const qrData = await gerarQRCodeDataURL(qrUrl);
+
+        const imgX = (pageWidth - imageSize) / 2;
+        doc.addImage(imgData, 'PNG', imgX, 12, imageSize, imageSize);
+
+        doc.setFontSize(14);
+        doc.setTextColor(40);
+        doc.text(a.label || a.nome, pageWidth / 2, 95, { align: 'center' });
+
+        doc.setFontSize(10);
+        doc.setTextColor(80);
+        const descricao = a.descricao || '';
+        const texto = descricao ? descricao : '';
+        if (texto) {
+          doc.text(texto, pageWidth / 2, 105, { align: 'center', maxWidth: pageWidth - (margin * 2) });
+        }
+
+        const qrX = (pageWidth - qrSize) / 2;
+        doc.addImage(qrData, 'PNG', qrX, 130, qrSize, qrSize);
+      }
+
+      doc.save(`qrcodes_${formatarTextoBonito(formato)}_${loja}.pdf`);
     }
   </script>
 </body>
