@@ -262,8 +262,16 @@
       const dadosLocais = localStorage.getItem(STORAGE_DATA_KEY);
       if (dadosLocais) { STATE = JSON.parse(dadosLocais); } 
       else { STATE = JSON.parse(JSON.stringify(DADOS_PADRAO)); }
+      normalizarDescricoes();
       renderizarApp();
       atualizarVersaoRodape();
+    }
+
+    function normalizarDescricoes() {
+      if (!STATE || !Array.isArray(STATE.assistentes)) return;
+      STATE.assistentes.forEach(a => {
+        if (!a.descricao && a.desc) a.descricao = a.desc;
+      });
     }
 
     function atualizarVersaoRodape() {
@@ -725,7 +733,7 @@
             data-ast-index="${a.__index}"
             placeholder="Descrição (2-3 linhas)"
             style="width:100%; box-sizing:border-box; padding:.6rem; border-radius:10px; border:1px solid #ccc; min-height:72px; resize:vertical;"
-          >${(a.descricao || '').trim()}</textarea>
+          >${(a.descricao || a.desc || '').trim()}</textarea>
         </div>
       `).join('');
 
@@ -742,6 +750,7 @@
           const val = (ta.value || '').trim();
           if (!Number.isNaN(idx) && STATE.assistentes[idx]) {
             STATE.assistentes[idx].descricao = val;
+            if (STATE.assistentes[idx].desc) STATE.assistentes[idx].desc = val;
           }
         });
         guardarDadosLocais();
@@ -753,88 +762,96 @@
     }
 
     async function gerarPDFQRCodes() {
-      const formato = localStorage.getItem(FORMATO_KEY);
-      const loja = localStorage.getItem(LOJA_KEY);
-      if (!formato || !loja) {
-        alert('Seleciona formato e loja na app antes de gerar o PDF.');
-        return;
-      }
-      const assistentes = STATE.assistentes
-        .map((a, idx) => ({ ...a, __index: idx }))
-        .filter(a => {
-          const f = (a.formato || '').toUpperCase();
-          const l = (a.loja || '').toUpperCase();
-          const ufN = (formato || '').toUpperCase();
-          const ulN = (loja || '').toUpperCase();
-          return (f === '*' || f === ufN) && (l === '*' || l === ulN);
+      try {
+        const formato = localStorage.getItem(FORMATO_KEY);
+        const loja = localStorage.getItem(LOJA_KEY);
+        if (!formato || !loja) {
+          alert('Seleciona formato e loja na app antes de gerar o PDF.');
+          return;
+        }
+        const assistentes = STATE.assistentes
+          .map((a, idx) => ({ ...a, __index: idx }))
+          .filter(a => {
+            const f = (a.formato || '').toUpperCase();
+            const l = (a.loja || '').toUpperCase();
+            const ufN = (formato || '').toUpperCase();
+            const ulN = (loja || '').toUpperCase();
+            return (f === '*' || f === ufN) && (l === '*' || l === ulN);
+          });
+        if (assistentes.length === 0) {
+          alert('Nenhum assistente disponível para esta seleção.');
+          return;
+        }
+
+        const semDescricao = assistentes.filter(a => {
+          const desc = (a.descricao || a.desc || '').trim();
+          return !desc;
         });
-      if (assistentes.length === 0) {
-        alert('Nenhum assistente disponível para esta seleção.');
-        return;
-      }
-
-      const semDescricao = assistentes.filter(a => !(a.descricao && a.descricao.trim()));
-      if (semDescricao.length) {
-        abrirModalDescricaoEmFalta(semDescricao, () => gerarPDFQRCodes());
-        return;
-      }
-
-      const jsPDF = await garantirPdfLib();
-      const doc = new jsPDF({ format: 'a5', unit: 'mm' });
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 10;
-      const imageWidth = pageWidth - (margin * 2);
-      const imageHeight = 108;
-      const qrSize = 55;
-      const qrX = (pageWidth - qrSize) / 2;
-      const qrY = pageHeight - margin - qrSize;
-
-      for (let idx = 0; idx < assistentes.length; idx++) {
-        const a = assistentes[idx];
-        if (idx > 0) doc.addPage('a5', 'p');
-
-        const imgSrc = a.icone || 'AibyAuchan.png';
-        let imgData = null;
-        try {
-          imgData = await carregarImagemComoDataURL(imgSrc);
-        } catch (e) {
-          imgData = await carregarImagemComoDataURL('AibyAuchan.png');
+        if (semDescricao.length) {
+          abrirModalDescricaoEmFalta(semDescricao, () => gerarPDFQRCodes());
+          return;
         }
 
-        const qrUrl = criarUrlQRCode(a, formato, loja);
-        const qrData = await gerarQRCodeDataURL(qrUrl);
+        const jsPDF = await garantirPdfLib();
+        const doc = new jsPDF({ format: 'a5', unit: 'mm' });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 10;
+        const imageWidth = pageWidth - (margin * 2);
+        const imageHeight = 108;
+        const qrSize = 55;
+        const qrX = (pageWidth - qrSize) / 2;
+        const qrY = pageHeight - margin - qrSize;
 
-        doc.addImage(imgData, 'PNG', margin, margin, imageWidth, imageHeight);
+        for (let idx = 0; idx < assistentes.length; idx++) {
+          const a = assistentes[idx];
+          if (idx > 0) doc.addPage('a5', 'p');
 
-        const descricao = (a.descricao || '').trim();
-        const textTop = margin + imageHeight + 8;
-        const textBottom = qrY - 6;
-        const availableHeight = textBottom - textTop;
-        let fontSize = 11;
-        doc.setFontSize(fontSize);
-        doc.setTextColor(0);
-        let lines = doc.splitTextToSize(descricao, imageWidth);
-        let lineHeight = 5;
-        let totalHeight = lines.length * lineHeight;
-        if (totalHeight > availableHeight) {
-          fontSize = 10;
+          const imgSrc = a.icone || 'AibyAuchan.png';
+          let imgData = null;
+          try {
+            imgData = await carregarImagemComoDataURL(imgSrc);
+          } catch (e) {
+            imgData = await carregarImagemComoDataURL('AibyAuchan.png');
+          }
+
+          const qrUrl = criarUrlQRCode(a, formato, loja);
+          const qrData = await gerarQRCodeDataURL(qrUrl);
+
+          doc.addImage(imgData, 'PNG', margin, margin, imageWidth, imageHeight);
+
+          const descricao = (a.descricao || a.desc || '').trim();
+          const textTop = margin + imageHeight + 8;
+          const textBottom = qrY - 6;
+          const availableHeight = textBottom - textTop;
+          let fontSize = 11;
           doc.setFontSize(fontSize);
-          lines = doc.splitTextToSize(descricao, imageWidth);
-          lineHeight = 4.6;
-          totalHeight = lines.length * lineHeight;
-        }
-        while (totalHeight > availableHeight && lines.length > 2) {
-          lines.pop();
-          lines[lines.length - 1] = `${lines[lines.length - 1].replace(/\s*$/, '')}…`;
-          totalHeight = lines.length * lineHeight;
-        }
-        doc.text(lines, pageWidth / 2, textTop + 1, { align: 'center' });
+          doc.setTextColor(0);
+          let lines = doc.splitTextToSize(descricao, imageWidth);
+          let lineHeight = 5;
+          let totalHeight = lines.length * lineHeight;
+          if (totalHeight > availableHeight) {
+            fontSize = 10;
+            doc.setFontSize(fontSize);
+            lines = doc.splitTextToSize(descricao, imageWidth);
+            lineHeight = 4.6;
+            totalHeight = lines.length * lineHeight;
+          }
+          while (totalHeight > availableHeight && lines.length > 2) {
+            lines.pop();
+            lines[lines.length - 1] = `${lines[lines.length - 1].replace(/\s*$/, '')}…`;
+            totalHeight = lines.length * lineHeight;
+          }
+          doc.text(lines, pageWidth / 2, textTop + 1, { align: 'center' });
 
-        doc.addImage(qrData, 'PNG', qrX, qrY, qrSize, qrSize);
+          doc.addImage(qrData, 'PNG', qrX, qrY, qrSize, qrSize);
+        }
+
+        doc.save(`qrcodes_${formatarTextoBonito(formato)}_${loja}.pdf`);
+      } catch (error) {
+        console.error(error);
+        alert('Falhou a geração do PDF. Abre a consola (F12) para detalhes.');
       }
-
-      doc.save(`qrcodes_${formatarTextoBonito(formato)}_${loja}.pdf`);
     }
   </script>
 </body>
