@@ -1,5 +1,5 @@
 // Ficheiro de Configuração Gerado Automaticamente
-const STORAGE_DATA_KEY = "appConfigData_v2.0.2";
+const STORAGE_DATA_KEY = "appConfigData_v2.0.3";
 
 const DADOS_PADRAO = {
   lojas: [
@@ -286,7 +286,8 @@ const DADOS_PADRAO = {
         "nome": "AuchanAI",
         "label": "AuchanAI",
         "url": "https://genai-platform.auchan.com/#/chat",
-        "icone": "AuchanAI.jpg"
+        "icone": "AuchanAI.jpg",
+        "descricao": "AuchanAI. O teu parceiro digital para gerar ideias, escrever melhor e organizar pensamentos. Está aqui para te inspirar, apoiar na criação de conteúdos e ajudar-te a pensar com mais clareza."
     },
     {
         "formato": "Hiper",
@@ -294,7 +295,8 @@ const DADOS_PADRAO = {
         "nome": "Coach",
         "label": "Coach",
         "url": "https://genai-platform.auchan.com/#/share/30a0ad45-9568-4c37-956e-a36f7cb17ac6",
-        "icone": "Coach.jpg"
+        "icone": "Coach.jpg",
+        "descricao": "Coach.  Ajuda a transformar desafios de liderança em planos de ação concretos, utilizando como referência os nossos modelos internos de competências, avaliação de desempenho e liderança."
     },
     {
         "formato": "Servicos",
@@ -302,7 +304,8 @@ const DADOS_PADRAO = {
         "nome": "Contratos",
         "label": "Contratos",
         "url": "https://genai-platform.auchan.com/#/share/6e5f9252-e132-4d4c-a308-3fc7ee54fddf",
-        "icone": "Contratos.jpg"
+        "icone": "Contratos.jpg",
+        "descricao": ""
     },
     {
         "formato": "Hiper",
@@ -390,7 +393,8 @@ const DADOS_PADRAO = {
         "nome": "Jade",
         "label": "Jade",
         "url": "https://genai-platform.auchan.com/#/share/dcd986cf-ca6e-41df-bb4e-8dc387eb0906",
-        "icone": "Jade.jpg"
+        "icone": "Jade.jpg",
+        "descricao": "Jade. Ajuda no teu trabalho na Frente de Loja. Disponível para esclarecer dúvidas, lembrar-te de procedimentos e guiar-te nos processos e ferramentas que usas todos os dias."
     },
     {
         "formato": "Hiper",
@@ -406,7 +410,8 @@ const DADOS_PADRAO = {
         "nome": "MySafira",
         "label": "MySafira",
         "url": "https://genai-platform.auchan.com/#/share/e7f3fdbd-7456-40d6-8f00-02c0f47c6344",
-        "icone": "MySafira.jpg"
+        "icone": "MySafira.jpg",
+        "descricao": "teste"
     },
     {
         "formato": "Super",
@@ -430,7 +435,8 @@ const DADOS_PADRAO = {
         "nome": "Violeta",
         "label": "Violeta",
         "url": "https://genai-platform.auchan.com/#/share/17fb9d00-4091-4c3f-91ac-6dfebabfecd6",
-        "icone": "Violeta.jpg"
+        "icone": "Violeta.jpg",
+        "descricao": "Violeta. A tua parceira de confiança para tudo o que envolve recursos humanos na Auchan. Está aqui para te ajudar a navegar pelos processos internos com facilidade."
     },
     {
         "formato": "Hiper",
