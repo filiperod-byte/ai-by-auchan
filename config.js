@@ -1,10 +1,8 @@
 // Ficheiro de Configuração Gerado Automaticamente
-const STORAGE_DATA_KEY = "appConfigData_v2.0.3";
+const STORAGE_DATA_KEY = "appConfigData_v2.0.4";
 
 const DADOS_PADRAO = {
   lojas: [
-    {"formato":"Hiper","loja":"001-Teste"},
-    {"formato":"Hiper","loja":"002-Teste2"},
     {"formato":"Hiper","loja":"008-Gaia"},
     {"formato":"Hiper","loja":"009-Coimbra"},
     {"formato":"Hiper","loja":"010-Viseu"},
@@ -313,7 +311,8 @@ const DADOS_PADRAO = {
         "nome": "Echo",
         "label": "Echo",
         "url": "https://genai-platform.auchan.com/#/share/e706fd1e-b79b-42cd-b369-14ac335302d5",
-        "icone": "Echo.jpg"
+        "icone": "Echo.jpg",
+        "descricao": ""
     },
     {
         "formato": "Hiper",
@@ -321,7 +320,8 @@ const DADOS_PADRAO = {
         "nome": "Echo",
         "label": "Echo",
         "url": "https://genai-platform.auchan.com/#/share/e706fd1e-b79b-42cd-b369-14ac335302d5",
-        "icone": "Echo.jpg"
+        "icone": "Echo.jpg",
+        "descricao": "Echo. Atua como o Diretório Humano Inteligente da organização, auxiliando colaboradores a encontrar o apoio especializado correto para a resolução de desafios operacionais e funcionais."
     },
     {
         "formato": "Servicos",
@@ -329,7 +329,8 @@ const DADOS_PADRAO = {
         "nome": "Estudos(Compra)",
         "label": "Estudos(Compra)",
         "url": "URL",
-        "icone": "Estudos-Compra.jpg"
+        "icone": "Estudos-Compra.jpg",
+        "descricao": ""
     },
     {
         "formato": "Servicos",
@@ -337,7 +338,8 @@ const DADOS_PADRAO = {
         "nome": "Estudos(Oferta)",
         "label": "Estudos(Oferta)",
         "url": "https://genai-platform.auchan.com/#/share/f50fe60a-7306-4427-8de9-7bf15f4643db",
-        "icone": "Estudos-Oferta.jpg"
+        "icone": "Estudos-Oferta.jpg",
+        "descricao": ""
     },
     {
         "formato": "Servicos",
@@ -345,7 +347,8 @@ const DADOS_PADRAO = {
         "nome": "Estudos(Operações)",
         "label": "Estudos(Operações)",
         "url": "https://genai-platform.auchan.com/#/share/598e9e9e-b591-4705-bdbe-52f19d7eedc4",
-        "icone": "Estudos-Operações.jpg"
+        "icone": "Estudos-Operações.jpg",
+        "descricao": ""
     },
     {
         "formato": "Hiper",
@@ -353,7 +356,8 @@ const DADOS_PADRAO = {
         "nome": "Faisca",
         "label": "Faisca",
         "url": "https://genai-platform.auchan.com/#/share/a389a983-adb8-42ab-b72e-31c56bfab267",
-        "icone": "Faisca.jpg"
+        "icone": "Faisca.jpg",
+        "descricao": ""
     },
     {
         "formato": "Hiper",
@@ -361,7 +365,8 @@ const DADOS_PADRAO = {
         "nome": "Faisca",
         "label": "Faisca",
         "url": "https://genai-platform.auchan.com/#/share/a389a983-adb8-42ab-b72e-31c56bfab267",
-        "icone": "Faisca.jpg"
+        "icone": "Faisca.jpg",
+        "descricao": ""
     },
     {
         "formato": "Hiper",
@@ -369,7 +374,8 @@ const DADOS_PADRAO = {
         "nome": "Faisca",
         "label": "Faisca",
         "url": "https://genai-platform.auchan.com/#/share/a389a983-adb8-42ab-b72e-31c56bfab267",
-        "icone": "Faisca.jpg"
+        "icone": "Faisca.jpg",
+        "descricao": ""
     },
     {
         "formato": "Servicos",
@@ -377,7 +383,8 @@ const DADOS_PADRAO = {
         "nome": "Ficha de Produto",
         "label": "Ficha de Produto",
         "url": "https://genai-platform.auchan.com/#/share/cb9d6925-ef73-41f2-a2ac-e92c4d4893c5",
-        "icone": "Ficha-de-Produto.jpg"
+        "icone": "Ficha-de-Produto.jpg",
+        "descricao": ""
     },
     {
         "formato": "Servicos",
@@ -385,7 +392,8 @@ const DADOS_PADRAO = {
         "nome": "Folhetos",
         "label": "Folhetos",
         "url": "https://genai-platform.auchan.com/#/share/d40417b7-1d75-48d5-b8b1-48e5b318d6db",
-        "icone": "Folhetos.jpg"
+        "icone": "Folhetos.jpg",
+        "descricao": ""
     },
     {
         "formato": "Hiper",
@@ -402,7 +410,8 @@ const DADOS_PADRAO = {
         "nome": "Manelinho",
         "label": "Manelinho",
         "url": "http://www.google.com",
-        "icone": "AibyAuchan.png"
+        "icone": "AibyAuchan.png",
+        "descricao": ""
     },
     {
         "formato": "Prox",
@@ -419,7 +428,8 @@ const DADOS_PADRAO = {
         "nome": "MySafira",
         "label": "MySafira",
         "url": "https://genai-platform.auchan.com/#/share/e7f3fdbd-7456-40d6-8f00-02c0f47c6344",
-        "icone": "MySafira.jpg"
+        "icone": "MySafira.jpg",
+        "descricao": ""
     },
     {
         "formato": "Servicos",
@@ -427,7 +437,8 @@ const DADOS_PADRAO = {
         "nome": "Reunião com Fornecedor",
         "label": "Reunião com Fornecedor",
         "url": "https://genai-platform.auchan.com/#/share/a73adc68-2cd2-4a63-bf23-0747d914d5a5",
-        "icone": "Reunião-Fornecedor.jpg"
+        "icone": "Reunião-Fornecedor.jpg",
+        "descricao": ""
     },
     {
         "formato": "*",
@@ -444,7 +455,8 @@ const DADOS_PADRAO = {
         "nome": "Wally",
         "label": "Wally",
         "url": "https://genai-platform.auchan.com/#/share/7f236c5d-c8de-4e6f-a8a3-19a542f68c51",
-        "icone": "wally-512.jpg"
+        "icone": "wally-512.jpg",
+        "descricao": "Wally. Ajuda-te a encontrar os artigos na loja.\nQuando o cliente tem dúvidas e não sabes onde está o produto, o Wally tem a resposta."
     },
     {
         "formato": "Hiper",
@@ -452,7 +464,8 @@ const DADOS_PADRAO = {
         "nome": "Wally",
         "label": "Wally",
         "url": "https://genai-platform.auchan.com/#/share/e8eedf3c-7c3c-4eb4-95f0-8a583ac828fb",
-        "icone": "wally-512.jpg"
+        "icone": "wally-512.jpg",
+        "descricao": ""
     }
   ]
 };
