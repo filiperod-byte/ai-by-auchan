@@ -62,7 +62,9 @@
     .admin-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #eee; }
     .admin-item-text { flex-grow: 1; cursor: pointer; }
     .admin-item-text:hover { color: #d63a3e; font-weight: bold; }
-    .admin-item button { width: auto; padding: 2px 8px; font-size: 0.7rem; margin: 0; background: #ff4444; margin-left: 10px;}
+    .admin-item button { width: auto; padding: 2px 8px; font-size: 0.7rem; margin: 0; border: 0; border-radius: 999px; cursor: pointer; }
+    .admin-item button.delete { background: #ff4444; color: #fff; }
+    .admin-item button.dup { background: #666; color: #fff; }
 
     .version-control { background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: left; border: 1px solid #eee; }
     .version-control label { font-size: 0.8rem; color: #666; display: block; margin-bottom: 3px; }
@@ -491,35 +493,65 @@
       aSorted.forEach(a => {
         const idx = STATE.assistentes.indexOf(a);
         const d = document.createElement('div'); d.className='admin-item';
-        d.innerHTML = `<div class="admin-item-text" onclick="prepararEdicao(${idx})">${a.label} <small style="opacity:0.7">(${a.formato})(${a.loja})</small></div><button onclick="adminRemoverAssistente(event, ${idx})">X</button>`;
+	d.innerHTML = `<div class="admin-item-text" onclick="prepararEdicao(${idx})">
+	${a.label} <small style="opacity:0.7">(${a.formato || '—'})(${a.loja || '—'})</small>
+
+	  </div>
+	  <div style="display:flex; gap:8px; align-items:center;">
+	    <button class="dup" onclick="adminDuplicarAssistente(event, ${idx})" title="Duplicar">⧉</button>
+	       <button class="delete" onclick="adminRemoverAssistente(event, ${idx})" title="Apagar">X</button>
+	  </div>`;
         al.appendChild(d);
       });
     }
 
-    function atualizarDropdownsAdminInicial() {
-      const s = document.getElementById('admin-ast-formato'); const prev = s.value;
-      s.innerHTML = '<option value="*">Qualquer Formato (*)</option>';
-      obterFormatosUnicos().forEach(f => { const o = document.createElement('option'); o.value=f; o.textContent=f; s.appendChild(o); });
-      if (prev) s.value = prev;
-      atualizarSelectLojasAdmin();
-    }
+function atualizarDropdownsAdminInicial() {
+  const s = document.getElementById('admin-ast-formato');
+  const prev = s.value;
 
-    function atualizarSelectLojasAdmin() {
-      const sf = document.getElementById('admin-ast-formato');
-      const sl = document.getElementById('admin-ast-loja');
-      const prev = sl.value;
+  s.innerHTML = `
+    <option value="">(Seleciona formato…)</option>
+    <option value="*">Qualquer Formato (*)</option>
+  `;
 
-      sl.innerHTML = '<option value="*">Qualquer Loja (*)</option>';
+  obterFormatosUnicos().forEach(f => {
+    const o = document.createElement('option');
+    o.value = f;
+    o.textContent = f;
+    s.appendChild(o);
+  });
 
-      let list = [];
-      if (sf.value === '*') list = [...STATE.lojas];
-      else list = STATE.lojas.filter(l => (l.formato||'').toUpperCase() === sf.value.toUpperCase());
+  // mantém seleção anterior se existir
+  if (prev !== undefined && prev !== null) s.value = prev;
+  atualizarSelectLojasAdmin();
+}
 
-      list.sort(ordenarLojas);
-      list.forEach(l => { const o = document.createElement('option'); o.value=l.loja; o.textContent=l.loja; sl.appendChild(o); });
+function atualizarSelectLojasAdmin() {
+  const sf = document.getElementById('admin-ast-formato');
+  const sl = document.getElementById('admin-ast-loja');
+  const prev = sl.value;
 
-      sl.value = (Array.from(sl.options).some(o => o.value === prev)) ? prev : '*';
-    }
+  sl.innerHTML = `
+    <option value="">(Seleciona loja…)</option>
+    <option value="*">Qualquer Loja (*)</option>
+  `;
+
+  let list = [];
+  if (sf.value === '*') list = [...STATE.lojas];
+  else if (sf.value === '') list = []; // formato por definir -> não lista lojas
+  else list = STATE.lojas.filter(l => (l.formato || '').toUpperCase() === sf.value.toUpperCase());
+
+  list.sort(ordenarLojas);
+  list.forEach(l => {
+    const o = document.createElement('option');
+    o.value = l.loja;
+    o.textContent = l.loja;
+    sl.appendChild(o);
+  });
+
+  // mantém seleção anterior se existir
+  if (Array.from(sl.options).some(o => o.value === prev)) sl.value = prev;
+}
 
     function selecionarImagemArquivo() {
       const i = document.getElementById('admin-file-picker');
@@ -579,43 +611,143 @@
       document.getElementById('btn-cancel-ast').style.display="none";
     }
 
-    function adminSaveAssistente() {
-      const l = document.getElementById('admin-ast-label').value.trim();
-      const n = l;
-      const u = document.getElementById('admin-ast-url').value.trim();
-      const i = document.getElementById('admin-ast-icone').value.trim();
-      const d = document.getElementById('admin-ast-descricao').value.trim();
-      let f = document.getElementById('admin-ast-formato').value || '*';
-      const loj = document.getElementById('admin-ast-loja').value || '*';
+function normKey_(s) {
+  return (s || '').trim().toLowerCase();
+}
 
-      if (f !== '*') f = formatarTextoBonito(f);
+function normScope_(v) {
+  const t = (v || '*').trim();
+  return t === '' ? '*' : t.toUpperCase();
+}
 
-      if (!l || !u) return alert("Falta Nome ou URL");
-      // 👇 obrigatório (assim não levas “PDF não gera” mais tarde)
-      if (!d) return alert("A descrição é obrigatória (senão o PDF não dá 😅).");
+// Dois escopos sobrepõem-se se existir pelo menos 1 seleção (formato/loja) onde ambos aparecem
+function scopesOverlap_(a, b) {
+  const af = (a.formato ?? '').toString().trim().toUpperCase();
+  const bf = (b.formato ?? '').toString().trim().toUpperCase();
+  const al = (a.loja ?? '').toString().trim().toUpperCase();
+  const bl = (b.loja ?? '').toString().trim().toUpperCase();
 
-      const novo = {formato:f, loja:loj, nome:n, label:l, url:u, icone:i, descricao:d, desc:d};
+  // ✅ Se algum dos dois ainda não tem scope definido, NÃO há conflito
+  if (!af || !al || !bf || !bl) return false;
 
-      const dup = STATE.assistentes.some((a, idx) => {
-        if (editingAssistenteIndex === idx) return false;
-        return a.nome===novo.nome && a.label===novo.label && a.url===novo.url && a.formato===novo.formato && a.loja===novo.loja;
-      });
-      if (dup) return alert("Assistente duplicado!");
+  const fmtOverlap = (af === '*') || (bf === '*') || (af === bf);
+  const lojaOverlap = (al === '*') || (bl === '*') || (al === bl);
 
-      if (editingAssistenteIndex >= 0) STATE.assistentes[editingAssistenteIndex] = novo;
-      else STATE.assistentes.push(novo);
+  return fmtOverlap && lojaOverlap;
+}
 
-      guardarDadosLocais(); renderizarAdminListas(); cancelarEdicao();
+function gerarLabelCopiaUnica_(base) {
+  let candidate = base;
+  let n = 2;
+  const exists = (lbl) => STATE.assistentes.some(a => normKey_(a.label) === normKey_(lbl));
+  while (exists(candidate)) {
+    candidate = `${base} ${n}`;
+    n++;
+  }
+  return candidate;
+}
+
+function adminDuplicarAssistente(e, i) {
+  e.stopPropagation();
+  const src = STATE.assistentes[i];
+  if (!src) return;
+
+  const clone = {
+    ...src,
+    // ✅ mantém o mesmo nome/label
+    nome: src.nome || src.label,
+    label: src.label || src.nome,
+
+    // ✅ deixa o scope por definir (não aparece na app e não choca com regras)
+    formato: '',
+    loja: ''
+  };
+
+  STATE.assistentes.push(clone);
+  guardarDadosLocais();
+  renderizarAdminListas();
+
+  // abre logo em edição no novo
+  prepararEdicao(STATE.assistentes.length - 1);
+}
+
+
+function adminSaveAssistente() {
+  const l = document.getElementById('admin-ast-label').value.trim();
+  const n = l; // nome = label
+  const u = document.getElementById('admin-ast-url').value.trim();
+  const i = document.getElementById('admin-ast-icone').value.trim();
+  const d = document.getElementById('admin-ast-descricao').value.trim();
+
+  const fRaw = document.getElementById('admin-ast-formato').value; // pode ser "" (por definir)
+  const lojRaw = document.getElementById('admin-ast-loja').value;  // pode ser "" (por definir)
+
+  if (!l || !u) return alert("Falta Nome ou URL");
+  if (!d) return alert("A descrição é obrigatória (para a impressão do PDF).");
+
+  // ✅ obriga a escolher (mas permite "*")
+  if (!fRaw || !lojRaw) {
+    alert('Escolhe Formato e Loja para este assistente (podes escolher "*" se for geral).');
+    return;
+  }
+
+  let f = fRaw;
+  const loj = lojRaw;
+
+  // normaliza formato (exceto "*")
+  if (f !== '*') f = formatarTextoBonito(f);
+
+  const novo = {
+    formato: f,
+    loja: loj,
+    nome: n,
+    label: l,
+    url: u,
+    icone: i,
+    descricao: d,
+    desc: d // compatibilidade
+  };
+
+  const novoKey = normKey_(novo.label || novo.nome);
+
+  // ✅ Regra de "não pode haver geral + específico com o mesmo nome"
+  const conflito = STATE.assistentes.some((a, idx) => {
+    if (idx === editingAssistenteIndex) return false;
+
+    const aKey = normKey_(a.label || a.nome);
+    if (aKey !== novoKey) return false;
+
+    return scopesOverlap_(a, novo); // já ignora os que estão "por definir"
+  });
+
+  if (conflito) {
+    // mensagem mais explícita para o cérebro humano não crashar
+    const novoGeral = (novo.formato === '*' && novo.loja === '*');
+    const existeGeral = STATE.assistentes.some((a, idx) => {
+      if (idx === editingAssistenteIndex) return false;
+      const aKey = normKey_(a.label || a.nome);
+      return aKey === novoKey && ((a.formato || '').trim() === '*') && ((a.loja || '').trim() === '*');
+    });
+
+    if (existeGeral && !novoGeral) {
+      alert('Já existe um assistente GERAL (*) com este nome. Não podes criar um mais específico com o mesmo nome.');
+    } else if (!existeGeral && novoGeral) {
+      alert('Já existem assistentes específicos com este nome. Não podes criar um assistente GERAL (*) com o mesmo nome.');
+    } else {
+      alert('Conflito: já existe um assistente com o mesmo nome cujo escopo se sobrepõe a este.');
     }
+    return;
+  }
 
-    function adminRemoverAssistente(e, i) {
-      e.stopPropagation();
-      if(confirm("Apagar?")) {
-        STATE.assistentes.splice(i,1);
-        guardarDadosLocais(); renderizarAdminListas();
-        if(editingAssistenteIndex===i) cancelarEdicao();
-      }
-    }
+  // ✅ grava
+  if (editingAssistenteIndex >= 0) STATE.assistentes[editingAssistenteIndex] = novo;
+  else STATE.assistentes.push(novo);
+
+  guardarDadosLocais();
+  renderizarAdminListas();
+  cancelarEdicao();
+}
+
 
     /* --- EXPORTAR CONFIG.JS --- */
     function atualizarSugestaoVersao() {
@@ -1002,4 +1134,3 @@
   </script>
 </body>
 </html>
-
