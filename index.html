@@ -56,6 +56,19 @@
     }
     .close-overlay-btn:hover { color: #d63a3e; }
 
+    /* MODAL: alterações por publicar */
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .modal-actions button { margin-bottom: 0; }
+    .modal-actions .ghost { background: #f2f2f2; color: #333; }
+    .modal-actions .warn { background: #ff9800; color: #fff; }
+    @media (max-width: 420px) {
+      .modal-actions { flex-direction: column; }
+    }
+
     /* ADMIN TABS */
     .admin-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap; }
     .admin-tab { padding: 5px 10px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; }
@@ -163,7 +176,7 @@
     <div class="overlay-box" style="width: min(520px, 95%);">
       <h2>Painel de Administração</h2>
 
-      <!-- Ordem pedida: Lojas, Assistentes, QRCodes, Guardar -->
+      <!-- Ordem: Lojas, Assistentes, QRCodes, Guardar -->
       <div class="admin-tabs">
         <div class="admin-tab active" data-tab="lojas" onclick="switchAdminTab('lojas')">Lojas</div>
         <div class="admin-tab" data-tab="assistentes" onclick="switchAdminTab('assistentes')">Assistentes</div>
@@ -284,6 +297,28 @@
     </div>
   </div>
 
+  <!-- MODAL: FECHAR ADMIN COM ALTERAÇÕES -->
+  <div id="admin-close-guard-overlay" class="overlay">
+    <div class="overlay-box" style="width:min(520px,95%); text-align:left;">
+      <span class="close-overlay-btn" onclick="fecharModalFechoAdmin_()">✕</span>
+      <h2>⚠️ Alterações por publicar</h2>
+      <p style="margin-top:0; color:#666; font-size:.95rem; line-height:1.35;">
+        Tens alterações no Admin que ainda não estão no <b>config.js</b> publicado.<br>
+        Queres ir já ao separador <b>Guardar</b> para fazer download?
+      </p>
+
+      <div class="modal-actions">
+        <button class="warn" onclick="irGuardarDoModal_()">Ir a Guardar</button>
+        <button class="ghost" onclick="fecharSemAtualizarDoModal_()">Fechar sem atualizar</button>
+        <button class="cancel" onclick="fecharModalFechoAdmin_()">Cancelar</button>
+      </div>
+
+      <p style="margin:10px 0 0 0; font-size:.8rem; color:#999;">
+        (Sim, isto é o teu “are you sure?” corporativo 😅)
+      </p>
+    </div>
+  </div>
+
   <!-- APP -->
   <div class="app">
     <div class="content-wrap">
@@ -329,7 +364,6 @@
     window.addEventListener('load', () => {
       carregarDados();
 
-      // Service worker: tenta registar e pronto
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('service-worker.js').catch(console.log);
       }
@@ -421,7 +455,6 @@
     }
 
     function hasUnpublishedChanges_() {
-      // se não houver published, não bloqueia (ex: config.js falhou)
       if (typeof DADOS_PADRAO === 'undefined') return { changed: false, reason: 'no_published' };
 
       const pub = sortAndNormalizeState_(DADOS_PADRAO);
@@ -652,33 +685,44 @@
       renderizarAdminListas();
       atualizarDropdownsAdminInicial();
       inicializarSelecaoPrintAdmin_();
-      // fica por defeito no tab "Lojas" (active já está)
       switchAdminTab('lojas');
     }
 
-    // ✅ NOVO: não deixa fechar sem perguntar se deve atualizar config.js quando há diferenças vs publicado
+    // ✅ NOVO: mini-modal 3 botões (em vez de confirm)
     function fecharAdmin() {
       const diff = hasUnpublishedChanges_();
       if (diff.changed) {
-        const irGuardar = confirm("⚠️ Tens alterações por publicar no config.js.\nQueres ir agora ao separador Guardar para fazer download do config.js?");
-        if (irGuardar) {
-          switchAdminTab('exportar');
-          return; // mantém Admin aberto
-        }
-        // se disser que não, deixa fechar na mesma (mas perguntou ✅)
+        abrirModalFechoAdmin_();
+        return; // mantém Admin aberto
       }
+      fecharAdminSemPerguntar_();
+    }
 
+    function fecharAdminSemPerguntar_() {
       document.getElementById('admin-overlay').style.display = 'none';
       cancelarEdicao();
     }
 
+    function abrirModalFechoAdmin_() {
+      document.getElementById('admin-close-guard-overlay').style.display = 'flex';
+    }
+    function fecharModalFechoAdmin_() {
+      document.getElementById('admin-close-guard-overlay').style.display = 'none';
+    }
+    function irGuardarDoModal_() {
+      fecharModalFechoAdmin_();
+      switchAdminTab('exportar');
+    }
+    function fecharSemAtualizarDoModal_() {
+      fecharModalFechoAdmin_();
+      fecharAdminSemPerguntar_();
+    }
+
     function switchAdminTab(tabId) {
-      // tabs ui
       document.querySelectorAll('.admin-tab').forEach(x => x.classList.remove('active'));
       const tabBtn = document.querySelector(`.admin-tab[data-tab="${tabId}"]`);
       if (tabBtn) tabBtn.classList.add('active');
 
-      // conteudos
       ['lojas','assistentes','qrcodes','exportar'].forEach(id => {
         const tab = document.getElementById(`admin-tab-${id}`);
         if (tab) tab.style.display = 'none';
@@ -696,7 +740,6 @@
      * ADMIN - LISTAS (LOJAS / ASSISTENTES)
      *************************************************/
     function renderizarAdminListas() {
-      // LOJAS
       const ll = document.getElementById('admin-lojas-list');
       ll.innerHTML = '';
       const lSorted = [...STATE.lojas].sort(ordenarLojas);
@@ -712,7 +755,6 @@
         ll.appendChild(d);
       });
 
-      // ASSISTENTES
       const al = document.getElementById('admin-assistentes-list');
       al.innerHTML = '';
       const aSorted = [...STATE.assistentes].sort((a, b) => (a.label || a.nome || '').localeCompare((b.label || b.nome || ''), undefined, { sensitivity: 'base' }));
@@ -863,7 +905,6 @@
       const al = ((a && a.loja) ?? '').toString().trim().toUpperCase();
       const bl = ((b && b.loja) ?? '').toString().trim().toUpperCase();
 
-      // se algum ainda não tem scope definido, é rascunho -> sem conflito
       if (!af || !al || !bf || !bl) return false;
 
       const fmtOverlap = (af === '*') || (bf === '*') || (af === bf);
@@ -892,7 +933,7 @@
     function validarConflitosAssistente_(novo, editingIdx) {
       const nf = ((novo.formato ?? '') + '').trim();
       const nl = ((novo.loja ?? '') + '').trim();
-      if (!nf || !nl) return null; // rascunho
+      if (!nf || !nl) return null;
 
       const novoKey = normKey_(novo.label || novo.nome);
       if (!novoKey) return null;
@@ -923,7 +964,7 @@
 
     function adminSaveAssistente() {
       const l = document.getElementById('admin-ast-label').value.trim();
-      const n = l; // nome = label
+      const n = l;
       const u = document.getElementById('admin-ast-url').value.trim();
       const ic = document.getElementById('admin-ast-icone').value.trim();
       const d = document.getElementById('admin-ast-descricao').value.trim();
@@ -969,7 +1010,6 @@
       renderizarAdminListas();
       cancelarEdicao();
 
-      // refresca QRCodes se for o separador ativo
       const qrtab = document.getElementById('admin-tab-qrcodes');
       if (qrtab && qrtab.style.display === 'block') renderizarListaQRCodes_();
     }
@@ -1030,7 +1070,6 @@
 
       const newKey = "appConfigData_v" + vUser;
 
-      // normaliza antes de exportar
       STATE.lojas.forEach(l => { if (l.formato) l.formato = formatarTextoBonito(l.formato); });
       STATE.assistentes.forEach(a => {
         if (a.formato && a.formato !== '*') a.formato = formatarTextoBonito(a.formato);
@@ -1082,7 +1121,7 @@
     }
 
     /*************************************************
-     * QRCODES - SELEÇÃO ADMIN (Formato/Loja sem sair do Admin)
+     * QRCODES - SELEÇÃO ADMIN
      *************************************************/
     const PRINT_APP_VALUE = '__APP__';
 
@@ -1091,7 +1130,6 @@
       const sl = document.getElementById('admin-print-loja');
       if (!sf || !sl) return;
 
-      // formato
       const prevF = sf.value || PRINT_APP_VALUE;
       sf.innerHTML = '';
       const optAppF = document.createElement('option');
@@ -1107,7 +1145,6 @@
       });
 
       sf.value = prevF;
-
       atualizarLojasPrintAdmin_();
     }
 
@@ -1124,7 +1161,6 @@
       optAppL.textContent = '(usar seleção da App)';
       sl.appendChild(optAppL);
 
-      // se formato é App, não lista lojas específicas (fica só “usar seleção da App”)
       if (sf.value === PRINT_APP_VALUE) {
         sl.value = PRINT_APP_VALUE;
         return;
@@ -1143,7 +1179,6 @@
         sl.appendChild(o);
       });
 
-      // tenta manter loja anterior, senão App
       if (Array.from(sl.options).some(o => o.value === prevL)) sl.value = prevL;
       else sl.value = PRINT_APP_VALUE;
     }
@@ -1169,12 +1204,11 @@
       const l = (sl && sl.value && sl.value !== PRINT_APP_VALUE) ? sl.value : (appL || '');
 
       const origem = ((sf && sf.value !== PRINT_APP_VALUE) || (sl && sl.value !== PRINT_APP_VALUE)) ? 'Admin' : 'App';
-
       return { formato: f, loja: l, origem };
     }
 
     /*************************************************
-     * QRCODES - COMPARAÇÃO VS PUBLICADO (NOVO/ALTERADO)
+     * QRCODES - COMPARAÇÃO VS PUBLICADO
      *************************************************/
     function mapPublishedByUrl_() {
       const m = new Map();
@@ -1208,7 +1242,6 @@
     }
 
     function contarAlteracoes_(candidatos, pubMap) {
-      // conta por URL (ou fallback por nome)
       const seen = new Set();
       let count = 0;
 
@@ -1318,7 +1351,6 @@
         `;
       }).join('');
 
-      // Select all behaviour
       selectAll.checked = true;
       selectAll.indeterminate = false;
 
@@ -1408,11 +1440,9 @@
           const ref = STATE.assistentes[idx];
           const refUrl = (ref.url || '').trim();
 
-          // atualiza atual
           ref.descricao = val;
           ref.desc = val;
 
-          // propaga por URL (mesmo assistente)
           if (refUrl) {
             STATE.assistentes.forEach(a => {
               if (((a.url || '').trim()) === refUrl) {
@@ -1490,7 +1520,7 @@
     }
 
     /*************************************************
-     * GERAR PDF (✅ sem nome, ✅ imagem quadrada, ✅ imagem+descrição+qr)
+     * GERAR PDF (sem nome, imagem quadrada, imagem+descrição+qr)
      *************************************************/
     async function gerarPDFQRCodes() {
       try {
@@ -1517,13 +1547,11 @@
 
         const setSel = new Set(selectedIdxs);
 
-        // só os selecionados
         const assistentes = STATE.assistentes
           .map((a, idx) => ({ ...a, __index: idx }))
           .filter(a => setSel.has(a.__index))
           .sort((a, b) => (a.label || a.nome || '').localeCompare((b.label || b.nome || ''), undefined, { sensitivity: 'base' }));
 
-        // descrições em falta (nos selecionados)
         const semDescricao = assistentes.filter(a => !(a.descricao || a.desc || '').trim());
         if (semDescricao.length) {
           abrirModalDescricaoEmFalta(semDescricao, () => gerarPDFQRCodes());
@@ -1537,15 +1565,13 @@
         const pageHeight = doc.internal.pageSize.getHeight();
         const margin = 10;
 
-        // ✅ imagem quadrada: altura = largura
         const imageWidth = pageWidth - (margin * 2);
         const imageHeight = imageWidth;
 
-        // área abaixo da imagem (descrição + QR)
         const belowTop = margin + imageHeight + 6;
         const belowHeight = pageHeight - margin - belowTop;
 
-        const qrSize = Math.min(55, belowHeight); // garante que cabe
+        const qrSize = Math.min(55, belowHeight);
         const gap = 6;
         const descWidth = imageWidth - qrSize - gap;
 
@@ -1554,7 +1580,6 @@
         const qrX = margin + descWidth + gap;
         const qrY = belowTop + Math.max(0, (belowHeight - qrSize) / 2);
 
-        // aviso de alterações vs publicado (geral)
         const diff = hasUnpublishedChanges_();
 
         for (let idx = 0; idx < assistentes.length; idx++) {
@@ -1570,10 +1595,8 @@
           const qrUrl = criarUrlQRCode(a, formatarTextoBonito(formato), loja);
           const qrData = await gerarQRCodeDataURL(qrUrl);
 
-          // IMAGEM (quadrada)
           doc.addImage(imgData, 'PNG', margin, margin, imageWidth, imageHeight);
 
-          // DESCRIÇÃO (sem nome)
           const descricao = (a.descricao || a.desc || '').trim();
           doc.setTextColor(0);
           doc.setFontSize(11);
@@ -1597,8 +1620,6 @@
           }
 
           doc.text(lines, descX, descY + 4);
-
-          // QR
           doc.addImage(qrData, 'PNG', qrX, qrY, qrSize, qrSize);
         }
 
