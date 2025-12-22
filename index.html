@@ -1261,19 +1261,20 @@
       renderizarListaQRCodes_();
     }
 
-    function obterSelecaoEfetivaQRCodes_() {
-      const sf = document.getElementById('admin-print-formato');
-      const sl = document.getElementById('admin-print-loja');
+function obterSelecaoEfetivaQRCodes_() {
+  const sf = document.getElementById('admin-print-formato');
+  const sl = document.getElementById('admin-print-loja');
 
-      const appF = localStorage.getItem(FORMATO_KEY);
-      const appL = localStorage.getItem(LOJA_KEY);
+  const appF = localStorage.getItem(FORMATO_KEY);
+  const appL = localStorage.getItem(LOJA_KEY);
 
-      const f = (sf && sf.value && sf.value !== PRINT_APP_VALUE) ? sf.value : (appF || '');
-      const l = (sl && sl.value && sl.value !== PRINT_APP_VALUE) ? sl.value : (appL || '');
+  const f = (sf && sf.value && sf.value !== PRINT_APP_VALUE) ? sf.value : (appF || '');
+  const l = (sl && sl.value && sl.value !== PRINT_APP_VALUE) ? sl.value : (appL || '');
 
-      const origem = ((sf && sf.value !== PRINT_APP_VALUE) || (sl && sl.value !== PRINT_APP_VALUE)) ? 'Admin' : 'App';
-      return { formato: f, loja: l, origem };
-    }
+  const origem = ((sf && sf.value !== PRINT_APP_VALUE) || (sl && sl.value !== PRINT_APP_VALUE)) ? 'Admin' : 'App';
+  return { formato: f, loja: l, origem };
+}
+
 
     /*************************************************
      * QRCODES - COMPARAÇÃO VS PUBLICADO
@@ -1329,117 +1330,130 @@
     /*************************************************
      * QRCODES - RENDER LISTA (checkbox à direita + fundo se alterado)
      *************************************************/
-    function renderizarListaQRCodes_() {
-      const selecao = document.getElementById('admin-qrcodes-selecao');
-      const warning = document.getElementById('admin-qrcodes-warning');
-      const list = document.getElementById('admin-qrcodes-list');
-      const selectAll = document.getElementById('admin-qrcodes-selectall');
-      const count = document.getElementById('admin-qrcodes-count');
+function renderizarListaQRCodes_() {
+  const selecao = document.getElementById('admin-qrcodes-selecao');
+  const warning = document.getElementById('admin-qrcodes-warning');
+  const list = document.getElementById('admin-qrcodes-list');
+  const selectAll = document.getElementById('admin-qrcodes-selectall');
+  const count = document.getElementById('admin-qrcodes-count');
 
-      if (!selecao || !warning || !list || !selectAll || !count) return;
+  if (!selecao || !warning || !list || !selectAll || !count) return;
 
-      const { formato, loja, origem } = obterSelecaoEfetivaQRCodes_();
+  const sel = obterSelecaoEfetivaQRCodes_(); // <-- agora existe
+  const { formato, loja, origem } = sel;
 
-      if (!formato || !loja) {
-        selecao.textContent = 'Sem seleção';
-        warning.innerHTML = `<span style="color:#d63a3e; font-weight:900;">Escolhe formato e loja (na App ou aqui no Admin) antes de gerar o PDF.</span>`;
-        list.innerHTML = '';
-        count.textContent = '';
-        selectAll.checked = false;
-        selectAll.indeterminate = false;
-        selectAll.disabled = true;
-        return;
-      }
+  if (!formato || !loja) {
+    selecao.textContent = 'Sem seleção';
+    warning.innerHTML = `<span style="color:#d63a3e; font-weight:900;">Escolhe formato e loja (na App ou aqui no Admin) antes de gerar o PDF.</span>`;
+    list.innerHTML = '';
+    count.textContent = '';
+    selectAll.checked = false;
+    selectAll.indeterminate = false;
+    selectAll.disabled = true;
+    return;
+  }
 
-      selecao.textContent = `${formatarTextoBonito(formato)} – ${loja} (${origem})`;
+  selecao.textContent = `${formatarTextoBonito(formato)} – ${loja} (${origem})`;
 
-      const ufN = (formato || '').toUpperCase();
-      const ulN = (loja || '').toUpperCase();
+  const ufN = (formato || '').toUpperCase();
+  const ulN = (loja || '').toUpperCase();
 
-      const candidatos = STATE.assistentes
-        .map((a, idx) => ({ ...a, __index: idx }))
-        .filter(a => {
-          const f = (a.formato || '').toUpperCase();
-          const l = (a.loja || '').toUpperCase();
-          return (f === '*' || f === ufN) && (l === '*' || l === ulN);
-        })
-        .sort((a, b) => (a.label || a.nome || '').localeCompare((b.label || b.nome || ''), undefined, { sensitivity: 'base' }));
+  const candidatos = STATE.assistentes
+    .map((a, idx) => ({ ...a, __index: idx }))
+    .filter(a => {
+      const f = (a.formato || '').toUpperCase();
+      const l = (a.loja || '').toUpperCase();
+      return (f === '*' || f === ufN) && (l === '*' || l === ulN);
+    })
+    .sort((a, b) => (a.label || a.nome || '').localeCompare((b.label || b.nome || ''), undefined, { sensitivity: 'base' }));
 
-      const pubMap = mapPublishedByUrl_();
-      const changesCount = contarAlteracoes_(candidatos, pubMap);
+  const pubMap = mapPublishedByUrl_();
+  const changesCount = contarAlteracoes_(candidatos, pubMap);
 
-      if (changesCount > 0) {
-        warning.innerHTML = `<span style="color:#d63a3e; font-weight:900;">⚠️ Existem ${changesCount} descrições novas/alteradas face ao publicado. Depois imprime e vai à aba <b>Guardar</b> fazer download do <b>config.js</b>.</span>`;
-      } else {
-        warning.innerHTML = `<span style="color:#2e7d32; font-weight:900;">✅ Tudo sincronizado com a versão publicada.</span>`;
-      }
+  if (changesCount > 0) {
+    warning.innerHTML = `<span style="color:#d63a3e; font-weight:900;">⚠️ Existem ${changesCount} descrições novas/alteradas face ao publicado. Depois imprime e vai à aba <b>Guardar</b> fazer download do <b>config.js</b>.</span>`;
+  } else {
+    warning.innerHTML = `<span style="color:#2e7d32; font-weight:900;">✅ Tudo sincronizado com a versão publicada.</span>`;
+  }
 
-      count.textContent = `${candidatos.length} assistente(s)`;
+  count.textContent = `${candidatos.length} assistente(s)`;
 
-      if (candidatos.length === 0) {
-        list.innerHTML = `<div style="padding:12px; color:#666;">Nenhum assistente disponível para esta seleção.</div>`;
-        selectAll.checked = false;
-        selectAll.indeterminate = false;
-        selectAll.disabled = true;
-        return;
-      }
+  if (candidatos.length === 0) {
+    list.innerHTML = `<div style="padding:12px; color:#666;">Nenhum assistente disponível para esta seleção.</div>`;
+    selectAll.checked = false;
+    selectAll.indeterminate = false;
+    selectAll.disabled = true;
+    return;
+  }
 
-      selectAll.disabled = false;
+  selectAll.disabled = false;
 
-      list.innerHTML = candidatos.map(a => {
-        const img = (a.icone || 'AibyAuchan.png');
-        const label = (a.label || a.nome || '').trim();
-        const scope = `${(a.formato ? formatarTextoBonito(a.formato) : '—')} · ${(a.loja || '—')}`;
+  // Importante: o layout da row passa a usar "auto 1fr auto auto"
+  list.innerHTML = candidatos.map(a => {
+    const img = (a.icone || 'AibyAuchan.png');
+    const label = (a.label || a.nome || '').trim();
+    const scope = `${(a.formato ? formatarTextoBonito(a.formato) : '—')} · ${(a.loja || '—')}`;
 
-        const st = getRowStatus_(a, pubMap).status;
-        const rowClass = st === 'alterado' ? 'qr-row badge-alterado' : (st === 'novo' ? 'qr-row badge-novo' : 'qr-row');
-        const badgeHtml = st === 'alterado'
-          ? `<span class="qr-badge alterado">⚠️ Alterado</span>`
-          : (st === 'novo' ? `<span class="qr-badge novo">🆕 Novo</span>` : ``);
+    const st = getRowStatus_(a, pubMap).status;
+    const rowClass =
+      st === 'alterado' ? 'qr-row badge-alterado' :
+      st === 'novo' ? 'qr-row badge-novo' : 'qr-row';
 
-        return `
-          <label class="${rowClass}">
-            <img src="${img}" onerror="this.src='AibyAuchan.png'"
-                 style="width:38px; height:38px; object-fit:cover; border-radius:10px; border:1px solid #eee; flex:0 0 auto;" />
+    const badgeHtml =
+      st === 'alterado' ? `<span class="qr-badge alterado">⚠️ Alterado</span>` :
+      st === 'novo' ? `<span class="qr-badge novo">🆕 Novo</span>` : ``;
 
-            <div style="flex:1; min-width:0;">
-              <div style="font-weight:900; color:#333; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                ${label}
-              </div>
-              <div style="font-size:0.8rem; color:#666; line-height:1.2;">
-                ${scope}
-              </div>
-            </div>
+    return `
+      <label class="${rowClass}" style="
+        display:grid;
+        grid-template-columns: 44px 1fr auto 22px;
+        align-items:center;
+        column-gap:12px;
+      ">
+        <img src="${img}" onerror="this.src='AibyAuchan.png'"
+             style="width:38px; height:38px; object-fit:cover; border-radius:10px; border:1px solid #eee;" />
 
-            ${badgeHtml}
+        <div style="min-width:0;">
+          <div style="font-weight:900; color:#333; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            ${label}
+          </div>
+          <div style="font-size:0.8rem; color:#666; line-height:1.2;">
+            ${scope}
+          </div>
+        </div>
 
-            <input type="checkbox" class="qr-ast-check" data-idx="${a.__index}" checked
-                   style="width:18px; height:18px; flex:0 0 auto;" />
-          </label>
-        `;
-      }).join('');
+        <div style="justify-self:end;">
+          ${badgeHtml}
+        </div>
 
-      selectAll.checked = true;
-      selectAll.indeterminate = false;
+        <input type="checkbox" class="qr-ast-check" data-idx="${a.__index}" checked
+               style="width:18px; height:18px; justify-self:end; margin:0;" />
+      </label>
+    `;
+  }).join('');
 
-      selectAll.onchange = () => {
-        const cbs = list.querySelectorAll('input.qr-ast-check');
-        cbs.forEach(cb => cb.checked = selectAll.checked);
-        selectAll.indeterminate = false;
-      };
+  // select-all
+  selectAll.checked = true;
+  selectAll.indeterminate = false;
 
-      if (!list.dataset.boundChange) {
-        list.dataset.boundChange = '1';
-        list.addEventListener('change', () => {
-          const cbs = [...list.querySelectorAll('input.qr-ast-check')];
-          const allOn = cbs.length > 0 && cbs.every(cb => cb.checked);
-          const anyOn = cbs.some(cb => cb.checked);
+  selectAll.onchange = () => {
+    const cbs = list.querySelectorAll('input.qr-ast-check');
+    cbs.forEach(cb => cb.checked = selectAll.checked);
+    selectAll.indeterminate = false;
+  };
 
-          selectAll.indeterminate = anyOn && !allOn;
-          selectAll.checked = allOn;
-        }, { passive: true });
-      }
-    }
+  if (!list.dataset.boundChange) {
+    list.dataset.boundChange = '1';
+    list.addEventListener('change', () => {
+      const cbs = [...list.querySelectorAll('input.qr-ast-check')];
+      const allOn = cbs.length > 0 && cbs.every(cb => cb.checked);
+      const anyOn = cbs.some(cb => cb.checked);
+
+      selectAll.indeterminate = anyOn && !allOn;
+      selectAll.checked = allOn;
+    }, { passive: true });
+  }
+}
 
     /*************************************************
      * QRCODES - MODAL DESCRIÇÕES EM FALTA
@@ -1788,3 +1802,4 @@
   </script>
 </body>
 </html>
+
