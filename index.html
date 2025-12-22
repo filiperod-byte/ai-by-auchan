@@ -31,8 +31,8 @@
     .help-link { cursor: pointer; text-decoration: underline; font-weight: bold; color: #fff; }
 
     /* OVERLAYS */
-    .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 999; overflow-y: auto; }
-    .overlay-box { position: relative; background: #ffffff; color: #333; border-radius: 18px; padding: 1.5rem 1.2rem; width: min(380px, 90%); box-shadow: 0 10px 25px rgba(0,0,0,.35); text-align: center; margin: 2rem 0; }
+    .overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); display: none; align-items: center; justify-content: center; z-index: 999; overflow-y: auto; padding: 24px 0; }
+    .overlay-box { position: relative; background: #ffffff; color: #333; border-radius: 18px; padding: 1.5rem 1.2rem; width: min(380px, 90%); box-shadow: 0 10px 25px rgba(0,0,0,.35); text-align: center; margin: 0; }
     .overlay-box h2 { margin-top: 0; margin-bottom: .8rem; font-size: 1.2rem; color: #d63a3e; }
     .overlay-box select, .overlay-box input, .overlay-box textarea { width: 100%; padding: .6rem; border-radius: 10px; border: 1px solid #ccc; font-size: .95rem; margin-bottom: 0.8rem; box-sizing: border-box; }
     .overlay-box textarea { resize: vertical; min-height: 80px; }
@@ -56,6 +56,19 @@
     }
     .close-overlay-btn:hover { color: #d63a3e; }
 
+    /* MODAL: alterações por publicar */
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .modal-actions button { margin-bottom: 0; }
+    .modal-actions .ghost { background: #f2f2f2; color: #333; }
+    .modal-actions .warn { background: #ff9800; color: #fff; }
+    @media (max-width: 420px) {
+      .modal-actions { flex-direction: column; }
+    }
+
     /* ADMIN TABS */
     .admin-tabs { display: flex; justify-content: center; gap: 10px; margin-bottom: 1rem; flex-wrap: wrap; }
     .admin-tab { padding: 5px 10px; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; }
@@ -75,12 +88,37 @@
     .tutorial-step { text-align: left; margin-bottom: 15px; display: flex; align-items: flex-start; gap: 10px; font-size: 0.9rem; border-bottom: 1px solid #eee; padding-bottom: 10px; }
     .tutorial-icon { font-size: 1.5rem; line-height: 1; }
     .ios-share-icon { width: 20px; height: 20px; vertical-align: middle; display: inline-block; }
+
+    /* HELP TABS */
+    .help-tabs { display:flex; justify-content:center; gap:10px; margin: 0 0 12px 0; flex-wrap:wrap; }
+    .help-tab { padding: 6px 10px; cursor:pointer; border-bottom:2px solid transparent; font-weight:800; color:#666; }
+    .help-tab.active { border-bottom:2px solid #d63a3e; color:#d63a3e; }
+    .help-panel { display:none; }
+    .help-panel.active { display:block; }
+
+    /* QRCodes list badges + alinhamento checkbox à direita */
+    .qr-row { display:flex; align-items:center; gap:12px; padding:10px 12px; border-bottom:1px solid #eee; cursor:pointer; user-select:none; background:#fff; }
+    .qr-row.badge-alterado { background: #fff3e0; }
+    .qr-row.badge-novo { background: #e3f2fd; }
+    .qr-badge { font-size: .85rem; font-weight: 900; white-space: nowrap; }
+    .qr-badge.alterado { color: #ef6c00; }
+    .qr-badge.novo { color: #1565c0; }
+
+    /* ADMIN LAYOUT FIX: tabs sempre visíveis mesmo com muitos itens */
+    .admin-box { width: min(520px, 95%); padding: 0; text-align: left; display:flex; flex-direction:column; max-height: calc(100vh - 48px); overflow: hidden; }
+    .admin-head { padding: 1.1rem 1.2rem 0.2rem 1.2rem; background:#fff; position: sticky; top: 0; z-index: 5; border-top-left-radius: 18px; border-top-right-radius: 18px; }
+    .admin-head h2 { text-align:center; margin:0 0 .8rem 0; }
+    .admin-tabs-wrap { padding: 0 1.2rem 0.8rem 1.2rem; background:#fff; position: sticky; top: 52px; z-index: 5; border-bottom: 1px solid #f0f0f0; }
+    .admin-body { padding: 1rem 1.2rem; overflow: auto; flex: 1; }
+    .admin-foot { padding: 0.9rem 1.2rem 1.2rem 1.2rem; background:#fff; position: sticky; bottom: 0; z-index: 5; border-bottom-left-radius: 18px; border-bottom-right-radius: 18px; border-top: 1px solid #f0f0f0; }
+    .admin-foot hr { margin: 10px 0; opacity: .2; }
+    .admin-foot button { margin-bottom: 0; }
   </style>
 </head>
 
 <body>
 
-  <!-- LOGIN OVERLAY -->
+  <!-- LOGIN -->
   <div id="login-overlay" class="overlay">
     <div class="overlay-box" style="width: min(300px, 80%);">
       <span class="close-overlay-btn" onclick="fecharLogin()">✕</span>
@@ -92,7 +130,7 @@
     </div>
   </div>
 
-  <!-- LOJA OVERLAY -->
+  <!-- LOJA -->
   <div id="loja-overlay" class="overlay">
     <div class="overlay-box">
       <span class="close-overlay-btn" onclick="fecharLojaOverlay()">✕</span>
@@ -108,14 +146,21 @@
     </div>
   </div>
 
-  <!-- HELP OVERLAY -->
+  <!-- HELP -->
   <div id="help-overlay" class="overlay">
-    <div class="overlay-box">
+    <div class="overlay-box" style="width:min(520px,95%); text-align:center;">
       <span class="close-overlay-btn" onclick="document.getElementById('help-overlay').style.display='none'">✕</span>
       <h2>📲 Instalar App</h2>
 
-      <div id="help-ios">
-        <p style="margin-bottom:15px; font-weight:bold; color:#666;">iPhone / iPad (iOS)</p>
+      <div class="help-tabs">
+        <div class="help-tab active" data-htab="ios" onclick="switchHelpTab_('ios')">iOS</div>
+        <div class="help-tab" data-htab="android" onclick="switchHelpTab_('android')">Android</div>
+        <div class="help-tab" data-htab="windows" onclick="switchHelpTab_('windows')">Windows</div>
+      </div>
+
+      <div id="help-panel-ios" class="help-panel active">
+        <p style="margin: 0 0 12px 0; font-weight:800; color:#666;">iPhone / iPad (Safari)</p>
+
         <div class="tutorial-step">
           <span class="tutorial-icon">1️⃣</span>
           <span>
@@ -127,110 +172,201 @@
             </svg>
           </span>
         </div>
+
         <div class="tutorial-step">
           <span class="tutorial-icon">2️⃣</span>
-          <span>Rola para baixo e escolhe a opção <b>"Adicionar ao Ecrã Principal"</b> (Add to Home Screen).</span>
+          <span>Rola para baixo e escolhe <b>"Adicionar ao Ecrã Principal"</b>.</span>
         </div>
-        <div class="tutorial-step">
+
+        <div class="tutorial-step" style="border-bottom:none; padding-bottom:0;">
           <span class="tutorial-icon">3️⃣</span>
           <span>Clica em <b>Adicionar</b> no topo direito.</span>
         </div>
       </div>
 
-      <hr style="margin: 15px 0; opacity: 0.3;">
-
-      <div id="help-android">
-        <p style="margin-bottom:15px; font-weight:bold; color:#666;">Android (Chrome)</p>
-        <div class="tutorial-step">
-          <span>Toca nos 3 pontinhos (⋮) e escolhe <b>"Instalar Aplicação"</b> ou "Adicionar ao Ecrã Principal".</span>
+      <div id="help-panel-android" class="help-panel">
+        <p style="margin: 0 0 12px 0; font-weight:800; color:#666;">Android (Chrome)</p>
+        <div class="tutorial-step" style="border-bottom:none; padding-bottom:0;">
+          <span class="tutorial-icon">✅</span>
+          <span>
+            Abre no Chrome, toca nos <b>3 pontinhos (⋮)</b> e escolhe <b>"Instalar Aplicação"</b> ou <b>"Adicionar ao ecrã principal"</b>.
+          </span>
         </div>
       </div>
 
-      <button class="secondary" onclick="document.getElementById('help-overlay').style.display='none'">Entendi</button>
+      <div id="help-panel-windows" class="help-panel">
+        <p style="margin: 0 0 12px 0; font-weight:800; color:#666;">Windows (Chrome / Edge)</p>
+        <div class="tutorial-step">
+          <span class="tutorial-icon">1️⃣</span>
+          <span>Abre a App no Chrome/Edge.</span>
+        </div>
+        <div class="tutorial-step">
+          <span class="tutorial-icon">2️⃣</span>
+          <span>Procura o ícone <b>Instalar</b> (normalmente no fim da barra de endereços) ou abre o menu ⋮.</span>
+        </div>
+        <div class="tutorial-step" style="border-bottom:none; padding-bottom:0;">
+          <span class="tutorial-icon">3️⃣</span>
+          <span>Escolhe <b>"Instalar AI by Auchan"</b>. Vai abrir como app (sem “tabs” a gritar contigo 😅).</span>
+        </div>
+      </div>
+
+      <button class="secondary" onclick="document.getElementById('help-overlay').style.display='none'" style="margin-top:14px;">Entendi</button>
     </div>
   </div>
 
-  <!-- ADMIN OVERLAY -->
+  <!-- ADMIN -->
   <div id="admin-overlay" class="overlay">
-    <div class="overlay-box" style="width: min(450px, 95%);">
-      <h2>Painel de Administração</h2>
-      <div class="admin-tabs" id="admin-tabs">
-        <div class="admin-tab active" data-tab="lojas" onclick="switchAdminTab('lojas')">Lojas</div>
-        <div class="admin-tab" data-tab="assistentes" onclick="switchAdminTab('assistentes')">Assistentes</div>
-        <div class="admin-tab" data-tab="exportar" onclick="switchAdminTab('exportar')">Guardar</div>
-        <!-- QRCodes é criado por JS (inicializarAdminQRCodesTab) -->
+    <div class="overlay-box admin-box">
+      <div class="admin-head">
+        <h2>Painel de Administração</h2>
       </div>
 
-      <!-- TAB LOJAS -->
-      <div id="admin-tab-lojas">
-        <div class="admin-list" id="admin-lojas-list"></div>
-        <h3>Adicionar Loja</h3>
-        <select id="admin-novo-formato">
-          <option value="Hiper">Hiper</option>
-          <option value="Super">Super</option>
-          <option value="Prox">Prox</option>
-          <option value="Servicos">Serviços</option>
-        </select>
-        <div style="display:flex; gap:5px;">
-          <input type="text" id="admin-nova-loja-cod" placeholder="Cod" maxlength="3" style="width: 80px;">
-          <input type="text" id="admin-nova-loja-nome" placeholder="Nome da Loja" style="flex:1;">
+      <!-- Ordem: Lojas, Assistentes, QRCodes, Guardar -->
+      <div class="admin-tabs-wrap">
+        <div class="admin-tabs" style="margin-bottom:0;">
+          <div class="admin-tab active" data-tab="lojas" onclick="switchAdminTab('lojas')">Lojas</div>
+          <div class="admin-tab" data-tab="assistentes" onclick="switchAdminTab('assistentes')">Assistentes</div>
+          <div class="admin-tab" data-tab="qrcodes" onclick="switchAdminTab('qrcodes')">QRCodes</div>
+          <div class="admin-tab" data-tab="exportar" onclick="switchAdminTab('exportar')">Guardar</div>
         </div>
-        <button onclick="adminAddLoja()">Adicionar Loja</button>
       </div>
 
-      <!-- TAB ASSISTENTES -->
-      <div id="admin-tab-assistentes" style="display:none;">
-        <div class="admin-list" id="admin-assistentes-list"></div>
-        <h3 id="admin-ast-title">Adicionar Assistente</h3>
-        <small style="display:block; margin-bottom:10px; color:#666;">Clica na lista acima para editar</small>
-
-        <input type="text" id="admin-ast-label" placeholder="Nome no Botão (Label)">
-        <input type="text" id="admin-ast-url" placeholder="URL Destino">
-        <textarea id="admin-ast-descricao" placeholder="Descrição (obrigatória)"></textarea>
-
-        <div style="display:flex; gap:5px; align-items:center;">
-          <input type="text" id="admin-ast-icone" placeholder="Nome Imagem (ex: wally.jpg)" style="margin-bottom:0.8rem; flex:1;">
-          <input type="file" id="admin-file-picker" style="display:none" onchange="selecionarImagemArquivo()">
-          <button class="file-btn" onclick="document.getElementById('admin-file-picker').click()" style="margin-bottom:0.8rem;" title="Escolher ficheiro">📂</button>
-        </div>
-
-        <div style="display:flex; gap:5px; margin-bottom: 0.8rem;">
-          <select id="admin-ast-formato" style="margin-bottom:0;" onchange="atualizarSelectLojasAdmin()">
-            <option value="">(Seleciona formato…)</option>
-            <option value="*">Qualquer Formato (*)</option>
+      <div class="admin-body">
+        <!-- LOJAS -->
+        <div id="admin-tab-lojas">
+          <div class="admin-list" id="admin-lojas-list"></div>
+          <h3>Adicionar Loja</h3>
+          <select id="admin-novo-formato">
+            <option value="Hiper">Hiper</option>
+            <option value="Super">Super</option>
+            <option value="Prox">Prox</option>
+            <option value="Servicos">Serviços</option>
           </select>
-          <select id="admin-ast-loja" style="margin-bottom:0;">
-            <option value="">(Seleciona loja…)</option>
-            <option value="*">Qualquer Loja (*)</option>
-          </select>
+          <div style="display:flex; gap:5px;">
+            <input type="text" id="admin-nova-loja-cod" placeholder="Cod" maxlength="3" style="width: 80px;">
+            <input type="text" id="admin-nova-loja-nome" placeholder="Nome da Loja" style="flex:1;">
+          </div>
+          <button onclick="adminAddLoja()">Adicionar Loja</button>
         </div>
 
-        <div style="display: flex; gap: 5px;">
-          <button onclick="adminSaveAssistente()" id="btn-save-ast">Adicionar Assistente</button>
-          <button onclick="cancelarEdicao()" id="btn-cancel-ast" class="cancel" style="display:none;">Cancelar</button>
+        <!-- ASSISTENTES -->
+        <div id="admin-tab-assistentes" style="display:none;">
+          <div class="admin-list" id="admin-assistentes-list"></div>
+          <h3 id="admin-ast-title">Adicionar Assistente</h3>
+          <small style="display:block; margin-bottom:10px; color:#666;">Clica na lista acima para editar</small>
+
+          <input type="text" id="admin-ast-label" placeholder="Nome no Botão (Label)">
+          <input type="text" id="admin-ast-url" placeholder="URL Destino">
+          <textarea id="admin-ast-descricao" placeholder="Descrição (obrigatória)"></textarea>
+
+          <div style="display:flex; gap:5px; align-items:center;">
+            <input type="text" id="admin-ast-icone" placeholder="Nome Imagem (ex: wally.jpg)" style="margin-bottom:0.8rem; flex:1;">
+            <input type="file" id="admin-file-picker" style="display:none" onchange="selecionarImagemArquivo()">
+            <button class="file-btn" onclick="document.getElementById('admin-file-picker').click()" style="margin-bottom:0.8rem;" title="Escolher ficheiro">📂</button>
+          </div>
+
+          <div style="display:flex; gap:5px; margin-bottom: 0.8rem;">
+            <select id="admin-ast-formato" style="margin-bottom:0;" onchange="atualizarSelectLojasAdmin()">
+              <option value="">(Seleciona formato…)</option>
+              <option value="*">Qualquer Formato (*)</option>
+            </select>
+            <select id="admin-ast-loja" style="margin-bottom:0;">
+              <option value="">(Seleciona loja…)</option>
+              <option value="*">Qualquer Loja (*)</option>
+            </select>
+          </div>
+
+          <div style="display: flex; gap: 5px;">
+            <button onclick="adminSaveAssistente()" id="btn-save-ast">Adicionar Assistente</button>
+            <button onclick="cancelarEdicao()" id="btn-cancel-ast" class="cancel" style="display:none;">Cancelar</button>
+          </div>
+        </div>
+
+        <!-- QRCODES -->
+        <div id="admin-tab-qrcodes" style="display:none; text-align:left;">
+          <p style="font-size:0.85rem; margin:0 0 12px 0;">
+            Aqui escolhes Formato/Loja no Admin e imprimes o que for preciso, sem sair do painel.
+          </p>
+
+          <div class="version-control" style="margin-bottom:10px;">
+            <label>Seleção para impressão (Admin):</label>
+
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
+              <select id="admin-print-formato" style="margin-bottom:0;" onchange="atualizarLojasPrintAdmin_()"></select>
+              <select id="admin-print-loja" style="margin-bottom:0;"></select>
+            </div>
+
+            <div style="display:flex; gap:10px;">
+              <button type="button" class="secondary" onclick="usarSelecaoAppNoQRCodes_()" style="margin-bottom:0;">Usar seleção da App</button>
+              <button type="button" class="secondary" onclick="renderizarListaQRCodes_()" style="margin-bottom:0;">Atualizar lista</button>
+            </div>
+
+            <div style="margin-top:12px; font-size:0.85rem;">
+              <div><span style="color:#666;">Seleção atual:</span> <strong id="admin-qrcodes-selecao" style="color:#333;">...</strong></div>
+              <div id="admin-qrcodes-warning" style="margin-top:6px; font-size:0.9rem;"></div>
+            </div>
+
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-top:12px;">
+              <label style="display:flex; gap:10px; align-items:center; cursor:pointer; user-select:none;">
+                <input type="checkbox" id="admin-qrcodes-selectall" />
+                <span style="font-weight:800; color:#333;">Selecionar tudo</span>
+              </label>
+              <span id="admin-qrcodes-count" style="font-size:0.85rem; color:#666;">...</span>
+            </div>
+
+            <div id="admin-qrcodes-list"
+                 style="margin-top:10px; max-height:45vh; overflow:auto; border:1px solid #eee; border-radius:12px; background:#fafafa;">
+            </div>
+          </div>
+
+          <button onclick="gerarPDFQRCodes()">📄 Gerar PDF QRCodes</button>
+        </div>
+
+        <!-- EXPORTAR -->
+        <div id="admin-tab-exportar" style="display:none;">
+          <p style="font-size: 0.85rem; margin-bottom: 10px;">
+            Gera e baixa o ficheiro <b>config.js</b>. Depois, faz upload apenas deste ficheiro para o GitHub.
+          </p>
+
+          <div class="version-control">
+            <label>Versão Atual:</label>
+            <strong id="lbl-versao-atual" style="color:#333;">...</strong>
+            <br><br>
+            <label>Nova Versão (sugestão):</label>
+            <input type="text" id="input-nova-versao" style="width: 100%; margin-bottom:0;" placeholder="Ex: v1.1.1">
+          </div>
+
+          <button onclick="baixarConfiguracao()">📥 Download Ficheiro de Configuração</button>
+          <button class="danger" onclick="limparTudoAdmin()">⚠️ Reset de Fábrica</button>
         </div>
       </div>
 
-      <!-- TAB EXPORTAR -->
-      <div id="admin-tab-exportar" style="display:none;">
-        <p style="font-size: 0.85rem; margin-bottom: 10px;">
-          Gera e baixa o ficheiro <b>config.js</b>. Depois, faz upload apenas deste ficheiro para o GitHub.
-        </p>
+      <div class="admin-foot">
+        <hr>
+        <button class="secondary" onclick="fecharAdmin()">Fechar Admin</button>
+      </div>
+    </div>
+  </div>
 
-        <div class="version-control">
-          <label>Versão Atual:</label>
-          <strong id="lbl-versao-atual" style="color:#333;">...</strong>
-          <br><br>
-          <label>Nova Versão (sugestão):</label>
-          <input type="text" id="input-nova-versao" style="width: 100%; margin-bottom:0;" placeholder="Ex: v1.1.1">
-        </div>
+  <!-- MODAL: FECHAR ADMIN COM ALTERAÇÕES -->
+  <div id="admin-close-guard-overlay" class="overlay">
+    <div class="overlay-box" style="width:min(520px,95%); text-align:left;">
+      <span class="close-overlay-btn" onclick="fecharModalFechoAdmin_()">✕</span>
+      <h2>⚠️ Alterações por publicar</h2>
+      <p style="margin-top:0; color:#666; font-size:.95rem; line-height:1.35;">
+        Tens alterações no Admin que ainda não estão no <b>config.js</b> publicado.<br>
+        Queres ir já ao separador <b>Guardar</b> para fazer download?
+      </p>
 
-        <button onclick="baixarConfiguracao()">📥 Download Ficheiro de Configuração</button>
-        <button class="danger" onclick="limparTudoAdmin()">⚠️ Reset de Fábrica</button>
+      <div class="modal-actions">
+        <button class="warn" onclick="irGuardarDoModal_()">Ir a Guardar</button>
+        <button class="ghost" onclick="fecharSemAtualizarDoModal_()">Fechar sem atualizar</button>
+        <button class="cancel" onclick="fecharModalFechoAdmin_()">Cancelar</button>
       </div>
 
-      <hr>
-      <button class="secondary" onclick="fecharAdmin()">Fechar Admin</button>
+      <p style="margin:10px 0 0 0; font-size:.8rem; color:#999;">
+        (Sim, isto é o teu “are you sure?” corporativo 😅)
+      </p>
     </div>
   </div>
 
@@ -252,7 +388,7 @@
 
   <script>
     /*************************************************
-     *  CONFIG / CONSTANTES
+     * CONFIG / CONSTANTES
      *************************************************/
     const FORM_BASE_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSeGFYjlrXC27y-a8sXgdnxKD4XzT8yImmL_0CZRXP26NwjQhQ/formResponse';
     const ENTRY_LOJA = 'entry.1749648688';
@@ -260,9 +396,6 @@
 
     const FORMATO_KEY = 'formatoSelecionado';
     const LOJA_KEY = 'lojaSelecionada';
-
-    const ADMIN_QR_FORMATO_KEY = 'adminQrFormato';
-    const ADMIN_QR_LOJA_KEY = 'adminQrLoja';
 
     const QR_PARAM_ASSISTENTE = 'assistente';
     const QR_PARAM_FORMATO = 'formato';
@@ -273,10 +406,11 @@
     let STATE = { lojas: [], assistentes: [] };
     let editingAssistenteIndex = -1;
 
+    // fallback caso config.js falhe
     const DADOS_PADRAO_FALLBACK = { lojas: [], assistentes: [] };
 
     /*************************************************
-     *  INIT
+     * BOOT
      *************************************************/
     window.addEventListener('load', () => {
       carregarDados();
@@ -285,22 +419,35 @@
         navigator.serviceWorker.register('service-worker.js').catch(console.log);
       }
 
-      inicializarAdminQRCodesTab();
       processarQRCodeParams();
     });
 
     /*************************************************
-     *  DADOS / STORAGE
+     * HELP TABS
+     *************************************************/
+    function switchHelpTab_(id) {
+      document.querySelectorAll('.help-tab').forEach(t => t.classList.remove('active'));
+      const btn = document.querySelector(`.help-tab[data-htab="${id}"]`);
+      if (btn) btn.classList.add('active');
+
+      document.querySelectorAll('.help-panel').forEach(p => p.classList.remove('active'));
+      const panel = document.getElementById(`help-panel-${id}`);
+      if (panel) panel.classList.add('active');
+    }
+
+    /*************************************************
+     * DADOS / STORAGE
      *************************************************/
     function carregarDados() {
-      if (typeof DADOS_PADRAO === 'undefined' || typeof STORAGE_DATA_KEY === 'undefined') {
-        console.warn("config.js não encontrado. A usar fallback.");
+      if (typeof DADOS_PADRAO === 'undefined') {
+        console.warn("Ficheiro config.js não encontrado.");
         window.DADOS_PADRAO = DADOS_PADRAO_FALLBACK;
-        window.STORAGE_DATA_KEY = "appConfigData_v0.0.0";
+        window.STORAGE_DATA_KEY = "appConfigData_v0.0";
       }
 
       const dadosLocais = localStorage.getItem(STORAGE_DATA_KEY);
-      STATE = dadosLocais ? JSON.parse(dadosLocais) : JSON.parse(JSON.stringify(DADOS_PADRAO));
+      if (dadosLocais) STATE = JSON.parse(dadosLocais);
+      else STATE = JSON.parse(JSON.stringify(DADOS_PADRAO));
 
       normalizarDescricoes();
       renderizarApp();
@@ -316,21 +463,18 @@
       if (!STATE || !Array.isArray(STATE.assistentes)) return;
       STATE.assistentes.forEach(a => {
         if (!a.descricao && a.desc) a.descricao = a.desc;
-        if (!a.desc && a.descricao) a.desc = a.descricao; // compat
+        if (!a.desc && a.descricao) a.desc = a.descricao;
       });
     }
 
     function atualizarVersaoRodape() {
       let versao = "Desconhecida";
-      if (typeof STORAGE_DATA_KEY !== 'undefined') {
-        const parts = STORAGE_DATA_KEY.split('_v');
-        versao = parts[1] ? `v${parts[1]}` : 'vX.X';
-      }
+      if (typeof STORAGE_DATA_KEY !== 'undefined') versao = STORAGE_DATA_KEY.split('_')[1] || 'vX.X';
       document.getElementById('app-footer-version').textContent = `Powered By G2G IAD3.0 ${String(versao).toUpperCase()}`;
     }
 
     /*************************************************
-     *  HELPERS
+     * HELPERS
      *************************************************/
     function formatarTextoBonito(t) {
       if (!t || t === "*") return t;
@@ -338,142 +482,66 @@
     }
 
     function ordenarLojas(a, b) {
-      return (a.loja || '').localeCompare((b.loja || ''), undefined, { numeric: true, sensitivity: 'base' });
-    }
-
-    function obterFormatosUnicos() {
-      const raw = (STATE.lojas || []).map(l => l.formato ? formatarTextoBonito(l.formato) : "");
-      return [...new Set(raw)].filter(f => f !== "").sort();
+      return a.loja.localeCompare(b.loja, undefined, { numeric: true, sensitivity: 'base' });
     }
 
     function normKey_(s) {
       return (s || '').toString().trim().toLowerCase();
     }
 
-    function normUpper_(s) {
-      return (s || '').toString().trim().toUpperCase();
+    function deepClone_(obj) {
+      return JSON.parse(JSON.stringify(obj));
     }
 
-    function isGlobalScope_(a) {
-      return normUpper_(a.formato) === '*' && normUpper_(a.loja) === '*';
+    function sortAndNormalizeState_(src) {
+      const out = deepClone_(src || { lojas: [], assistentes: [] });
+
+      out.lojas = Array.isArray(out.lojas) ? out.lojas.map(l => ({
+        formato: l.formato ? formatarTextoBonito(l.formato) : '',
+        loja: (l.loja || '').trim()
+      })) : [];
+
+      out.assistentes = Array.isArray(out.assistentes) ? out.assistentes.map(a => ({
+        formato: (a.formato || '').trim(),
+        loja: (a.loja || '').trim(),
+        nome: (a.nome || a.label || '').trim(),
+        label: (a.label || a.nome || '').trim(),
+        url: (a.url || '').trim(),
+        icone: (a.icone || '').trim(),
+        descricao: ((a.descricao || a.desc) || '').trim(),
+        desc: ((a.descricao || a.desc) || '').trim()
+      })) : [];
+
+      out.lojas.sort((x, y) => (x.formato + ' - ' + x.loja).localeCompare(y.formato + ' - ' + y.loja, undefined, { numeric: true }));
+      out.assistentes.sort((x, y) => (x.label || '').localeCompare((y.label || ''), undefined, { sensitivity: 'base' }));
+
+      return out;
     }
 
-    function scopesOverlap_(a, b) {
-      const af = normUpper_(a.formato);
-      const bf = normUpper_(b.formato);
-      const al = normUpper_(a.loja);
-      const bl = normUpper_(b.loja);
+    function hasUnpublishedChanges_() {
+      if (typeof DADOS_PADRAO === 'undefined') return { changed: false, reason: 'no_published' };
 
-      // se algum está por definir, não conflita
-      if (!af || !bf || !al || !bl) return false;
+      const pub = sortAndNormalizeState_(DADOS_PADRAO);
+      const local = sortAndNormalizeState_(STATE);
 
-      const fmtOverlap = (af === '*') || (bf === '*') || (af === bf);
-      const lojaOverlap = (al === '*') || (bl === '*') || (al === bl);
-      return fmtOverlap && lojaOverlap;
+      const pubStr = JSON.stringify(pub);
+      const localStr = JSON.stringify(local);
+
+      if (pubStr !== localStr) return { changed: true, reason: 'diff' };
+      return { changed: false, reason: 'same' };
     }
-
-    function gerarLabelCopiaUnica_(base) {
-      let candidate = base;
-      let n = 2;
-      const exists = (lbl) => (STATE.assistentes || []).some(a => normKey_(a.label) === normKey_(lbl));
-      while (exists(candidate)) {
-        candidate = `${base} ${n}`;
-        n++;
-      }
-      return candidate;
-    }
-
-
-function _loadImgElFromDataURL_(dataUrl) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = dataUrl;
-  });
-}
-
-function _roundedRect_(ctx, x, y, w, h, r) {
-  const rr = Math.min(r, w / 2, h / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + rr, y);
-  ctx.arcTo(x + w, y, x + w, y + h, rr);
-  ctx.arcTo(x + w, y + h, x, y + h, rr);
-  ctx.arcTo(x, y + h, x, y, rr);
-  ctx.arcTo(x, y, x + w, y, rr);
-  ctx.closePath();
-}
-
-/**
- * Gera QR e coloca logo ao centro (AibyAuchan.jpg), devolvendo DataURL PNG.
- * - Usa um "badge" branco por trás do logo para manter legibilidade.
- */
-async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.jpg') {
-  // 1) QR base (dataURL)
-  const qrData = await gerarQRCodeDataURL(texto);
-
-  // 2) Logo (tenta .jpg, fallback para .png)
-  let logoData = null;
-  try {
-    logoData = await carregarImagemComoDataURL(logoSrcPreferido);
-  } catch (e) {
-    try {
-      logoData = await carregarImagemComoDataURL('AibyAuchan.png');
-    } catch (e2) {
-      // Se não houver logo, devolve QR normal
-      return qrData;
-    }
-  }
-
-  // 3) Compor num canvas
-  const qrImg = await _loadImgElFromDataURL_(qrData);
-  const logoImg = await _loadImgElFromDataURL_(logoData);
-
-  const size = Math.max(qrImg.naturalWidth || 700, 700);
-  const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext('2d');
-
-  // QR
-  ctx.drawImage(qrImg, 0, 0, size, size);
-
-  // Logo no centro
-  const logoSize = Math.round(size * 0.22);     // ~22% do QR
-  const pad = Math.round(size * 0.03);          // margem do badge branco
-  const badgeSize = logoSize + pad * 2;
-
-  const cx = Math.round((size - badgeSize) / 2);
-  const cy = Math.round((size - badgeSize) / 2);
-
-  // badge branco arredondado
-  ctx.save();
-  ctx.fillStyle = 'white';
-  _roundedRect_(ctx, cx, cy, badgeSize, badgeSize, Math.round(size * 0.03));
-  ctx.fill();
-  ctx.restore();
-
-  // logo por cima
-  const lx = Math.round((size - logoSize) / 2);
-  const ly = Math.round((size - logoSize) / 2);
-  ctx.drawImage(logoImg, lx, ly, logoSize, logoSize);
-
-  return canvas.toDataURL('image/png');
-}
-
 
     /*************************************************
-     *  APP: SELEÇÃO DE LOJA + GRID
+     * APP UI
      *************************************************/
-    function renderizarApp() {
-      atualizarSelectFormato();
-      atualizarUILoja();
+    function obterFormatosUnicos() {
+      const raw = STATE.lojas.map(l => l.formato ? formatarTextoBonito(l.formato) : "");
+      return [...new Set(raw)].filter(f => f !== "").sort();
     }
 
     function atualizarSelectFormato() {
       const s = document.getElementById('formato-select');
       const val = s.value;
-
       s.innerHTML = '<option value="" disabled selected>Seleciona o formato…</option>';
       obterFormatosUnicos().forEach(f => {
         const o = document.createElement('option');
@@ -481,21 +549,18 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
         o.textContent = f;
         s.appendChild(o);
       });
-
       if (val) s.value = val;
     }
 
     function atualizarSelectLojas() {
       const fmt = document.getElementById('formato-select').value;
       const s = document.getElementById('loja-select');
-
       s.innerHTML = '<option value="" disabled selected>Seleciona a loja…</option>';
       if (!fmt) return;
 
       const fmtN = fmt.toUpperCase();
-      const ljs = (STATE.lojas || []).filter(l => (l.formato || '').toUpperCase() === fmtN);
+      const ljs = STATE.lojas.filter(l => (l.formato || '').toUpperCase() === fmtN);
       ljs.sort(ordenarLojas);
-
       ljs.forEach(l => {
         const o = document.createElement('option');
         o.value = l.loja;
@@ -507,7 +572,6 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
     function atualizarUILoja() {
       const f = localStorage.getItem(FORMATO_KEY);
       const l = localStorage.getItem(LOJA_KEY);
-
       const span = document.getElementById('loja-nome');
       const over = document.getElementById('loja-overlay');
 
@@ -522,8 +586,55 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
       }
     }
 
+    function renderizarApp() {
+      atualizarSelectFormato();
+      atualizarUILoja();
+    }
+
     function fecharLojaOverlay() {
       document.getElementById('loja-overlay').style.display = 'none';
+    }
+
+    function filtrarAssistentesPorSelecao(uf, ul) {
+      const ufN = (uf || '').toUpperCase();
+      const ulN = (ul || '').toUpperCase();
+      return STATE.assistentes.filter(a => {
+        const f = (a.formato || '').toUpperCase();
+        const l = (a.loja || '').toUpperCase();
+        return (f === '*' || f === ufN) && (l === '*' || l === ulN);
+      });
+    }
+
+    function renderizarGridAssistentes(uf, ul) {
+      const grid = document.querySelector('.grid');
+      grid.innerHTML = '';
+
+      const matches = filtrarAssistentesPorSelecao(uf, ul)
+        .slice()
+        .sort((a, b) => (a.label || a.nome || '').localeCompare((b.label || b.nome || ''), undefined, { sensitivity: 'base' }));
+
+      if (matches.length === 0) {
+        grid.innerHTML = '<p style="grid-column: span 2; opacity: 0.7;">Nenhum assistente disponível.</p>';
+        return;
+      }
+
+      matches.forEach(a => {
+        const btn = document.createElement('div');
+        btn.className = 'btn';
+        btn.onclick = () => abrirAssistente(a.nome || a.label, a.url);
+
+        const img = document.createElement('img');
+        img.src = a.icone || 'AibyAuchan.png';
+        img.onerror = function() { this.src = 'AibyAuchan.png'; };
+
+        const lbl = document.createElement('div');
+        lbl.className = 'label';
+        lbl.textContent = a.label || a.nome;
+
+        btn.appendChild(img);
+        btn.appendChild(lbl);
+        grid.appendChild(btn);
+      });
     }
 
     function guardarLoja() {
@@ -541,54 +652,10 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
       document.getElementById('loja-overlay').style.display = 'flex';
     }
 
-    function filtrarAssistentesPorSelecao(uf, ul) {
-      const ufN = (uf || '').toUpperCase();
-      const ulN = (ul || '').toUpperCase();
-
-      return (STATE.assistentes || []).filter(a => {
-        const f = (a.formato || '').toUpperCase();
-        const l = (a.loja || '').toUpperCase();
-        return (f === '*' || f === ufN) && (l === '*' || l === ulN);
-      });
-    }
-
-    function renderizarGridAssistentes(uf, ul) {
-      const grid = document.querySelector('.grid');
-      grid.innerHTML = '';
-
-      const matches = filtrarAssistentesPorSelecao(uf, ul).slice().sort((a, b) => (a.label || '').localeCompare((b.label || '')));
-
-      if (matches.length === 0) {
-        grid.innerHTML = '<p style="grid-column: span 2; opacity: 0.7;">Nenhum assistente disponível.</p>';
-        return;
-      }
-
-      matches.forEach(a => {
-        const btn = document.createElement('div');
-        btn.className = 'btn';
-        btn.onclick = () => abrirAssistente(a.nome || a.label, a.url);
-
-        const img = document.createElement('img');
-        img.src = a.icone || 'AibyAuchan.png';
-        img.onerror = function () { this.src = 'AibyAuchan.png'; };
-
-        const lbl = document.createElement('div');
-        lbl.className = 'label';
-        lbl.textContent = a.label || a.nome;
-
-        btn.appendChild(img);
-        btn.appendChild(lbl);
-        grid.appendChild(btn);
-      });
-    }
-
-    /*************************************************
-     *  LOG + ABRIR ASSISTENTE
-     *************************************************/
     function abrirAssistente(nomeAssistente, urlDestino) {
-      const l = localStorage.getItem(LOJA_KEY) || 'Sem loja';
+      const loja = localStorage.getItem(LOJA_KEY) || 'Sem loja';
       const p = new URLSearchParams();
-      p.append(ENTRY_LOJA, l);
+      p.append(ENTRY_LOJA, loja);
       p.append(ENTRY_ASSISTENTE, nomeAssistente || 'Sem nome');
 
       fetch(FORM_BASE_URL, {
@@ -602,7 +669,7 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
     }
 
     /*************************************************
-     *  QR PARAMS (SCAN)
+     * QR PARAMS (abrir direto por QR)
      *************************************************/
     function processarQRCodeParams() {
       const params = new URLSearchParams(window.location.search);
@@ -615,7 +682,10 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
       if (formatoParam) localStorage.setItem(FORMATO_KEY, formatoParam);
       if (lojaParam) localStorage.setItem(LOJA_KEY, lojaParam);
 
-      const assistente = (STATE.assistentes || []).find(a => a.nome === assistenteParam || a.label === assistenteParam);
+      const assistente = STATE.assistentes.find(a =>
+        (a.nome === assistenteParam) || (a.label === assistenteParam)
+      );
+
       if (!assistente) {
         alert("Assistente não encontrado.");
         return;
@@ -624,7 +694,7 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
       const lojaFinal = lojaParam || localStorage.getItem(LOJA_KEY) || 'Sem loja';
       const payload = new URLSearchParams();
       payload.append(ENTRY_LOJA, lojaFinal);
-      payload.append(ENTRY_ASSISTENTE, assistente.nome || assistente.label || assistenteParam);
+      payload.append(ENTRY_ASSISTENTE, assistente.nome || assistente.label);
 
       const body = payload.toString();
 
@@ -644,22 +714,20 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
     }
 
     /*************************************************
-     *  ADMIN: ABRIR COM 5 CLICKS NO LOGO
+     * ADMIN - LOGIN / OPEN / CLOSE
      *************************************************/
-    (function bindAdminTrigger_() {
-      let lc = 0;
-      document.getElementById('logo-trigger').addEventListener('click', () => {
-        lc++;
-        if (lc === 5) {
-          lc = 0;
-          abrirLogin();
-        }
-      });
-    })();
+    let logoClicks = 0;
+    document.getElementById('logo-trigger').addEventListener('click', () => {
+      logoClicks++;
+      if (logoClicks === 5) {
+        logoClicks = 0;
+        abrirLogin();
+      }
+    });
 
     function abrirLogin() {
       document.getElementById('login-overlay').style.display = 'flex';
-      setTimeout(() => document.getElementById('login-password-input').focus(), 100);
+      setTimeout(() => document.getElementById('login-password-input').focus(), 80);
     }
 
     function fecharLogin() {
@@ -680,49 +748,65 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
       document.getElementById('admin-overlay').style.display = 'flex';
       renderizarAdminListas();
       atualizarDropdownsAdminInicial();
-      // se estivermos em QRCodes, garante lista atualizada
-      const tabQr = document.getElementById('admin-tab-qrcodes');
-      if (tabQr && tabQr.style.display === 'block') renderizarListaQRCodes_();
+      inicializarSelecaoPrintAdmin_();
+      switchAdminTab('lojas');
     }
 
+    // mantém admin aberto se houver alterações locais vs publicado
     function fecharAdmin() {
+      const diff = hasUnpublishedChanges_();
+      if (diff.changed) {
+        abrirModalFechoAdmin_();
+        return;
+      }
+      fecharAdminSemPerguntar_();
+    }
+
+    function fecharAdminSemPerguntar_() {
       document.getElementById('admin-overlay').style.display = 'none';
       cancelarEdicao();
     }
 
+    function abrirModalFechoAdmin_() {
+      document.getElementById('admin-close-guard-overlay').style.display = 'flex';
+    }
+    function fecharModalFechoAdmin_() {
+      document.getElementById('admin-close-guard-overlay').style.display = 'none';
+    }
+    function irGuardarDoModal_() {
+      fecharModalFechoAdmin_();
+      switchAdminTab('exportar');
+    }
+    function fecharSemAtualizarDoModal_() {
+      fecharModalFechoAdmin_();
+      fecharAdminSemPerguntar_();
+    }
+
     function switchAdminTab(tabId) {
-      // tabs active class
-      document.querySelectorAll('#admin-tabs .admin-tab').forEach(t => {
-        t.classList.toggle('active', t.dataset.tab === tabId);
+      document.querySelectorAll('.admin-tab').forEach(x => x.classList.remove('active'));
+      const tabBtn = document.querySelector(`.admin-tab[data-tab="${tabId}"]`);
+      if (tabBtn) tabBtn.classList.add('active');
+
+      ['lojas','assistentes','qrcodes','exportar'].forEach(id => {
+        const tab = document.getElementById(`admin-tab-${id}`);
+        if (tab) tab.style.display = 'none';
       });
 
-      // hide all
-      ['lojas','assistentes','exportar','qrcodes'].forEach(id => {
-        const el = document.getElementById(`admin-tab-${id}`);
-        if (el) el.style.display = 'none';
-      });
+      const tabAtual = document.getElementById(`admin-tab-${tabId}`);
+      if (tabAtual) tabAtual.style.display = 'block';
 
-      // show current
-      const cur = document.getElementById(`admin-tab-${tabId}`);
-      if (cur) cur.style.display = 'block';
-
-      // side effects
       if (tabId === 'assistentes') atualizarDropdownsAdminInicial();
       if (tabId === 'exportar') atualizarSugestaoVersao();
-      if (tabId === 'qrcodes') {
-        popularDropdownsAdminQr_();
-        renderizarListaQRCodes_();
-      }
+      if (tabId === 'qrcodes') renderizarListaQRCodes_();
     }
 
     /*************************************************
-     *  ADMIN: LISTAS (LOJAS + ASSISTENTES)
+     * ADMIN - LISTAS (LOJAS / ASSISTENTES)
      *************************************************/
     function renderizarAdminListas() {
-      // LOJAS
       const ll = document.getElementById('admin-lojas-list');
       ll.innerHTML = '';
-      const lSorted = (STATE.lojas || []).slice().sort(ordenarLojas);
+      const lSorted = [...STATE.lojas].sort(ordenarLojas);
 
       lSorted.forEach(l => {
         const idx = STATE.lojas.indexOf(l);
@@ -735,10 +819,9 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
         ll.appendChild(d);
       });
 
-      // ASSISTENTES
       const al = document.getElementById('admin-assistentes-list');
       al.innerHTML = '';
-      const aSorted = (STATE.assistentes || []).slice().sort((a, b) => (a.label || '').localeCompare((b.label || '')));
+      const aSorted = [...STATE.assistentes].sort((a, b) => (a.label || a.nome || '').localeCompare((b.label || b.nome || ''), undefined, { sensitivity: 'base' }));
 
       aSorted.forEach(a => {
         const idx = STATE.assistentes.indexOf(a);
@@ -749,6 +832,7 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
             ${(a.label || a.nome || '(sem nome)')}
             <small style="opacity:0.7">(${a.formato || '—'})(${a.loja || '—'})</small>
           </div>
+
           <div style="display:flex; gap:8px; align-items:center;">
             <button type="button" class="dup" onclick="adminDuplicarAssistenteByIndex(${idx})" title="Duplicar">⧉</button>
             <button type="button" class="delete" onclick="adminRemoverAssistenteByIndex(${idx})" title="Apagar">X</button>
@@ -758,11 +842,9 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
       });
     }
 
-    function selecionarImagemArquivo() {
-      const i = document.getElementById('admin-file-picker');
-      if (i.files && i.files[0]) document.getElementById('admin-ast-icone').value = i.files[0].name;
-    }
-
+    /*************************************************
+     * ADMIN - LOJAS CRUD
+     *************************************************/
     function adminAddLoja() {
       let f = document.getElementById('admin-novo-formato').value;
       const c = document.getElementById('admin-nova-loja-cod').value.trim();
@@ -772,12 +854,13 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
       f = formatarTextoBonito(f);
       const lc = `${c}-${n}`;
 
-      if ((STATE.lojas || []).some(l => l.formato === f && l.loja === lc)) return alert("Loja já existe.");
+      if (STATE.lojas.some(l => l.formato === f && l.loja === lc)) return alert("Loja já existe.");
 
       STATE.lojas.push({ formato: f, loja: lc });
       guardarDadosLocais();
       renderizarAdminListas();
       atualizarDropdownsAdminInicial();
+      inicializarSelecaoPrintAdmin_();
 
       document.getElementById('admin-nova-loja-cod').value = '';
       document.getElementById('admin-nova-loja-nome').value = '';
@@ -789,46 +872,17 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
       guardarDadosLocais();
       renderizarAdminListas();
       atualizarDropdownsAdminInicial();
-    }
-
-    function adminRemoverAssistenteByIndex(i) {
-      if (!Number.isInteger(i) || !STATE.assistentes[i]) return;
-      if (!confirm("Apagar?")) return;
-
-      STATE.assistentes.splice(i, 1);
-      guardarDadosLocais();
-      renderizarAdminListas();
-
-      if (editingAssistenteIndex === i) cancelarEdicao();
-
-      // se estiver no QRCodes, refresca
-      const tabQr = document.getElementById('admin-tab-qrcodes');
-      if (tabQr && tabQr.style.display === 'block') renderizarListaQRCodes_();
-    }
-
-    function adminDuplicarAssistenteByIndex(i) {
-      const src = STATE.assistentes[i];
-      if (!src) return;
-
-      const baseLabel = (src.label || src.nome || 'Assistente') + ' (cópia)';
-      const clone = {
-        ...src,
-        nome: src.nome || src.label || (src.label || 'Assistente'),
-        label: gerarLabelCopiaUnica_(baseLabel),
-        // obriga o user a escolher scope (para não “aparecer” sem querer)
-        formato: '',
-        loja: ''
-      };
-
-      STATE.assistentes.push(clone);
-      guardarDadosLocais();
-      renderizarAdminListas();
-      prepararEdicao(STATE.assistentes.length - 1);
+      inicializarSelecaoPrintAdmin_();
     }
 
     /*************************************************
-     *  ADMIN: DROPDOWNS (ASSISTENTES)
+     * ADMIN - ASSISTENTES CRUD
      *************************************************/
+    function selecionarImagemArquivo() {
+      const i = document.getElementById('admin-file-picker');
+      if (i.files && i.files[0]) document.getElementById('admin-ast-icone').value = i.files[0].name;
+    }
+
     function atualizarDropdownsAdminInicial() {
       const s = document.getElementById('admin-ast-formato');
       const prev = s.value;
@@ -860,9 +914,9 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
       `;
 
       let list = [];
-      if (sf.value === '*') list = (STATE.lojas || []).slice();
+      if (sf.value === '*') list = [...STATE.lojas];
       else if (sf.value === '') list = [];
-      else list = (STATE.lojas || []).filter(l => (l.formato || '').toUpperCase() === sf.value.toUpperCase());
+      else list = STATE.lojas.filter(l => (l.formato || '').toUpperCase() === sf.value.toUpperCase());
 
       list.sort(ordenarLojas);
       list.forEach(l => {
@@ -875,19 +929,15 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
       if (Array.from(sl.options).some(o => o.value === prev)) sl.value = prev;
     }
 
-    /*************************************************
-     *  ADMIN: EDITAR / GUARDAR ASSISTENTE
-     *************************************************/
     function prepararEdicao(i) {
       editingAssistenteIndex = i;
       const a = STATE.assistentes[i];
 
-      document.getElementById('admin-ast-label').value = (a.label || '');
-      document.getElementById('admin-ast-url').value = (a.url || '');
-      document.getElementById('admin-ast-icone').value = (a.icone || '');
-      document.getElementById('admin-ast-descricao').value = (a.descricao || a.desc || '');
+      document.getElementById('admin-ast-label').value = a.label || '';
+      document.getElementById('admin-ast-url').value = a.url || '';
+      document.getElementById('admin-ast-icone').value = a.icone || '';
+      document.getElementById('admin-ast-descricao').value = (a.descricao || a.desc || '') || '';
 
-      atualizarDropdownsAdminInicial();
       document.getElementById('admin-ast-formato').value = a.formato ? formatarTextoBonito(a.formato) : '';
       atualizarSelectLojasAdmin();
       document.getElementById('admin-ast-loja').value = a.loja || '';
@@ -899,75 +949,106 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
 
     function cancelarEdicao() {
       editingAssistenteIndex = -1;
+
       ['admin-ast-label','admin-ast-url','admin-ast-icone','admin-ast-descricao'].forEach(id => {
-        document.getElementById(id).value = '';
+        const el = document.getElementById(id);
+        if (el) el.value = '';
       });
 
-      atualizarDropdownsAdminInicial();
       document.getElementById('admin-ast-formato').value = '';
       atualizarSelectLojasAdmin();
-      document.getElementById('admin-ast-loja').value = '';
 
       document.getElementById('admin-ast-title').innerText = "Adicionar Assistente";
       document.getElementById('btn-save-ast').innerText = "Adicionar Assistente";
       document.getElementById('btn-cancel-ast').style.display = "none";
     }
 
+    function scopesOverlap_(a, b) {
+      const af = ((a && a.formato) ?? '').toString().trim().toUpperCase();
+      const bf = ((b && b.formato) ?? '').toString().trim().toUpperCase();
+      const al = ((a && a.loja) ?? '').toString().trim().toUpperCase();
+      const bl = ((b && b.loja) ?? '').toString().trim().toUpperCase();
+
+      if (!af || !al || !bf || !bl) return false;
+
+      const fmtOverlap = (af === '*') || (bf === '*') || (af === bf);
+      const lojaOverlap = (al === '*') || (bl === '*') || (al === bl);
+
+      return fmtOverlap && lojaOverlap;
+    }
+
+    function isGlobalScope_(a) {
+      const f = ((a && a.formato) ?? '').toString().trim().toUpperCase();
+      const l = ((a && a.loja) ?? '').toString().trim().toUpperCase();
+      return f === '*' && l === '*';
+    }
+
+    function gerarLabelCopiaUnica_(base) {
+      let candidate = base;
+      let n = 2;
+      const exists = (lbl) => STATE.assistentes.some(a => normKey_(a.label) === normKey_(lbl));
+      while (exists(candidate)) {
+        candidate = `${base} ${n}`;
+        n++;
+      }
+      return candidate;
+    }
+
     function validarConflitosAssistente_(novo, editingIdx) {
+      const nf = ((novo.formato ?? '') + '').trim();
+      const nl = ((novo.loja ?? '') + '').trim();
+      if (!nf || !nl) return null;
+
       const novoKey = normKey_(novo.label || novo.nome);
       if (!novoKey) return null;
 
-      for (let idx = 0; idx < (STATE.assistentes || []).length; idx++) {
+      for (let idx = 0; idx < STATE.assistentes.length; idx++) {
         if (idx === editingIdx) continue;
         const a = STATE.assistentes[idx];
 
         const aKey = normKey_(a.label || a.nome);
         if (aKey !== novoKey) continue;
 
-        if (!scopesOverlap_(a, novo)) continue;
+        if (!scopesOverlap_(novo, a)) continue;
 
         const aGlobal = isGlobalScope_(a);
         const novoGlobal = isGlobalScope_(novo);
 
         if (aGlobal && !novoGlobal) {
-          return `Já existe um assistente GERAL (*)(*) com este nome. Não podes criar um mais específico com o mesmo nome.`;
+          return `Já existe um assistente GERAL (*)(*) com o nome "${novo.label || novo.nome}". Não podes criar versões mais específicas com o mesmo nome.`;
         }
         if (!aGlobal && novoGlobal) {
-          return `Já existem assistentes específicos com este nome. Não podes criar um assistente GERAL (*)(*) com o mesmo nome.`;
+          return `Já existem versões específicas do assistente "${novo.label || novo.nome}". Não podes criar uma versão GERAL (*)(*) com o mesmo nome.`;
         }
-
-        return `Conflito: já existe um assistente com o mesmo nome cujo escopo se sobrepõe a este.`;
+        return `Conflito: já existe um assistente com este nome cujo escopo se sobrepõe.`;
       }
+
       return null;
     }
 
     function adminSaveAssistente() {
       const l = document.getElementById('admin-ast-label').value.trim();
+      const n = l;
       const u = document.getElementById('admin-ast-url').value.trim();
-      const i = document.getElementById('admin-ast-icone').value.trim();
+      const ic = document.getElementById('admin-ast-icone').value.trim();
       const d = document.getElementById('admin-ast-descricao').value.trim();
 
-      let f = (document.getElementById('admin-ast-formato').value || '').trim();
-      let loj = (document.getElementById('admin-ast-loja').value || '').trim();
+      let f = (document.getElementById('admin-ast-formato').value ?? '').toString().trim();
+      let loj = (document.getElementById('admin-ast-loja').value ?? '').toString().trim();
 
       if (!l || !u) return alert("Falta Nome ou URL");
-      if (!d) return alert("A descrição é obrigatória (para o PDF não dar rage 😅).");
-
-      // obriga a escolher formato e loja (pode ser "*")
-      if (!f || !loj) {
-        alert('Escolhe Formato e Loja (podes usar "*" se for geral).');
-        return;
-      }
+      if (!d) return alert("A descrição é obrigatória (para o PDF).");
+      if (!f || !loj) return alert('Escolhe Formato e Loja (podes usar "*").');
 
       if (f !== '*') f = formatarTextoBonito(f);
 
       const novo = {
         formato: f,
         loja: loj,
-        nome: l,      // nome = label (como tinhas)
+        nome: n,
         label: l,
         url: u,
-        icone: i,
+        icone: ic,
         descricao: d,
         desc: d
       };
@@ -975,14 +1056,13 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
       const conflito = validarConflitosAssistente_(novo, editingAssistenteIndex);
       if (conflito) return alert(conflito);
 
-      // bloqueia duplicado exacto
-      const dupExato = (STATE.assistentes || []).some((a, idx) => {
+      const dupExato = STATE.assistentes.some((a, idx) => {
         if (idx === editingAssistenteIndex) return false;
         return (
-          normKey_(a.label) === normKey_(novo.label) &&
+          normKey_(a.label || a.nome) === normKey_(novo.label || novo.nome) &&
           normKey_(a.url) === normKey_(novo.url) &&
-          normUpper_(a.formato) === normUpper_(novo.formato) &&
-          normUpper_(a.loja) === normUpper_(novo.loja)
+          ((a.formato || '') === (novo.formato || '')) &&
+          ((a.loja || '') === (novo.loja || ''))
         );
       });
       if (dupExato) return alert("Assistente duplicado!");
@@ -994,24 +1074,55 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
       renderizarAdminListas();
       cancelarEdicao();
 
-      const tabQr = document.getElementById('admin-tab-qrcodes');
-      if (tabQr && tabQr.style.display === 'block') renderizarListaQRCodes_();
+      const qrtab = document.getElementById('admin-tab-qrcodes');
+      if (qrtab && qrtab.style.display === 'block') renderizarListaQRCodes_();
+    }
+
+    function adminRemoverAssistenteByIndex(i) {
+      if (!Number.isInteger(i) || !STATE.assistentes[i]) return;
+      if (!confirm("Apagar?")) return;
+
+      STATE.assistentes.splice(i, 1);
+      guardarDadosLocais();
+      renderizarAdminListas();
+
+      if (editingAssistenteIndex === i) cancelarEdicao();
+
+      const qrtab = document.getElementById('admin-tab-qrcodes');
+      if (qrtab && qrtab.style.display === 'block') renderizarListaQRCodes_();
+    }
+
+    function adminDuplicarAssistenteByIndex(i) {
+      const src = STATE.assistentes[i];
+      if (!src) return;
+
+      const baseLabel = (src.label || src.nome || 'Assistente') + ' (cópia)';
+
+      const clone = {
+        ...src,
+        nome: src.nome || src.label,
+        label: gerarLabelCopiaUnica_(baseLabel),
+        formato: '',
+        loja: ''
+      };
+
+      STATE.assistentes.push(clone);
+      guardarDadosLocais();
+      renderizarAdminListas();
+      prepararEdicao(STATE.assistentes.length - 1);
     }
 
     /*************************************************
-     *  EXPORTAR CONFIG.JS
+     * EXPORTAR CONFIG.JS
      *************************************************/
     function atualizarSugestaoVersao() {
-      let v = "1.0.0";
-      if (typeof STORAGE_DATA_KEY !== 'undefined') {
-        const parts = STORAGE_DATA_KEY.split('_v');
-        v = parts[1] || "1.0.0";
-      }
+      let v = "1.0";
+      if (typeof STORAGE_DATA_KEY !== 'undefined') v = STORAGE_DATA_KEY.split('_v')[1] || "1.0";
 
       document.getElementById('lbl-versao-atual').textContent = "v" + v;
 
       let p = v.split('.').map(Number);
-      while (p.length < 3) p.push(0);
+      if (p.length === 2) p.push(0);
       p[p.length - 1]++;
 
       document.getElementById('input-nova-versao').value = "v" + p.join('.');
@@ -1020,36 +1131,32 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
     function baixarConfiguracao() {
       let vUser = document.getElementById('input-nova-versao').value.trim();
       if (vUser.startsWith('v')) vUser = vUser.substring(1);
+
       const newKey = "appConfigData_v" + vUser;
 
-      // normaliza formatos
-      (STATE.lojas || []).forEach(l => { if (l.formato) l.formato = formatarTextoBonito(l.formato); });
-      (STATE.assistentes || []).forEach(a => { if (a.formato && a.formato !== '*') a.formato = formatarTextoBonito(a.formato); });
-
-      // ordenar
-      STATE.lojas.sort(ordenarLojas);
-
-      // garantir "descricao" sempre
-      (STATE.assistentes || []).forEach(a => {
-        const desc = (a.descricao || a.desc || '').trim();
-        a.descricao = desc;
-        a.desc = desc;
+      STATE.lojas.forEach(l => { if (l.formato) l.formato = formatarTextoBonito(l.formato); });
+      STATE.assistentes.forEach(a => {
+        if (a.formato && a.formato !== '*') a.formato = formatarTextoBonito(a.formato);
+        const dd = (a.descricao || a.desc || '').trim();
+        a.descricao = dd;
+        a.desc = dd;
       });
 
-      STATE.assistentes.sort((a, b) => (a.label || '').localeCompare((b.label || '')));
+      STATE.lojas.sort(ordenarLojas);
+      STATE.assistentes.sort((a, b) => (a.label || a.nome || '').localeCompare((b.label || b.nome || ''), undefined, { sensitivity: 'base' }));
 
       let content = `// Ficheiro de Configuração Gerado Automaticamente\n`;
       content += `const STORAGE_DATA_KEY = "${newKey}";\n\n`;
       content += `const DADOS_PADRAO = {\n`;
       content += `  lojas: [\n`;
-      (STATE.lojas || []).forEach((l, idx) => {
+      STATE.lojas.forEach((l, idx) => {
         let line = JSON.stringify(l);
         if (idx < STATE.lojas.length - 1) line += ",";
         content += `    ${line}\n`;
       });
       content += `  ],\n`;
       content += `  assistentes: [\n`;
-      (STATE.assistentes || []).forEach((a, idx) => {
+      STATE.assistentes.forEach((a, idx) => {
         let block = JSON.stringify(a, null, 4);
         block = block.split('\n').map(line => "    " + line).join('\n');
         if (idx < STATE.assistentes.length - 1) block += ",";
@@ -1060,15 +1167,15 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
 
       const blob = new Blob([content], { type: "text/javascript" });
       const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = "config.js";
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "config.js";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
       URL.revokeObjectURL(url);
 
-      alert("config.js baixado! Faz upload dele para o GitHub 😎");
+      alert("Ficheiro config.js baixado!\nFaz upload dele para a pasta do GitHub.");
     }
 
     function limparTudoAdmin() {
@@ -1078,254 +1185,149 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
     }
 
     /*************************************************
-     *  QRCODES: CONTEXTO (ADMIN OU APP)
+     * QRCODES - SELEÇÃO ADMIN
+     * - sem opção (*) nos dropdowns (só lojas reais)
      *************************************************/
-    function getQrContext_() {
-      const af = (localStorage.getItem(ADMIN_QR_FORMATO_KEY) || '').trim();
-      const al = (localStorage.getItem(ADMIN_QR_LOJA_KEY) || '').trim();
-      if (af && al) return { formato: af, loja: al, source: 'admin' };
+    const PRINT_APP_VALUE = '__APP__';
 
-      const f = (localStorage.getItem(FORMATO_KEY) || '').trim();
-      const l = (localStorage.getItem(LOJA_KEY) || '').trim();
-      return { formato: f, loja: l, source: 'app' };
-    }
-
-    function setQrContextAdmin_(formato, loja) {
-      localStorage.setItem(ADMIN_QR_FORMATO_KEY, formato || '');
-      localStorage.setItem(ADMIN_QR_LOJA_KEY, loja || '');
-    }
-
-    function clearQrContextAdmin_() {
-      localStorage.removeItem(ADMIN_QR_FORMATO_KEY);
-      localStorage.removeItem(ADMIN_QR_LOJA_KEY);
-    }
-
-    function getLojasPorFormato_(formato) {
-      const f = (formato || '').trim();
-      if (!f) return [];
-      if (f === '*') return (STATE.lojas || []).slice().sort(ordenarLojas);
-      return (STATE.lojas || []).filter(x => normUpper_(x.formato) === normUpper_(f)).sort(ordenarLojas);
-    }
-
-    /*************************************************
-     *  QRCODES: UI TAB
-     *************************************************/
-    function inicializarAdminQRCodesTab() {
-      const tabsContainer = document.getElementById('admin-tabs');
-      if (!tabsContainer || document.getElementById('admin-tab-qrcodes')) return;
-
-      const tab = document.createElement('div');
-      tab.className = 'admin-tab';
-      tab.dataset.tab = 'qrcodes';
-      tab.textContent = 'QRCodes';
-      tab.onclick = () => switchAdminTab('qrcodes');
-      tabsContainer.appendChild(tab);
-
-      const overlayBox = document.querySelector('#admin-overlay .overlay-box');
-      const exportarTab = document.getElementById('admin-tab-exportar');
-
-      const qrcodesTab = document.createElement('div');
-      qrcodesTab.id = 'admin-tab-qrcodes';
-      qrcodesTab.style.display = 'none';
-
-      qrcodesTab.innerHTML = `
-        <p style="font-size:0.85rem; margin-bottom:10px;">
-          Aqui escolhes Formato/Loja no Admin e imprimes o que for preciso, sem sair do painel.
-        </p>
-
-        <div class="version-control" style="margin-bottom:10px;">
-          <label>Seleção para impressão (Admin):</label>
-
-          <div style="display:flex; gap:8px; margin-bottom:10px;">
-            <select id="admin-qr-formato" style="margin-bottom:0;" onchange="onAdminQrFormatoChange_()">
-              <option value="">(usar seleção da App)</option>
-              <option value="*">Qualquer Formato (*)</option>
-            </select>
-
-            <select id="admin-qr-loja" style="margin-bottom:0;" onchange="onAdminQrLojaChange_()">
-              <option value="">(usar seleção da App)</option>
-              <option value="*">Qualquer Loja (*)</option>
-            </select>
-          </div>
-
-          <div style="display:flex; gap:8px; margin-bottom:10px;">
-            <button class="secondary" style="flex:1; padding:.55rem;" onclick="usarSelecaoAppNoQr_()">Usar seleção da App</button>
-            <button class="secondary" style="flex:1; padding:.55rem;" onclick="renderizarListaQRCodes_()">Atualizar lista</button>
-          </div>
-
-          <label>Seleção atual:</label>
-          <strong id="admin-qrcodes-selecao" style="color:#333;">...</strong>
-
-          <div id="admin-qrcodes-warning" style="margin-top:8px; font-size:0.85rem;"></div>
-
-          <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px;">
-            <label style="display:flex; gap:10px; align-items:center; cursor:pointer; user-select:none;">
-              <input type="checkbox" id="admin-qrcodes-selectall" />
-              <span style="font-weight:800; color:#333;">Selecionar tudo</span>
-            </label>
-            <span id="admin-qrcodes-count" style="font-size:0.85rem; color:#666;">...</span>
-          </div>
-
-          <div id="admin-qrcodes-list"
-               style="margin-top:10px; max-height:45vh; overflow:auto; border:1px solid #eee; border-radius:12px; background:#fafafa;">
-          </div>
-        </div>
-
-        <button onclick="gerarPDFQRCodes()">📄 Gerar PDF QRCodes</button>
-      `;
-
-      overlayBox.insertBefore(qrcodesTab, exportarTab.nextSibling);
-    }
-
-    function popularDropdownsAdminQr_() {
-      const sf = document.getElementById('admin-qr-formato');
-      const sl = document.getElementById('admin-qr-loja');
+    function inicializarSelecaoPrintAdmin_() {
+      const sf = document.getElementById('admin-print-formato');
+      const sl = document.getElementById('admin-print-loja');
       if (!sf || !sl) return;
 
-      // formats: mantém as 2 base options e reinjeta únicos
-      const keep = sf.innerHTML;
-      sf.innerHTML = keep;
+      const prevF = sf.value || PRINT_APP_VALUE;
+      sf.innerHTML = '';
+
+      const optAppF = document.createElement('option');
+      optAppF.value = PRINT_APP_VALUE;
+      optAppF.textContent = '(usar seleção da App)';
+      sf.appendChild(optAppF);
 
       obterFormatosUnicos().forEach(f => {
+        if (!f || f === '*') return;
         const o = document.createElement('option');
         o.value = f;
         o.textContent = f;
         sf.appendChild(o);
       });
 
-      // re-aplica seleção guardada (se existir)
-      const af = localStorage.getItem(ADMIN_QR_FORMATO_KEY) || '';
-      const al = localStorage.getItem(ADMIN_QR_LOJA_KEY) || '';
-
-      if (sf.value !== af) sf.value = af;
-      rebuildAdminQrLojas_();
-
-      if (al && Array.from(sl.options).some(o => o.value === al)) sl.value = al;
+      sf.value = prevF;
+      atualizarLojasPrintAdmin_();
     }
 
-    function rebuildAdminQrLojas_() {
-      const sf = document.getElementById('admin-qr-formato');
-      const sl = document.getElementById('admin-qr-loja');
+    function atualizarLojasPrintAdmin_() {
+      const sf = document.getElementById('admin-print-formato');
+      const sl = document.getElementById('admin-print-loja');
       if (!sf || !sl) return;
 
-      const f = (sf.value || '').trim();
-      const prev = (sl.value || '').trim();
+      const prevL = sl.value || PRINT_APP_VALUE;
+      sl.innerHTML = '';
 
-      sl.innerHTML = `
-        <option value="">(usar seleção da App)</option>
-        <option value="*">Qualquer Loja (*)</option>
-      `;
+      const optAppL = document.createElement('option');
+      optAppL.value = PRINT_APP_VALUE;
+      optAppL.textContent = '(usar seleção da App)';
+      sl.appendChild(optAppL);
 
-      if (f) {
-        const lojas = getLojasPorFormato_(f);
-        lojas.forEach(l => {
-          const o = document.createElement('option');
-          o.value = l.loja;
-          o.textContent = l.loja;
-          sl.appendChild(o);
-        });
+      if (sf.value === PRINT_APP_VALUE) {
+        sl.value = PRINT_APP_VALUE;
+        return;
       }
 
-      if (prev && Array.from(sl.options).some(o => o.value === prev)) sl.value = prev;
+      const fmt = sf.value;
+      const lojas = STATE.lojas
+        .filter(l => (l.formato || '').toUpperCase() === String(fmt).toUpperCase())
+        .filter(l => (l.loja || '').trim() !== '*' && (l.loja || '').trim() !== 'Qualquer Loja (*)')
+        .slice()
+        .sort(ordenarLojas);
+
+      lojas.forEach(l => {
+        const o = document.createElement('option');
+        o.value = l.loja;
+        o.textContent = l.loja;
+        sl.appendChild(o);
+      });
+
+      if (Array.from(sl.options).some(o => o.value === prevL)) sl.value = prevL;
+      else sl.value = PRINT_APP_VALUE;
     }
 
-    function onAdminQrFormatoChange_() {
-      rebuildAdminQrLojas_();
-
-      const sf = document.getElementById('admin-qr-formato');
-      const sl = document.getElementById('admin-qr-loja');
+    function usarSelecaoAppNoQRCodes_() {
+      const sf = document.getElementById('admin-print-formato');
+      const sl = document.getElementById('admin-print-loja');
       if (!sf || !sl) return;
 
-      const f = (sf.value || '').trim();
-      const l = (sl.value || '').trim();
-
-      if (f && l) setQrContextAdmin_(f, l);
-      else clearQrContextAdmin_();
-
+      sf.value = PRINT_APP_VALUE;
+      sl.value = PRINT_APP_VALUE;
       renderizarListaQRCodes_();
     }
 
-    function onAdminQrLojaChange_() {
-      const sf = document.getElementById('admin-qr-formato');
-      const sl = document.getElementById('admin-qr-loja');
-      if (!sf || !sl) return;
+    function obterSelecaoEfetivaQRCodes_() {
+      const sf = document.getElementById('admin-print-formato');
+      const sl = document.getElementById('admin-print-loja');
 
-      const f = (sf.value || '').trim();
-      const l = (sl.value || '').trim();
+      const appF = localStorage.getItem(FORMATO_KEY);
+      const appL = localStorage.getItem(LOJA_KEY);
 
-      if (f && l) setQrContextAdmin_(f, l);
-      else clearQrContextAdmin_();
+      const f = (sf && sf.value && sf.value !== PRINT_APP_VALUE) ? sf.value : (appF || '');
+      const l = (sl && sl.value && sl.value !== PRINT_APP_VALUE) ? sl.value : (appL || '');
 
-      renderizarListaQRCodes_();
-    }
-
-    function usarSelecaoAppNoQr_() {
-      clearQrContextAdmin_();
-      const sf = document.getElementById('admin-qr-formato');
-      const sl = document.getElementById('admin-qr-loja');
-      if (sf) sf.value = '';
-      if (sl) sl.value = '';
-      renderizarListaQRCodes_();
+      const origem = ((sf && sf.value !== PRINT_APP_VALUE) || (sl && sl.value !== PRINT_APP_VALUE)) ? 'Admin' : 'App';
+      return { formato: f, loja: l, origem };
     }
 
     /*************************************************
-     *  QRCODES: PUBLICADO vs LOCAL (por URL)
+     * QRCODES - COMPARAÇÃO VS PUBLICADO
      *************************************************/
-    function normalizarUrl_(u) {
-      return (u || '').toString().trim();
-    }
-
-    function normalizarDesc_(d) {
-      return (d || '').toString().trim();
-    }
-
-    function mapUrlParaDescricao_(arr) {
+    function mapPublishedByUrl_() {
       const m = new Map();
-      (arr || []).forEach(a => {
-        const url = normalizarUrl_(a.url);
-        const desc = normalizarDesc_(a.descricao || a.desc);
-        if (!url) return;
-        if (!m.has(url)) m.set(url, desc || '');
-        if (m.get(url) === '' && desc) m.set(url, desc);
+      const pub = (typeof DADOS_PADRAO !== 'undefined' && DADOS_PADRAO && Array.isArray(DADOS_PADRAO.assistentes))
+        ? DADOS_PADRAO.assistentes
+        : [];
+
+      pub.forEach(a => {
+        const url = (a.url || '').trim();
+        const key = url ? `U:${normKey_(url)}` : `N:${normKey_(a.label || a.nome)}`;
+        const desc = ((a.descricao || a.desc) || '').toString().trim();
+        if (!m.has(key)) m.set(key, desc);
+        if (m.get(key) === '' && desc) m.set(key, desc);
       });
+
       return m;
     }
 
-    function buildPublishedDescMap_() {
-      const publicados = (typeof DADOS_PADRAO !== 'undefined' && DADOS_PADRAO && Array.isArray(DADOS_PADRAO.assistentes))
-        ? DADOS_PADRAO.assistentes
-        : [];
-      return mapUrlParaDescricao_(publicados);
+    function getRowStatus_(assistente, pubMap) {
+      const url = (assistente.url || '').trim();
+      const key = url ? `U:${normKey_(url)}` : `N:${normKey_(assistente.label || assistente.nome)}`;
+
+      const localDesc = ((assistente.descricao || assistente.desc) || '').toString().trim();
+      const pubHas = pubMap.has(key);
+
+      if (!pubHas) return { status: 'novo' };
+      const pubDesc = (pubMap.get(key) || '').toString().trim();
+
+      if (pubDesc !== localDesc) return { status: 'alterado' };
+      return { status: 'ok' };
     }
 
-    function contarAlteracoesDescricaoNaoPublicadas_(assistentesFiltrados) {
-      const pubMap = buildPublishedDescMap_();
-      const localMap = mapUrlParaDescricao_(assistentesFiltrados);
-
+    function contarAlteracoes_(candidatos, pubMap) {
+      const seen = new Set();
       let count = 0;
-      localMap.forEach((descLocal, url) => {
-        const descPub = pubMap.has(url) ? (pubMap.get(url) || '') : null;
-        if (descPub === null) { count++; return; }
-        if (normalizarDesc_(descPub) !== normalizarDesc_(descLocal)) count++;
+
+      candidatos.forEach(a => {
+        const url = (a.url || '').trim();
+        const key = url ? `U:${normKey_(url)}` : `N:${normKey_(a.label || a.nome)}`;
+        if (seen.has(key)) return;
+        seen.add(key);
+
+        const st = getRowStatus_(a, pubMap).status;
+        if (st === 'novo' || st === 'alterado') count++;
       });
 
-      return { count };
-    }
-
-    function getAssistenteChangeTag_(a, pubMap) {
-      const url = normalizarUrl_(a.url);
-      if (!url) return { tipo: '', changed: false };
-
-      const localDesc = normalizarDesc_(a.descricao || a.desc);
-      const pubDesc = pubMap.has(url) ? normalizarDesc_(pubMap.get(url) || '') : null;
-
-      if (pubDesc === null) return { tipo: 'novo', changed: true };
-      if (pubDesc !== localDesc) return { tipo: 'alterado', changed: true };
-      return { tipo: '', changed: false };
+      return count;
     }
 
     /*************************************************
-     *  QRCODES: LISTA + HIGHLIGHT
+     * QRCODES - RENDER LISTA (checkbox à direita + fundo se alterado)
      *************************************************/
     function renderizarListaQRCodes_() {
       const selecao = document.getElementById('admin-qrcodes-selecao');
@@ -1336,15 +1338,11 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
 
       if (!selecao || !warning || !list || !selectAll || !count) return;
 
-      const ctx = getQrContext_();
-      const formato = ctx.formato;
-      const loja = ctx.loja;
+      const { formato, loja, origem } = obterSelecaoEfetivaQRCodes_();
 
       if (!formato || !loja) {
         selecao.textContent = 'Sem seleção';
-        warning.innerHTML = `<span style="color:#d63a3e; font-weight:900;">
-          Escolhe Formato e Loja (Admin) ou define na App.
-        </span>`;
+        warning.innerHTML = `<span style="color:#d63a3e; font-weight:900;">Escolhe formato e loja (na App ou aqui no Admin) antes de gerar o PDF.</span>`;
         list.innerHTML = '';
         count.textContent = '';
         selectAll.checked = false;
@@ -1353,32 +1351,28 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
         return;
       }
 
-      selecao.textContent = `${formatarTextoBonito(formato)} – ${loja} ${ctx.source === 'admin' ? '(Admin)' : '(App)'}`;
+      selecao.textContent = `${formatarTextoBonito(formato)} – ${loja} (${origem})`;
 
-      const ufN = normUpper_(formato);
-      const ulN = normUpper_(loja);
+      const ufN = (formato || '').toUpperCase();
+      const ulN = (loja || '').toUpperCase();
 
-      // ⚠️ aqui "seleção *" significa wildcard total (mostrar tudo)
-      const candidatos = (STATE.assistentes || [])
+      const candidatos = STATE.assistentes
         .map((a, idx) => ({ ...a, __index: idx }))
         .filter(a => {
-          const f = normUpper_(a.formato);
-          const l = normUpper_(a.loja);
-
-          const fmtMatch = (ufN === '*') ? true : (f === '*' || f === ufN);
-          const lojaMatch = (ulN === '*') ? true : (l === '*' || l === ulN);
-
-          return fmtMatch && lojaMatch;
+          const f = (a.formato || '').toUpperCase();
+          const l = (a.loja || '').toUpperCase();
+          return (f === '*' || f === ufN) && (l === '*' || l === ulN);
         })
-        .sort((a, b) => (a.label || '').localeCompare((b.label || '')));
+        .sort((a, b) => (a.label || a.nome || '').localeCompare((b.label || b.nome || ''), undefined, { sensitivity: 'base' }));
 
-      const changesInfo = contarAlteracoesDescricaoNaoPublicadas_(candidatos);
-      warning.innerHTML = (changesInfo.count > 0)
-        ? `<span style="color:#d63a3e; font-weight:900;">
-            ⚠️ Existem ${changesInfo.count} descrições novas/alteradas face ao publicado.
-            Depois imprime e vai à aba <b>Guardar</b> fazer download do <b>config.js</b>.
-          </span>`
-        : `<span style="color:#2e7d32; font-weight:900;">✅ Tudo sincronizado com a versão publicada.</span>`;
+      const pubMap = mapPublishedByUrl_();
+      const changesCount = contarAlteracoes_(candidatos, pubMap);
+
+      if (changesCount > 0) {
+        warning.innerHTML = `<span style="color:#d63a3e; font-weight:900;">⚠️ Existem ${changesCount} descrições novas/alteradas face ao publicado. Depois imprime e vai à aba <b>Guardar</b> fazer download do <b>config.js</b>.</span>`;
+      } else {
+        warning.innerHTML = `<span style="color:#2e7d32; font-weight:900;">✅ Tudo sincronizado com a versão publicada.</span>`;
+      }
 
       count.textContent = `${candidatos.length} assistente(s)`;
 
@@ -1392,48 +1386,32 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
 
       selectAll.disabled = false;
 
-      const pubMap = buildPublishedDescMap_();
-
       list.innerHTML = candidatos.map(a => {
         const img = (a.icone || 'AibyAuchan.png');
         const label = (a.label || a.nome || '').trim();
         const scope = `${(a.formato ? formatarTextoBonito(a.formato) : '—')} · ${(a.loja || '—')}`;
 
-        const tag = getAssistenteChangeTag_(a, pubMap);
-
-        const bg = tag.tipo === 'novo'
-          ? 'background:#e8f5e9;'
-          : tag.tipo === 'alterado'
-            ? 'background:#fff3e0;'
-            : 'background:#fff;';
-
-        const badge = tag.tipo === 'novo'
-          ? `<span style="font-size:.75rem; font-weight:900; color:#2e7d32;">🆕 Novo</span>`
-          : tag.tipo === 'alterado'
-            ? `<span style="font-size:.75rem; font-weight:900; color:#ef6c00;">⚠️ Alterado</span>`
-            : '';
+        const st = getRowStatus_(a, pubMap).status;
+        const rowClass = st === 'alterado' ? 'qr-row badge-alterado' : (st === 'novo' ? 'qr-row badge-novo' : 'qr-row');
+        const badgeHtml = st === 'alterado'
+          ? `<span class="qr-badge alterado">⚠️ Alterado</span>`
+          : (st === 'novo' ? `<span class="qr-badge novo">🆕 Novo</span>` : ``);
 
         return `
-          <label style="
-            display:flex; align-items:center; gap:12px;
-            padding:10px 12px; border-bottom:1px solid #eee;
-            cursor:pointer; user-select:none; ${bg}
-          ">
+          <label class="${rowClass}">
             <img src="${img}" onerror="this.src='AibyAuchan.png'"
                  style="width:38px; height:38px; object-fit:cover; border-radius:10px; border:1px solid #eee; flex:0 0 auto;" />
 
             <div style="flex:1; min-width:0;">
-              <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-                <div style="font-weight:900; color:#333; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
-                  ${label}
-                </div>
-                ${badge}
+              <div style="font-weight:900; color:#333; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                ${label}
               </div>
-
               <div style="font-size:0.8rem; color:#666; line-height:1.2;">
                 ${scope}
               </div>
             </div>
+
+            ${badgeHtml}
 
             <input type="checkbox" class="qr-ast-check" data-idx="${a.__index}" checked
                    style="width:18px; height:18px; flex:0 0 auto;" />
@@ -1441,7 +1419,6 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
         `;
       }).join('');
 
-      // select all behaviour
       selectAll.checked = true;
       selectAll.indeterminate = false;
 
@@ -1457,6 +1434,7 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
           const cbs = [...list.querySelectorAll('input.qr-ast-check')];
           const allOn = cbs.length > 0 && cbs.every(cb => cb.checked);
           const anyOn = cbs.some(cb => cb.checked);
+
           selectAll.indeterminate = anyOn && !allOn;
           selectAll.checked = allOn;
         }, { passive: true });
@@ -1464,70 +1442,7 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
     }
 
     /*************************************************
-     *  PDF: libs + QR + imagens
-     *************************************************/
-    function carregarScript(src) {
-      return new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = src;
-        s.onload = resolve;
-        s.onerror = () => reject(new Error('Falha ao carregar biblioteca: ' + src));
-        document.head.appendChild(s);
-      });
-    }
-
-    async function garantirPdfLib() {
-      if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF;
-      await carregarScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
-      return window.jspdf.jsPDF;
-    }
-
-    function criarUrlQRCode(assistente, formato, loja) {
-      const base = `${window.location.origin}${window.location.pathname}`;
-      const params = new URLSearchParams();
-
-      params.set(QR_PARAM_ASSISTENTE, assistente.nome || assistente.label || '');
-
-      // evita gravar '*' na app de quem scaneia
-      if (formato && formato !== '*') params.set(QR_PARAM_FORMATO, formato);
-      if (loja && loja !== '*') params.set(QR_PARAM_LOJA, loja);
-
-      return `${base}?${params.toString()}`;
-    }
-
-    async function carregarImagemComoDataURL(src) {
-      return new Promise((resolve, reject) => {
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = img.naturalWidth;
-          canvas.height = img.naturalHeight;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0);
-          resolve(canvas.toDataURL('image/png'));
-        };
-        img.onerror = reject;
-        img.src = src;
-      });
-    }
-
-    async function gerarQRCodeDataURL(texto) {
-      const api = `https://api.qrserver.com/v1/create-qr-code/?size=700x700&data=${encodeURIComponent(texto)}`;
-      const res = await fetch(api);
-      if (!res.ok) throw new Error(`QR API HTTP ${res.status}`);
-
-      const blob = await res.blob();
-      return await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-    }
-
-    /*************************************************
-     *  MODAL: DESCRIÇÕES EM FALTA (para PDF)
+     * QRCODES - MODAL DESCRIÇÕES EM FALTA
      *************************************************/
     function garantirModalDescricao() {
       if (document.getElementById('missing-desc-overlay')) return;
@@ -1564,22 +1479,22 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
       list.innerHTML = lista.map(a => `
         <div style="margin-bottom:12px; padding-bottom:12px; border-bottom:1px solid #eee;">
           <div style="font-weight:700; color:#333; margin-bottom:6px;">
-            ${a.label || a.nome}
+            ${(a.label || a.nome || '(sem nome)')}
           </div>
           <textarea
             data-missing-desc="1"
             data-ast-index="${a.__index}"
             placeholder="Descrição (2-3 linhas)"
             style="width:100%; box-sizing:border-box; padding:.6rem; border-radius:10px; border:1px solid #ccc; min-height:72px; resize:vertical;"
-          >${(a.descricao || a.desc || '').trim()}</textarea>
+          >${((a.descricao || a.desc || '') + '').trim()}</textarea>
         </div>
       `).join('');
 
       window.__missingDescSaveAndContinue = function () {
         err.textContent = '';
-
         const tas = [...list.querySelectorAll('textarea[data-missing-desc="1"]')];
         const faltam = tas.some(ta => !(ta.value || '').trim());
+
         if (faltam) {
           err.textContent = 'Ainda faltam descrições. Preenche tudo para continuar.';
           return;
@@ -1591,16 +1506,14 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
           if (Number.isNaN(idx) || !STATE.assistentes[idx]) return;
 
           const ref = STATE.assistentes[idx];
-          const refUrl = normalizarUrl_(ref.url);
+          const refUrl = (ref.url || '').trim();
 
-          // atualiza o atual
           ref.descricao = val;
           ref.desc = val;
 
-          // propaga por URL (mesmo assistente)
           if (refUrl) {
-            (STATE.assistentes || []).forEach(a => {
-              if (normalizarUrl_(a.url) === refUrl) {
+            STATE.assistentes.forEach(a => {
+              if (((a.url || '').trim()) === refUrl) {
                 a.descricao = val;
                 a.desc = val;
               }
@@ -1617,193 +1530,261 @@ async function gerarQRCodeDataURLComLogo(texto, logoSrcPreferido = 'AibyAuchan.j
     }
 
     /*************************************************
-     *  PDF: GERAR (selecionados no separador QRCodes)
+     * PDF HELPERS
      *************************************************/
-async function gerarPDFQRCodes() {
-  try {
-    const { formato, loja } = obterSelecaoEfetivaQRCodes_();
-    if (!formato || !loja) {
-      alert('Seleciona formato e loja (na App ou aqui no Admin) antes de gerar o PDF.');
-      return;
+    function carregarScript(src) {
+      return new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = resolve;
+        s.onerror = () => reject(new Error('Falha ao carregar biblioteca: ' + src));
+        document.head.appendChild(s);
+      });
     }
 
-    const list = document.getElementById('admin-qrcodes-list');
-    if (!list) {
-      alert('Abre o separador QRCodes primeiro.');
-      return;
+    async function garantirPdfLib() {
+      if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF;
+      await carregarScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
+      return window.jspdf.jsPDF;
     }
 
-    const selectedIdxs = [...list.querySelectorAll('input.qr-ast-check:checked')]
-      .map(cb => Number(cb.getAttribute('data-idx')))
-      .filter(n => !Number.isNaN(n));
-
-    if (selectedIdxs.length === 0) {
-      alert('Seleciona pelo menos 1 assistente para imprimir.');
-      return;
+    async function garantirQrLib_() {
+      if (window.QRCode && typeof window.QRCode.toCanvas === 'function') return window.QRCode;
+      await carregarScript('https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js');
+      return window.QRCode;
     }
 
-    const setSel = new Set(selectedIdxs);
-
-    const assistentes = STATE.assistentes
-      .map((a, idx) => ({ ...a, __index: idx }))
-      .filter(a => setSel.has(a.__index))
-      .sort((a, b) => (a.label || a.nome || '').localeCompare((b.label || b.nome || ''), undefined, { sensitivity: 'base' }));
-
-    const semDescricao = assistentes.filter(a => !((a.descricao || a.desc || '').toString().trim()));
-    if (semDescricao.length) {
-      abrirModalDescricaoEmFalta(semDescricao, () => gerarPDFQRCodes());
-      return;
+    function criarUrlQRCode(assistente, formato, loja) {
+      const base = `${window.location.origin}${window.location.pathname}`;
+      const params = new URLSearchParams();
+      params.set(QR_PARAM_ASSISTENTE, assistente.nome || assistente.label);
+      if (formato) params.set(QR_PARAM_FORMATO, formato);
+      if (loja) params.set(QR_PARAM_LOJA, loja);
+      return `${base}?${params.toString()}`;
     }
 
-    const jsPDF = await garantirPdfLib();
-    const doc = new jsPDF({ format: 'a5', unit: 'mm' });
-
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    const margin = 10;
-
-    const contentW = pageWidth - margin * 2;
-
-    const lojaText = `${loja}`; // só loja (sem nome do assistente)
-
-    // Pequena função para cortar descrição se for gigante demais
-    function fitDescricao_(doc, text, width, maxH, fontSize) {
-      doc.setFontSize(fontSize);
-      const lineH = fontSize <= 10 ? 4.5 : 4.8;
-
-      let lines = doc.splitTextToSize(text, width);
-      let h = lines.length * lineH;
-
-      // baixa um bocado se estiver demasiado alto
-      if (h > maxH && fontSize > 10) {
-        fontSize = 10;
-        doc.setFontSize(fontSize);
-        lines = doc.splitTextToSize(text, width);
-        h = lines.length * 4.5;
-      }
-
-      // corta com reticências até caber
-      const lh = (fontSize <= 10) ? 4.5 : 4.8;
-      while (h > maxH && lines.length > 2) {
-        lines.pop();
-        lines[lines.length - 1] = `${String(lines[lines.length - 1]).replace(/\s*$/, '')}…`;
-        h = lines.length * lh;
-      }
-
-      return { lines, height: h, lineHeight: lh, fontSize };
+    async function carregarImagemComoDataURL(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          resolve(canvas.toDataURL('image/png'));
+        };
+        img.onerror = reject;
+        img.src = src;
+      });
     }
 
-    const diff = hasUnpublishedChanges_();
+    async function gerarQRCodeComLogoDataURL_(texto, logoSrc) {
+      const QR = await garantirQrLib_();
+      const size = 700;
 
-    for (let idx = 0; idx < assistentes.length; idx++) {
-      const a = assistentes[idx];
-      if (idx > 0) doc.addPage('a5', 'p');
+      const canvas = document.createElement('canvas');
+      canvas.width = size;
+      canvas.height = size;
 
-      // --- carregar imagem do assistente (quadrada) ---
-      const imgSrc = a.icone || 'AibyAuchan.png';
-      let imgData = null;
-      try { imgData = await carregarImagemComoDataURL(imgSrc); }
-      catch { imgData = await carregarImagemComoDataURL('AibyAuchan.png'); }
+      await QR.toCanvas(canvas, texto, {
+        errorCorrectionLevel: 'H',
+        margin: 2,
+        width: size
+      });
 
-      // --- preparar QR com logo ao centro ---
-      const qrUrl = criarUrlQRCode(a, formatarTextoBonito(formato), loja);
-      const qrData = await gerarQRCodeDataURLComLogo(qrUrl, 'AibyAuchan.jpg');
+      // overlay logo no centro
+      const ctx = canvas.getContext('2d');
+      const logo = new Image();
+      logo.crossOrigin = 'anonymous';
 
-      // --- calcular tamanhos para layout vertical ---
-      const descricao = (a.descricao || a.desc || '').toString().trim();
+      const logoDataUrl = await carregarImagemComoDataURL(logoSrc).catch(() => null);
+      if (!logoDataUrl) return canvas.toDataURL('image/png');
 
-      // parâmetros base (ajustáveis)
-      let qrSize = 46;          // podes mexer aqui se quiseres maior/menor
-      const gapAfterImg = 6;
-      const gapAfterDesc = 8;
-      const gapAfterQr = 5;
+      await new Promise((resolve, reject) => {
+        logo.onload = resolve;
+        logo.onerror = reject;
+        logo.src = logoDataUrl;
+      });
 
-      // reserva para texto loja por baixo do QR
-      const lojaFont = 10;
-      const lojaH = 5;
+      const logoSize = Math.round(size * 0.18); // ~18%
+      const x = (size - logoSize) / 2;
+      const y = (size - logoSize) / 2;
 
-      // 1) decide tamanho da imagem (quadrada) com base no espaço total
-      // primeiro, assume um tamanho de imagem máximo pelo width
-      let imgSize = contentW;
+      // “patch” branco por trás do logo (para legibilidade)
+      const pad = Math.round(logoSize * 0.18);
+      const rx = x - pad;
+      const ry = y - pad;
+      const rw = logoSize + pad * 2;
+      const rh = logoSize + pad * 2;
 
-      // vamos ajustar imagem para caber com descrição + QR + loja
-      // tentamos com font 11 e depois ajustamos se necessário
-      doc.setTextColor(0);
-      const maxDescH = 40; // “teto” razoável; se precisar, cortamos com …
-      const fitted = fitDescricao_(doc, descricao, contentW, maxDescH, 11);
+      // rounded rect
+      const r = Math.round(logoSize * 0.2);
+      ctx.save();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath();
+      ctx.moveTo(rx + r, ry);
+      ctx.arcTo(rx + rw, ry, rx + rw, ry + rh, r);
+      ctx.arcTo(rx + rw, ry + rh, rx, ry + rh, r);
+      ctx.arcTo(rx, ry + rh, rx, ry, r);
+      ctx.arcTo(rx, ry, rx + rw, ry, r);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
 
-      // altura total necessária
-      const totalNeeded =
-        margin + imgSize + gapAfterImg +
-        fitted.height + gapAfterDesc +
-        qrSize + gapAfterQr +
-        lojaH + margin;
+      ctx.drawImage(logo, x, y, logoSize, logoSize);
 
-      // se não cabe, encolhe a imagem (e se preciso, QR)
-      if (totalNeeded > pageHeight) {
-        // primeiro, tenta reduzir QR um pouco
-        while (qrSize > 38) {
-          const need =
-            margin + imgSize + gapAfterImg +
-            fitted.height + gapAfterDesc +
-            qrSize + gapAfterQr +
-            lojaH + margin;
-          if (need <= pageHeight) break;
-          qrSize -= 2;
+      return canvas.toDataURL('image/png');
+    }
+
+    /*************************************************
+     * GERAR PDF
+     * - imagem quadrada (topo)
+     * - por baixo: descrição
+     * - por baixo: QRCode centrado (com logo)
+     * - sem nome do assistente; com nome da loja no rodapé
+     *************************************************/
+    async function gerarPDFQRCodes() {
+      try {
+        const { formato, loja } = obterSelecaoEfetivaQRCodes_();
+        if (!formato || !loja) {
+          alert('Seleciona formato e loja (na App ou aqui no Admin) antes de gerar o PDF.');
+          return;
         }
 
-        // depois encolhe imagem para o que sobrar
-        const availableForImg =
-          pageHeight - (margin + gapAfterImg + fitted.height + gapAfterDesc + qrSize + gapAfterQr + lojaH + margin);
+        const list = document.getElementById('admin-qrcodes-list');
+        if (!list) {
+          alert('Abre o separador QRCodes primeiro.');
+          return;
+        }
 
-        imgSize = Math.min(contentW, Math.max(55, availableForImg));
+        const selectedIdxs = [...list.querySelectorAll('input.qr-ast-check:checked')]
+          .map(cb => Number(cb.getAttribute('data-idx')))
+          .filter(n => !Number.isNaN(n));
+
+        if (selectedIdxs.length === 0) {
+          alert('Seleciona pelo menos 1 assistente para imprimir.');
+          return;
+        }
+
+        const setSel = new Set(selectedIdxs);
+
+        const assistentes = STATE.assistentes
+          .map((a, idx) => ({ ...a, __index: idx }))
+          .filter(a => setSel.has(a.__index))
+          .sort((a, b) => (a.label || a.nome || '').localeCompare((b.label || b.nome || ''), undefined, { sensitivity: 'base' }));
+
+        const semDescricao = assistentes.filter(a => !(a.descricao || a.desc || '').trim());
+        if (semDescricao.length) {
+          abrirModalDescricaoEmFalta(semDescricao, () => gerarPDFQRCodes());
+          return;
+        }
+
+        const jsPDF = await garantirPdfLib();
+        const doc = new jsPDF({ format: 'a5', unit: 'mm' });
+
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = 10;
+
+        const imageWidth = pageWidth - (margin * 2);
+        const imageHeight = imageWidth;
+
+        const yAfterImage = margin + imageHeight + 6;
+        const usableBottom = pageHeight - margin;
+        const available = usableBottom - yAfterImage;
+
+        const lojaLabel = `${formatarTextoBonito(formato)} – ${loja}`;
+
+        const minQr = 42;      // mm
+        const maxQr = 70;      // mm
+        const storeLineH = 6;  // mm (texto loja)
+        const gap1 = 6;
+        const gap2 = 6;
+
+        // reserva mínima: QR + texto loja
+        const descMax = Math.max(18, available - minQr - storeLineH - gap1 - gap2);
+
+        const diff = hasUnpublishedChanges_();
+
+        for (let idx = 0; idx < assistentes.length; idx++) {
+          const a = assistentes[idx];
+          if (idx > 0) doc.addPage('a5', 'p');
+
+          const imgSrc = a.icone || 'AibyAuchan.png';
+          let imgData = null;
+          try { imgData = await carregarImagemComoDataURL(imgSrc); }
+          catch { imgData = await carregarImagemComoDataURL('AibyAuchan.png'); }
+
+          const qrUrl = criarUrlQRCode(a, formatarTextoBonito(formato), loja);
+
+          // QR com logo ao centro (AibyAuchan.jpg se existir; senão png)
+          const qrData = await gerarQRCodeComLogoDataURL_(qrUrl, 'AibyAuchan.jpg').catch(async () => {
+            return await gerarQRCodeComLogoDataURL_(qrUrl, 'AibyAuchan.png');
+          });
+
+          // 1) IMAGEM (quadrada)
+          doc.addImage(imgData, 'PNG', margin, margin, imageWidth, imageHeight);
+
+          // 2) DESCRIÇÃO (full width) por baixo da imagem
+          const descricao = (a.descricao || a.desc || '').trim();
+          doc.setTextColor(0);
+          doc.setFontSize(11);
+
+          const descX = margin;
+          const descY = yAfterImage;
+          const descW = imageWidth;
+
+          let lines = doc.splitTextToSize(descricao, descW);
+          let lineH = 4.8;
+          let totalH = lines.length * lineH;
+
+          // reduzir se for gigante
+          if (totalH > descMax) {
+            doc.setFontSize(10);
+            lines = doc.splitTextToSize(descricao, descW);
+            lineH = 4.5;
+            totalH = lines.length * lineH;
+          }
+
+          // cortar com reticências até caber
+          while (totalH > descMax && lines.length > 2) {
+            lines.pop();
+            lines[lines.length - 1] = `${lines[lines.length - 1].replace(/\s*$/, '')}…`;
+            totalH = lines.length * lineH;
+          }
+
+          doc.text(lines, descX, descY + 4);
+
+          const yAfterDesc = descY + Math.min(descMax, totalH + 6);
+
+          // 3) QR por baixo da descrição (centrado)
+          const qrAvail = usableBottom - yAfterDesc - storeLineH - gap2;
+          const qrSize = Math.max(minQr, Math.min(maxQr, qrAvail));
+
+          const qrX = (pageWidth - qrSize) / 2;
+          const qrY = yAfterDesc + gap1;
+
+          doc.addImage(qrData, 'PNG', qrX, qrY, qrSize, qrSize);
+
+          // 4) Nome da loja no rodapé (não aparece nome do assistente)
+          doc.setFontSize(10);
+          doc.setTextColor(60);
+          doc.text(lojaLabel, pageWidth / 2, usableBottom, { align: 'center' });
+        }
+
+        if (diff.changed) {
+          alert(`⚠️ Atenção: existem alterações por publicar.\nDepois de imprimires, vai à aba Guardar e faz download do config.js para atualizar a app.`);
+        }
+
+        doc.save(`qrcodes_${formatarTextoBonito(formato)}_${loja}.pdf`);
+      } catch (error) {
+        console.error('PDF ERROR:', error);
+        const detalhe = (error && (error.message || String(error))) || 'Erro desconhecido';
+        alert('Falhou a geração do PDF. Detalhe: ' + detalhe);
       }
-
-      // se ainda assim não cabe (descrição mega), corta mais a descrição
-      const descMaxHReal =
-        pageHeight - (margin + imgSize + gapAfterImg + gapAfterDesc + qrSize + gapAfterQr + lojaH + margin);
-
-      const fitted2 = fitDescricao_(doc, descricao, contentW, Math.max(20, descMaxHReal), fitted.fontSize);
-
-      // --- coordenadas finais ---
-      const imgX = (pageWidth - imgSize) / 2;
-      const imgY = margin;
-
-      const descY = imgY + imgSize + gapAfterImg; // baseline da 1ª linha
-      const qrY = descY + fitted2.height + gapAfterDesc;
-      const qrX = (pageWidth - qrSize) / 2;
-
-      const lojaY = qrY + qrSize + gapAfterQr;
-
-      // --- desenhar no PDF ---
-      // imagem quadrada
-      doc.addImage(imgData, 'PNG', imgX, imgY, imgSize, imgSize);
-
-      // descrição centrada
-      doc.setFontSize(fitted2.fontSize);
-      doc.setTextColor(0);
-      doc.text(fitted2.lines, pageWidth / 2, descY, { align: 'center' });
-
-      // QR centrado (com logo)
-      doc.addImage(qrData, 'PNG', qrX, qrY, qrSize, qrSize);
-
-      // nome da loja por baixo do QR
-      doc.setFontSize(lojaFont);
-      doc.setTextColor(60);
-      doc.text(lojaText, pageWidth / 2, lojaY, { align: 'center' });
     }
-
-    if (diff.changed) {
-      alert(`⚠️ Atenção: existem alterações por publicar.\nDepois de imprimires, vai à aba Guardar e faz download do config.js para atualizar a app.`);
-    }
-
-    doc.save(`qrcodes_${formatarTextoBonito(formato)}_${loja}.pdf`);
-  } catch (error) {
-    console.error('PDF ERROR:', error);
-    const detalhe = (error && (error.message || String(error))) || 'Erro desconhecido';
-    alert('Falhou a geração do PDF. Detalhe: ' + detalhe);
-  }
-}
   </script>
 </body>
 </html>
