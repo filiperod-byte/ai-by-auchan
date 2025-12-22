@@ -459,51 +459,85 @@
     function abrirAdmin() { document.getElementById('admin-overlay').style.display = 'flex'; renderizarAdminListas(); atualizarDropdownsAdminInicial(); atualizarResumoQRCodeAdmin(); }
     function fecharAdmin() { document.getElementById('admin-overlay').style.display = 'none'; cancelarEdicao(); }
 
-    function switchAdminTab(t) {
-      document.querySelectorAll('.admin-tab').forEach(x => x.classList.remove('active'));
-      ['lojas','assistentes','exportar','qrcodes'].forEach(id => {
-        const tab = document.getElementById(`admin-tab-${id}`);
-        if (tab) tab.style.display = 'none';
-      });
+if (t === 'qrcodes') atualizarResumoQRCodeAdmin();
 
-      const tabAtual = document.getElementById(`admin-tab-${t}`);
-      if (tabAtual) tabAtual.style.display = 'block';
+function renderizarAdminListas() {
+  // LOJAS
+  const ll = document.getElementById('admin-lojas-list');
+  ll.innerHTML = '';
+  const lSorted = [...STATE.lojas].sort(ordenarLojas);
 
-      const tabs = ['lojas','assistentes','exportar','qrcodes'];
-      const idx = tabs.indexOf(t);
-      if (idx >= 0) document.querySelectorAll('.admin-tab')[idx].classList.add('active');
+  lSorted.forEach(l => {
+    const idx = STATE.lojas.indexOf(l);
+    const d = document.createElement('div');
+    d.className = 'admin-item';
+    d.innerHTML = `
+      <span>${formatarTextoBonito(l.formato)} - ${l.loja}</span>
+      <button type="button" class="delete" onclick="adminRemoverLoja(${idx})" title="Apagar">X</button>
+    `;
+    ll.appendChild(d);
+  });
 
-      if (t === 'assistentes') atualizarDropdownsAdminInicial();
-      if (t === 'exportar') atualizarSugestaoVersao();
-      if (t === 'qrcodes') atualizarResumoQRCodeAdmin();
-    }
+  // ASSISTENTES
+  const al = document.getElementById('admin-assistentes-list');
+  al.innerHTML = '';
+  const aSorted = [...STATE.assistentes].sort((a, b) => (a.label || '').localeCompare(b.label || ''));
 
-    function renderizarAdminListas() {
-      const ll = document.getElementById('admin-lojas-list'); ll.innerHTML = '';
-      const lSorted = [...STATE.lojas].sort(ordenarLojas);
-      lSorted.forEach(l => {
-        const idx = STATE.lojas.indexOf(l);
-        const d = document.createElement('div'); d.className='admin-item';
-        d.innerHTML = `<span>${formatarTextoBonito(l.formato)} - ${l.loja}</span><button onclick="adminRemoverLoja(${idx})">X</button>`;
-        ll.appendChild(d);
-      });
+  aSorted.forEach(a => {
+    const idx = STATE.assistentes.indexOf(a);
+    const d = document.createElement('div');
+    d.className = 'admin-item';
 
-      const al = document.getElementById('admin-assistentes-list'); al.innerHTML = '';
-      const aSorted = [...STATE.assistentes].sort((a,b)=>a.label.localeCompare(b.label));
-      aSorted.forEach(a => {
-        const idx = STATE.assistentes.indexOf(a);
-        const d = document.createElement('div'); d.className='admin-item';
-	d.innerHTML = `<div class="admin-item-text" onclick="prepararEdicao(${idx})">
-	${a.label} <small style="opacity:0.7">(${a.formato || '—'})(${a.loja || '—'})</small>
+    d.innerHTML = `
+      <div class="admin-item-text" onclick="prepararEdicao(${idx})">
+        ${(a.label || a.nome || '(sem nome)')}
+        <small style="opacity:0.7">(${a.formato || '—'})(${a.loja || '—'})</small>
+      </div>
 
-	  </div>
-	  <div style="display:flex; gap:8px; align-items:center;">
-	    <button class="dup" onclick="adminDuplicarAssistente(event, ${idx})" title="Duplicar">⧉</button>
-	       <button class="delete" onclick="adminRemoverAssistente(event, ${idx})" title="Apagar">X</button>
-	  </div>`;
-        al.appendChild(d);
-      });
-    }
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button type="button" class="dup" onclick="adminDuplicarAssistenteByIndex(${idx})" title="Duplicar">⧉</button>
+        <button type="button" class="delete" onclick="adminRemoverAssistenteByIndex(${idx})" title="Apagar">X</button>
+      </div>
+    `;
+    al.appendChild(d);
+  });
+}
+
+function adminRemoverAssistenteByIndex(i) {
+  if (!Number.isInteger(i) || !STATE.assistentes[i]) return;
+  if (!confirm("Apagar?")) return;
+
+  STATE.assistentes.splice(i, 1);
+  guardarDadosLocais();
+renderizarListaQRCodes_();
+
+  renderizarAdminListas();
+
+  if (editingAssistenteIndex === i) cancelarEdicao();
+}
+
+function adminDuplicarAssistenteByIndex(i) {
+  const src = STATE.assistentes[i];
+  if (!src) return;
+
+  const clone = {
+    ...src,
+    nome: src.nome || src.label,
+    label: (src.label || src.nome || 'Assistente') + ' (cópia)',
+    // scope por preencher
+    formato: '',
+    loja: ''
+  };
+
+  // evita bater logo em nomes já existentes
+  clone.label = gerarLabelCopiaUnica_(clone.label);
+
+  STATE.assistentes.push(clone);
+  guardarDadosLocais();
+  renderizarAdminListas();
+  prepararEdicao(STATE.assistentes.length - 1);
+}
+
 
 function atualizarDropdownsAdminInicial() {
   const s = document.getElementById('admin-ast-formato');
@@ -819,36 +853,157 @@ function adminSaveAssistente() {
     }
 
     /* --- QRCODES + PDF --- */
-    function inicializarAdminQRCodes() {
-      const tabsContainer = document.querySelector('.admin-tabs');
-      if (!tabsContainer || document.getElementById('admin-tab-qrcodes')) return;
+function inicializarAdminQRCodes() {
+  const tabsContainer = document.querySelector('.admin-tabs');
+  if (!tabsContainer || document.getElementById('admin-tab-qrcodes')) return;
 
-      const tab = document.createElement('div');
-      tab.className = 'admin-tab';
-      tab.textContent = 'QRCodes';
-      tab.onclick = () => switchAdminTab('qrcodes');
-      tabsContainer.appendChild(tab);
+  // cria tab
+  const tab = document.createElement('div');
+  tab.className = 'admin-tab';
+  tab.textContent = 'QRCodes';
+  tab.onclick = () => switchAdminTab('qrcodes');
+  tabsContainer.appendChild(tab);
 
-      const overlayBox = document.querySelector('#admin-overlay .overlay-box');
-      const exportarTab = document.getElementById('admin-tab-exportar');
+  // cria conteúdo
+  const overlayBox = document.querySelector('#admin-overlay .overlay-box');
+  const exportarTab = document.getElementById('admin-tab-exportar');
 
-      const qrcodesTab = document.createElement('div');
-      qrcodesTab.id = 'admin-tab-qrcodes';
-      qrcodesTab.style.display = 'none';
-      qrcodesTab.innerHTML = `
-        <p style="font-size: 0.85rem; margin-bottom: 10px;">
-          Gera um PDF A5 com 1 página por assistente para a seleção atual da app.
-        </p>
-        <div class="version-control" style="margin-bottom: 10px;">
-          <label>Seleção atual:</label>
-          <strong id="admin-qrcodes-selecao" style="color:#333;">...</strong>
-          <div id="admin-qrcodes-resumo" style="margin-top:8px; font-size:0.8rem; color:#666;"></div>
+  const qrcodesTab = document.createElement('div');
+  qrcodesTab.id = 'admin-tab-qrcodes';
+  qrcodesTab.style.display = 'none';
+
+  qrcodesTab.innerHTML = `
+    <p style="font-size: 0.85rem; margin-bottom: 10px;">
+      Escolhe que assistentes queres imprimir. Só os selecionados entram no PDF.
+    </p>
+
+    <div class="version-control" style="margin-bottom: 10px;">
+      <label>Seleção atual:</label>
+      <strong id="admin-qrcodes-selecao" style="color:#333;">...</strong>
+
+      <div id="admin-qrcodes-warning" style="margin-top:8px; font-size:0.85rem;"></div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px;">
+        <label style="display:flex; gap:10px; align-items:center; cursor:pointer; user-select:none;">
+          <input type="checkbox" id="admin-qrcodes-selectall" />
+          <span style="font-weight:700; color:#333;">Selecionar tudo</span>
+        </label>
+        <span id="admin-qrcodes-count" style="font-size:0.85rem; color:#666;">...</span>
+      </div>
+
+      <div id="admin-qrcodes-list"
+           style="margin-top:10px; max-height:45vh; overflow:auto; border:1px solid #eee; border-radius:12px; background:#fafafa;">
+      </div>
+    </div>
+
+    <button onclick="gerarPDFQRCodes()">📄 Gerar PDF QRCodes</button>
+  `;
+
+  overlayBox.insertBefore(qrcodesTab, exportarTab.nextSibling);
+}
+
+function renderizarListaQRCodes_() {
+  const selecao = document.getElementById('admin-qrcodes-selecao');
+  const warning = document.getElementById('admin-qrcodes-warning');
+  const list = document.getElementById('admin-qrcodes-list');
+  const selectAll = document.getElementById('admin-qrcodes-selectall');
+  const count = document.getElementById('admin-qrcodes-count');
+
+  if (!selecao || !warning || !list || !selectAll || !count) return;
+
+  const formato = localStorage.getItem(FORMATO_KEY);
+  const loja = localStorage.getItem(LOJA_KEY);
+
+  if (!formato || !loja) {
+    selecao.textContent = 'Sem seleção';
+    warning.innerHTML = `<span style="color:#d63a3e; font-weight:800;">Escolhe formato e loja na app antes de gerar o PDF.</span>`;
+    list.innerHTML = '';
+    count.textContent = '';
+    selectAll.checked = false;
+    selectAll.disabled = true;
+    return;
+  }
+
+  selecao.textContent = `${formatarTextoBonito(formato)} – ${loja}`;
+
+  const candidatos = STATE.assistentes
+    .map((a, idx) => ({ ...a, __index: idx }))
+    .filter(a => {
+      const f = (a.formato || '').toUpperCase();
+      const l = (a.loja || '').toUpperCase();
+      const ufN = (formato || '').toUpperCase();
+      const ulN = (loja || '').toUpperCase();
+      return (f === '*' || f === ufN) && (l === '*' || l === ulN);
+    })
+    .sort((a,b)=> (a.label||'').localeCompare(b.label||''));
+
+  const changesInfo = contarAlteracoesDescricaoNaoPublicadas_(candidatos);
+
+  if (changesInfo.count > 0) {
+    warning.innerHTML = `<span style="color:#d63a3e; font-weight:900;">⚠️ Existem ${changesInfo.count} descrições novas/alteradas. Depois imprime e vai à aba <b>Guardar</b> fazer download do <b>config.js</b>.</span>`;
+  } else {
+    warning.innerHTML = `<span style="color:#2e7d32; font-weight:900;">✅ Tudo sincronizado com a versão publicada.</span>`;
+  }
+
+  count.textContent = `${candidatos.length} assistente(s)`;
+
+  if (candidatos.length === 0) {
+    list.innerHTML = `<div style="padding:12px; color:#666;">Nenhum assistente disponível para esta seleção.</div>`;
+    selectAll.checked = false;
+    selectAll.disabled = true;
+    return;
+  }
+
+  selectAll.disabled = false;
+
+  // Render rows
+  list.innerHTML = candidatos.map(a => {
+    const img = (a.icone || 'AibyAuchan.png');
+    const label = (a.label || a.nome || '').trim();
+    const scope = `${formatarTextoBonito(a.formato || '') || '—'} · ${a.loja || '—'}`;
+
+    return `
+      <label style="
+        display:flex; align-items:center; gap:12px;
+        padding:10px 12px; border-bottom:1px solid #eee;
+        cursor:pointer; user-select:none; background:#fff;
+      ">
+        <img src="${img}" onerror="this.src='AibyAuchan.png'"
+             style="width:38px; height:38px; object-fit:cover; border-radius:10px; border:1px solid #eee; flex:0 0 auto;" />
+
+        <div style="flex:1; min-width:0;">
+          <div style="font-weight:900; color:#333; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            ${label}
+          </div>
+          <div style="font-size:0.8rem; color:#666; line-height:1.2;">
+            ${scope}
+          </div>
         </div>
-        <button onclick="gerarPDFQRCodes()">📄 Gerar PDF QRCodes</button>
-      `;
 
-      overlayBox.insertBefore(qrcodesTab, exportarTab.nextSibling);
-    }
+        <input type="checkbox" class="qr-ast-check" data-idx="${a.__index}" checked
+               style="width:18px; height:18px; flex:0 0 auto;" />
+      </label>
+    `;
+  }).join('');
+
+  // Select all toggle
+  selectAll.checked = true;
+  selectAll.onchange = () => {
+    const cbs = list.querySelectorAll('input.qr-ast-check');
+    cbs.forEach(cb => cb.checked = selectAll.checked);
+  };
+
+  // Se o user mexer manualmente, atualiza o "Selecionar tudo"
+  list.addEventListener('change', () => {
+    const cbs = [...list.querySelectorAll('input.qr-ast-check')];
+    const allOn = cbs.length > 0 && cbs.every(cb => cb.checked);
+    const anyOn = cbs.some(cb => cb.checked);
+    selectAll.indeterminate = anyOn && !allOn; // fica aquele “meio selecionado”
+    selectAll.checked = allOn;
+  }, { passive: true });
+}
+
+
 
 function atualizarResumoQRCodeAdmin() {
   const selecao = document.getElementById('admin-qrcodes-selecao');
@@ -1318,6 +1473,586 @@ async function gerarPDFQRCodes(selectedIdxs) {
     alert('Falhou a geração do PDF. Detalhe: ' + detalhe);
   }
 }
+
+/*************************************************
+ * PATCH FINAL (cola no fim do <script>)
+ *************************************************/
+
+/* ---------- Helpers base ---------- */
+function normKey_(s) {
+  return (s || '').toString().trim().toLowerCase();
+}
+
+function nomeKeyAssistente_(a) {
+  return normKey_((a && (a.nome || a.label)) || '');
+}
+
+function scopeKey_(a) {
+  const f = ((a && a.formato) ?? '').toString().trim().toUpperCase();
+  const l = ((a && a.loja) ?? '').toString().trim().toUpperCase();
+  return `${f}||${l}`;
+}
+
+// Dois escopos sobrepõem-se se existir pelo menos 1 seleção (formato/loja) onde ambos aparecem
+function scopesOverlap_(a, b) {
+  const af = ((a && a.formato) ?? '').toString().trim().toUpperCase();
+  const bf = ((b && b.formato) ?? '').toString().trim().toUpperCase();
+  const al = ((a && a.loja) ?? '').toString().trim().toUpperCase();
+  const bl = ((b && b.loja) ?? '').toString().trim().toUpperCase();
+
+  // Se algum dos dois ainda não tem scope definido, não há conflito (é “rascunho”)
+  if (!af || !al || !bf || !bl) return false;
+
+  const fmtOverlap = (af === '*') || (bf === '*') || (af === bf);
+  const lojaOverlap = (al === '*') || (bl === '*') || (al === bl);
+
+  return fmtOverlap && lojaOverlap;
+}
+
+function isGlobalScope_(a) {
+  const f = ((a && a.formato) ?? '').toString().trim().toUpperCase();
+  const l = ((a && a.loja) ?? '').toString().trim().toUpperCase();
+  return f === '*' && l === '*';
+}
+
+function gerarLabelCopiaUnica_(base) {
+  let candidate = base;
+  let n = 2;
+  const exists = (lbl) => STATE.assistentes.some(a => normKey_(a.label) === normKey_(lbl));
+  while (exists(candidate)) {
+    candidate = `${base} ${n}`;
+    n++;
+  }
+  return candidate;
+}
+
+/* ---------- “Publicada vs Local” (para aviso de sync) ---------- */
+function publishedAssistMap_() {
+  const src = (typeof DADOS_PADRAO !== 'undefined' && DADOS_PADRAO && Array.isArray(DADOS_PADRAO.assistentes))
+    ? DADOS_PADRAO.assistentes
+    : [];
+
+  const map = new Map();
+  src.forEach(a => {
+    const urlK = normKey_(a.url);
+    const nameK = nomeKeyAssistente_(a);
+    const scK = scopeKey_(a);
+    const desc = ((a.descricao || a.desc) || '').toString().trim();
+
+    // chave preferida: URL + scope (mais estável)
+    const key = urlK ? `U:${urlK}::S:${scK}` : `N:${nameK}::S:${scK}`;
+    map.set(key, desc);
+  });
+  return map;
+}
+
+function contarAlteracoesDescricaoNaoPublicadas_(assistentes) {
+  const pub = publishedAssistMap_();
+  let count = 0;
+
+  (assistentes || []).forEach(a => {
+    const urlK = normKey_(a.url);
+    const nameK = nomeKeyAssistente_(a);
+    const scK = scopeKey_(a);
+
+    const key = urlK ? `U:${urlK}::S:${scK}` : `N:${nameK}::S:${scK}`;
+
+    const pubDesc = (pub.get(key) || '').trim();
+    const localDesc = (((a.descricao || a.desc) || '') + '').trim();
+
+    if (pubDesc !== localDesc) count++;
+  });
+
+  return { count };
+}
+
+/* ---------- FIX: apagar/duplicar assistente sem depender de event ---------- */
+function adminRemoverAssistenteByIndex(i) {
+  if (!Number.isInteger(i) || !STATE.assistentes[i]) return;
+  if (!confirm("Apagar?")) return;
+
+  STATE.assistentes.splice(i, 1);
+  guardarDadosLocais();
+  renderizarAdminListas();
+
+  if (editingAssistenteIndex === i) cancelarEdicao();
+}
+
+function adminDuplicarAssistenteByIndex(i) {
+  const src = STATE.assistentes[i];
+  if (!src) return;
+
+  const baseLabel = (src.label || src.nome || 'Assistente') + ' (cópia)';
+
+  const clone = {
+    ...src,
+    nome: src.nome || src.label,
+    label: gerarLabelCopiaUnica_(baseLabel),
+    // scope por preencher (não aparece na app e não choca com regras)
+    formato: '',
+    loja: ''
+  };
+
+  STATE.assistentes.push(clone);
+  guardarDadosLocais();
+  renderizarAdminListas();
+  prepararEdicao(STATE.assistentes.length - 1);
+}
+
+/* ---------- FIX: render admin listas (botões funcionam) ---------- */
+function renderizarAdminListas() {
+  // LOJAS
+  const ll = document.getElementById('admin-lojas-list');
+  if (ll) {
+    ll.innerHTML = '';
+    const lSorted = [...STATE.lojas].sort(ordenarLojas);
+
+    lSorted.forEach(l => {
+      const idx = STATE.lojas.indexOf(l);
+      const d = document.createElement('div');
+      d.className = 'admin-item';
+      d.innerHTML = `
+        <span>${formatarTextoBonito(l.formato)} - ${l.loja}</span>
+        <button type="button" class="delete" onclick="adminRemoverLoja(${idx})" title="Apagar">X</button>
+      `;
+      ll.appendChild(d);
+    });
+  }
+
+  // ASSISTENTES
+  const al = document.getElementById('admin-assistentes-list');
+  if (al) {
+    al.innerHTML = '';
+    const aSorted = [...STATE.assistentes].sort((a, b) => (a.label || '').localeCompare(b.label || ''));
+
+    aSorted.forEach(a => {
+      const idx = STATE.assistentes.indexOf(a);
+      const d = document.createElement('div');
+      d.className = 'admin-item';
+
+      d.innerHTML = `
+        <div class="admin-item-text" onclick="prepararEdicao(${idx})">
+          ${(a.label || a.nome || '(sem nome)')}
+          <small style="opacity:0.7">(${a.formato || '—'})(${a.loja || '—'})</small>
+        </div>
+
+        <div style="display:flex; gap:8px; align-items:center;">
+          <button type="button" class="dup" onclick="adminDuplicarAssistenteByIndex(${idx})" title="Duplicar">⧉</button>
+          <button type="button" class="delete" onclick="adminRemoverAssistenteByIndex(${idx})" title="Apagar">X</button>
+        </div>
+      `;
+      al.appendChild(d);
+    });
+  }
+}
+
+/* ---------- Regras de conflito (global vs específico) + save ---------- */
+function validarConflitosAssistente_(novo, editingIdx) {
+  // permite rascunho (formato/loja vazios) -> não bloqueia
+  const nf = ((novo.formato ?? '') + '').trim();
+  const nl = ((novo.loja ?? '') + '').trim();
+  if (!nf || !nl) return null;
+
+  const novoName = nomeKeyAssistente_(novo);
+  if (!novoName) return null;
+
+  for (let idx = 0; idx < STATE.assistentes.length; idx++) {
+    if (idx === editingIdx) continue;
+    const a = STATE.assistentes[idx];
+
+    if (nomeKeyAssistente_(a) !== novoName) continue;
+
+    // se scopes sobrepõem, há conflito
+    if (!scopesOverlap_(novo, a)) continue;
+
+    const aGlobal = isGlobalScope_(a);
+    const novoGlobal = isGlobalScope_(novo);
+
+    if (aGlobal && !novoGlobal) {
+      return `Já existe um assistente "${novo.label || novo.nome}" associado a TODOS os formatos/lojas (*)(*). Não podes criar versões mais específicas com o mesmo nome.`;
+    }
+    if (!aGlobal && novoGlobal) {
+      return `Já existem versões específicas do assistente "${novo.label || novo.nome}". Não podes criar uma versão global (*)(*) com o mesmo nome.`;
+    }
+
+    return `Já existe um assistente "${novo.label || novo.nome}" com configuração que sobrepõe esta (mesmo formato/loja ou wildcard).`;
+  }
+
+  return null;
+}
+
+// substitui a tua adminSaveAssistente por esta
+function adminSaveAssistente() {
+  const l = document.getElementById('admin-ast-label').value.trim();
+  const n = l; // manténs nome = label (como tinhas)
+  const u = document.getElementById('admin-ast-url').value.trim();
+  const i = document.getElementById('admin-ast-icone').value.trim();
+  const d = document.getElementById('admin-ast-descricao').value.trim();
+
+  let f = (document.getElementById('admin-ast-formato').value ?? '').toString();
+  let loj = (document.getElementById('admin-ast-loja').value ?? '').toString();
+
+  // Mantém comportamento: se vazio, fica vazio (rascunho)
+  // Se tiver valor e não for '*', formatamos bonito
+  if (f && f !== '*' ) f = formatarTextoBonito(f);
+
+  if (!l || !u) return alert("Falta Nome ou URL");
+  if (!d) return alert("A descrição é obrigatória (senão o PDF não dá 😅).");
+
+  const novo = {
+    formato: f,
+    loja: loj,
+    nome: n,
+    label: l,
+    url: u,
+    icone: i,
+    descricao: d,
+    desc: d // compat
+  };
+
+  // Regra: global vs específico (e sobreposições)
+  const conflito = validarConflitosAssistente_(novo, editingAssistenteIndex);
+  if (conflito) return alert(conflito);
+
+  // Bloqueia duplicado EXACTO (para não ter clones iguais)
+  const dupExato = STATE.assistentes.some((a, idx) => {
+    if (editingAssistenteIndex === idx) return false;
+    return (
+      normKey_(a.nome) === normKey_(novo.nome) &&
+      normKey_(a.label) === normKey_(novo.label) &&
+      normKey_(a.url) === normKey_(novo.url) &&
+      ((a.formato || '') === (novo.formato || '')) &&
+      ((a.loja || '') === (novo.loja || ''))
+    );
+  });
+  if (dupExato) return alert("Assistente duplicado!");
+
+  if (editingAssistenteIndex >= 0) STATE.assistentes[editingAssistenteIndex] = novo;
+  else STATE.assistentes.push(novo);
+
+  guardarDadosLocais();
+  renderizarAdminListas();
+  cancelarEdicao();
+
+  // se estivermos no tab qrcodes, refresca a lista
+  if (document.getElementById('admin-tab-qrcodes')?.style?.display === 'block') {
+    renderizarListaQRCodes_();
+  }
+}
+
+/* ---------- QRCODES UI: sem popup, lista inline, foto + checkbox ---------- */
+function inicializarAdminQRCodes() {
+  const tabsContainer = document.querySelector('.admin-tabs');
+  if (!tabsContainer || document.getElementById('admin-tab-qrcodes')) return;
+
+  const tab = document.createElement('div');
+  tab.className = 'admin-tab';
+  tab.textContent = 'QRCodes';
+  tab.onclick = () => switchAdminTab('qrcodes');
+  tabsContainer.appendChild(tab);
+
+  const overlayBox = document.querySelector('#admin-overlay .overlay-box');
+  const exportarTab = document.getElementById('admin-tab-exportar');
+
+  const qrcodesTab = document.createElement('div');
+  qrcodesTab.id = 'admin-tab-qrcodes';
+  qrcodesTab.style.display = 'none';
+
+  qrcodesTab.innerHTML = `
+    <p style="font-size:0.85rem; margin-bottom:10px;">
+      Escolhe que assistentes queres imprimir. Só os selecionados entram no PDF.
+    </p>
+
+    <div class="version-control" style="margin-bottom:10px;">
+      <label>Seleção atual:</label>
+      <strong id="admin-qrcodes-selecao" style="color:#333;">...</strong>
+
+      <div id="admin-qrcodes-warning" style="margin-top:8px; font-size:0.85rem;"></div>
+
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top:10px;">
+        <label style="display:flex; gap:10px; align-items:center; cursor:pointer; user-select:none;">
+          <input type="checkbox" id="admin-qrcodes-selectall" />
+          <span style="font-weight:800; color:#333;">Selecionar tudo</span>
+        </label>
+
+        <span id="admin-qrcodes-count" style="font-size:0.85rem; color:#666;">...</span>
+      </div>
+
+      <div id="admin-qrcodes-list"
+           style="margin-top:10px; max-height:45vh; overflow:auto; border:1px solid #eee; border-radius:12px; background:#fafafa;">
+      </div>
+    </div>
+
+    <button onclick="gerarPDFQRCodes()">📄 Gerar PDF QRCodes</button>
+  `;
+
+  overlayBox.insertBefore(qrcodesTab, exportarTab.nextSibling);
+}
+
+function renderizarListaQRCodes_() {
+  const selecao = document.getElementById('admin-qrcodes-selecao');
+  const warning = document.getElementById('admin-qrcodes-warning');
+  const list = document.getElementById('admin-qrcodes-list');
+  const selectAll = document.getElementById('admin-qrcodes-selectall');
+  const count = document.getElementById('admin-qrcodes-count');
+
+  if (!selecao || !warning || !list || !selectAll || !count) return;
+
+  const formato = localStorage.getItem(FORMATO_KEY);
+  const loja = localStorage.getItem(LOJA_KEY);
+
+  if (!formato || !loja) {
+    selecao.textContent = 'Sem seleção';
+    warning.innerHTML = `<span style="color:#d63a3e; font-weight:900;">Escolhe formato e loja na app antes de gerar o PDF.</span>`;
+    list.innerHTML = '';
+    count.textContent = '';
+    selectAll.checked = false;
+    selectAll.indeterminate = false;
+    selectAll.disabled = true;
+    return;
+  }
+
+  selecao.textContent = `${formatarTextoBonito(formato)} – ${loja}`;
+
+  const candidatos = STATE.assistentes
+    .map((a, idx) => ({ ...a, __index: idx }))
+    .filter(a => {
+      const f = (a.formato || '').toUpperCase();
+      const l = (a.loja || '').toUpperCase();
+      const ufN = (formato || '').toUpperCase();
+      const ulN = (loja || '').toUpperCase();
+      return (f === '*' || f === ufN) && (l === '*' || l === ulN);
+    })
+    .sort((a,b)=> (a.label||'').localeCompare(b.label||''));
+
+  const changesInfo = contarAlteracoesDescricaoNaoPublicadas_(candidatos);
+
+  if (changesInfo.count > 0) {
+    warning.innerHTML = `<span style="color:#d63a3e; font-weight:900;">⚠️ Existem ${changesInfo.count} descrições novas/alteradas. Depois imprime e vai à aba <b>Guardar</b> fazer download do <b>config.js</b>.</span>`;
+  } else {
+    warning.innerHTML = `<span style="color:#2e7d32; font-weight:900;">✅ Tudo sincronizado com a versão publicada.</span>`;
+  }
+
+  count.textContent = `${candidatos.length} assistente(s)`;
+
+  if (candidatos.length === 0) {
+    list.innerHTML = `<div style="padding:12px; color:#666;">Nenhum assistente disponível para esta seleção.</div>`;
+    selectAll.checked = false;
+    selectAll.indeterminate = false;
+    selectAll.disabled = true;
+    return;
+  }
+
+  selectAll.disabled = false;
+
+  // Render rows (foto + nome + scope + checkbox alinhados)
+  list.innerHTML = candidatos.map(a => {
+    const img = (a.icone || 'AibyAuchan.png');
+    const label = (a.label || a.nome || '').trim();
+    const scope = `${(a.formato ? formatarTextoBonito(a.formato) : '—')} · ${(a.loja || '—')}`;
+
+    return `
+      <label style="
+        display:flex; align-items:center; gap:12px;
+        padding:10px 12px; border-bottom:1px solid #eee;
+        cursor:pointer; user-select:none; background:#fff;
+      ">
+        <img src="${img}" onerror="this.src='AibyAuchan.png'"
+             style="width:38px; height:38px; object-fit:cover; border-radius:10px; border:1px solid #eee; flex:0 0 auto;" />
+
+        <div style="flex:1; min-width:0;">
+          <div style="font-weight:900; color:#333; line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+            ${label}
+          </div>
+          <div style="font-size:0.8rem; color:#666; line-height:1.2;">
+            ${scope}
+          </div>
+        </div>
+
+        <input type="checkbox" class="qr-ast-check" data-idx="${a.__index}" checked
+               style="width:18px; height:18px; flex:0 0 auto;" />
+      </label>
+    `;
+  }).join('');
+
+  // Select all behaviour
+  selectAll.checked = true;
+  selectAll.indeterminate = false;
+
+  selectAll.onchange = () => {
+    const cbs = list.querySelectorAll('input.qr-ast-check');
+    cbs.forEach(cb => cb.checked = selectAll.checked);
+    selectAll.indeterminate = false;
+  };
+
+  // Evita múltiplos listeners sempre que renderiza
+  if (!list.dataset.boundChange) {
+    list.dataset.boundChange = '1';
+    list.addEventListener('change', () => {
+      const cbs = [...list.querySelectorAll('input.qr-ast-check')];
+      const allOn = cbs.length > 0 && cbs.every(cb => cb.checked);
+      const anyOn = cbs.some(cb => cb.checked);
+
+      selectAll.indeterminate = anyOn && !allOn;
+      selectAll.checked = allOn;
+    }, { passive: true });
+  }
+}
+
+/* ---------- switchAdminTab (VERSÃO CORRIGIDA) ---------- */
+function switchAdminTab(t) {
+  document.querySelectorAll('.admin-tab').forEach(x => x.classList.remove('active'));
+
+  ['lojas','assistentes','exportar','qrcodes'].forEach(id => {
+    const tab = document.getElementById(`admin-tab-${id}`);
+    if (tab) tab.style.display = 'none';
+  });
+
+  const tabAtual = document.getElementById(`admin-tab-${t}`);
+  if (tabAtual) tabAtual.style.display = 'block';
+
+  const tabs = ['lojas','assistentes','exportar','qrcodes'];
+  const idx = tabs.indexOf(t);
+  if (idx >= 0) document.querySelectorAll('.admin-tab')[idx].classList.add('active');
+
+  if (t === 'assistentes') atualizarDropdownsAdminInicial();
+  if (t === 'exportar') atualizarSugestaoVersao();
+  if (t === 'qrcodes') renderizarListaQRCodes_();
+}
+
+/* ---------- gerarPDFQRCodes: imprime só selecionados + alerta de publish ---------- */
+async function gerarPDFQRCodes() {
+  try {
+    const formato = localStorage.getItem(FORMATO_KEY);
+    const loja = localStorage.getItem(LOJA_KEY);
+
+    if (!formato || !loja) {
+      alert('Seleciona formato e loja na app antes de gerar o PDF.');
+      return;
+    }
+
+    const list = document.getElementById('admin-qrcodes-list');
+    if (!list) {
+      alert('Abre o separador QRCodes primeiro.');
+      return;
+    }
+
+    const selectedIdxs = [...list.querySelectorAll('input.qr-ast-check:checked')]
+      .map(cb => Number(cb.getAttribute('data-idx')))
+      .filter(n => !Number.isNaN(n));
+
+    if (selectedIdxs.length === 0) {
+      alert('Seleciona pelo menos 1 assistente para imprimir.');
+      return;
+    }
+
+    const setSel = new Set(selectedIdxs);
+
+    const assistentes = STATE.assistentes
+      .map((a, idx) => ({ ...a, __index: idx }))
+      .filter(a => setSel.has(a.__index))
+      .sort((a,b)=> (a.label||'').localeCompare(b.label||''));
+
+    const semDescricao = assistentes.filter(a => !(a.descricao || a.desc || '').trim());
+    if (semDescricao.length) {
+      abrirModalDescricaoEmFalta(semDescricao, () => gerarPDFQRCodes());
+      return;
+    }
+
+    const changesInfo = contarAlteracoesDescricaoNaoPublicadas_(assistentes);
+
+    const jsPDF = await garantirPdfLib();
+    const doc = new jsPDF({ format: 'a5', unit: 'mm' });
+
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 10;
+
+    const imageWidth = pageWidth - (margin * 2);
+    const imageHeight = 108;
+
+    const qrSize = 55;
+    const qrX = (pageWidth - qrSize) / 2;
+    const qrY = pageHeight - margin - qrSize;
+
+    for (let idx = 0; idx < assistentes.length; idx++) {
+      const a = assistentes[idx];
+      if (idx > 0) doc.addPage('a5', 'p');
+
+      const imgSrc = a.icone || 'AibyAuchan.png';
+      let imgData = null;
+
+      try { imgData = await carregarImagemComoDataURL(imgSrc); }
+      catch { imgData = await carregarImagemComoDataURL('AibyAuchan.png'); }
+
+      const qrUrl = criarUrlQRCode(a, formato, loja);
+      const qrData = await gerarQRCodeDataURL(qrUrl);
+
+      doc.addImage(imgData, 'PNG', margin, margin, imageWidth, imageHeight);
+
+      const titleY = margin + imageHeight + 10;
+      doc.setTextColor(0);
+      doc.setFontSize(16);
+      doc.text((a.label || a.nome || '').trim(), pageWidth / 2, titleY, { align: 'center' });
+
+      const descricao = (a.descricao || a.desc || '').trim();
+      const descTop = titleY + 8;
+      const textBottom = qrY - 6;
+      const availableHeight = textBottom - descTop;
+
+      let fontSize = 11;
+      doc.setFontSize(fontSize);
+
+      let lines = doc.splitTextToSize(descricao, imageWidth);
+      let lineHeight = 5;
+      let totalHeight = lines.length * lineHeight;
+
+      if (totalHeight > availableHeight) {
+        fontSize = 10;
+        doc.setFontSize(fontSize);
+        lines = doc.splitTextToSize(descricao, imageWidth);
+        lineHeight = 4.6;
+        totalHeight = lines.length * lineHeight;
+      }
+
+      while (totalHeight > availableHeight && lines.length > 2) {
+        lines.pop();
+        lines[lines.length - 1] = `${lines[lines.length - 1].replace(/\s*$/, '')}…`;
+        totalHeight = lines.length * lineHeight;
+      }
+
+      doc.text(lines, pageWidth / 2, descTop, { align: 'center' });
+      doc.addImage(qrData, 'PNG', qrX, qrY, qrSize, qrSize);
+    }
+
+    if (changesInfo.count > 0) {
+      alert(`⚠️ Tens ${changesInfo.count} descrições novas/alteradas por publicar.\nVai à aba Guardar e faz download do config.js para atualizar a app.`);
+    }
+
+    doc.save(`qrcodes_${formatarTextoBonito(formato)}_${loja}.pdf`);
+  } catch (error) {
+    console.error('PDF ERROR:', error);
+    const detalhe = (error && (error.message || String(error))) || 'Erro desconhecido';
+    alert('Falhou a geração do PDF. Detalhe: ' + detalhe);
+  }
+}
+
+/* ---------- Micro-ajuda: quando abres Admin, se já existir QRCodes tab, fica pronto ---------- */
+(function garantirQRCodesNoAbrirAdmin_(){
+  const _oldAbrirAdmin = (typeof abrirAdmin === 'function') ? abrirAdmin : null;
+  if (!_oldAbrirAdmin || _oldAbrirAdmin.__patched) return;
+
+  function abrirAdminPatched() {
+    _oldAbrirAdmin();
+    // se o user entrar já a pensar em QRCodes, a lista fica certa
+    if (document.getElementById('admin-tab-qrcodes')?.style?.display === 'block') {
+      renderizarListaQRCodes_();
+    }
+  }
+  abrirAdminPatched.__patched = true;
+  window.abrirAdmin = abrirAdminPatched;
+})();
+
 
   </script>
 </body>
