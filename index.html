@@ -1556,15 +1556,15 @@ function renderizarListaQRCodes_() {
       });
     }
 
-    async function garantirPdfLib() {
-      if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF;
-      await carregarScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
-      return window.jspdf.jsPDF;
-    }
+  async function garantirPdfLib() {
+  if (window.jspdf && window.jspdf.jsPDF) return window.jspdf.jsPDF;
+  await carregarScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
+  return window.jspdf.jsPDF;
+}
 
     async function garantirQrLib_() {
       if (window.QRCode && typeof window.QRCode.toCanvas === 'function') return window.QRCode;
-      await carregarScript('https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js');
+      await carregarScript('https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js');
       return window.QRCode;
     }
 
@@ -1802,4 +1802,5 @@ function renderizarListaQRCodes_() {
   </script>
 </body>
 </html>
+
 
