@@ -1543,9 +1543,10 @@ function renderizarListaQRCodes_() {
       overlay.style.display = 'flex';
     }
 
-    /*************************************************
-     * PDF HELPERS
-     *************************************************/
+
+/*************************************************
+ * PDF HELPERS (SUBSTITUI TUDO O QUE TENS AQUI)
+ *************************************************/
 function carregarScript(src) {
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');
@@ -1561,19 +1562,50 @@ async function garantirPdfLib() {
   await carregarScript('https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js');
   return window.jspdf.jsPDF;
 }
+
+/**
+ * ✅ QR lib robusta:
+ * - tenta global (se já existir)
+ * - senão usa ESM via import() com vários CDNs
+ */
 async function garantirQrLib_() {
-  // Biblioteca "qrcode" expõe window.QRCode com toCanvas
-  if (window.QRCode && typeof window.QRCode.toCanvas === 'function') return window.QRCode;
+  // cache interno
+  if (window.__QR_LIB__ && typeof window.__QR_LIB__.toCanvas === 'function') return window.__QR_LIB__;
 
-  // ✅ caminho correto no jsdelivr (o /build já não existe)
-  await carregarScript('https://cdn.jsdelivr.net/npm/qrcode@1.5.3/lib/browser.js');
-
-  if (!window.QRCode || typeof window.QRCode.toCanvas !== 'function') {
-    throw new Error('Biblioteca QRCode carregou mas não expôs QRCode.toCanvas');
+  // caso já exista global (de outra tentativa)
+  if (window.QRCode && typeof window.QRCode.toCanvas === 'function') {
+    window.__QR_LIB__ = window.QRCode;
+    return window.__QR_LIB__;
   }
-  return window.QRCode;
-}
 
+  const candidates = [
+    'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/+esm',
+    'https://cdn.jsdelivr.net/npm/qrcode@1.5.4/+esm',
+    'https://esm.sh/qrcode@1.5.3',
+    'https://cdn.skypack.dev/qrcode'
+  ];
+
+  let lastErr = null;
+
+  for (const url of candidates) {
+    try {
+      const mod = await import(url);
+      const QR = mod?.default || mod;
+
+      if (QR && typeof QR.toCanvas === 'function') {
+        window.__QR_LIB__ = QR;
+        // opcional: também expõe em window.QRCode para debug
+        window.QRCode = QR;
+        return QR;
+      }
+      lastErr = new Error('Lib carregou mas não tem toCanvas: ' + url);
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+
+  throw new Error('Não foi possível carregar a biblioteca de QRCode com toCanvas. Último erro: ' + (lastErr?.message || lastErr));
+}
 
 function criarUrlQRCode(assistente, formato, loja) {
   const base = `${window.location.origin}${window.location.pathname}`;
@@ -1607,16 +1639,9 @@ async function carregarImagemComoDataURL(src) {
   });
 }
 
-    function loadImage_(src) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => resolve(img);
-    img.onerror = reject;
-    img.src = src;
-  });
-}
-
+/**
+ * Gera QR PNG com logo ao centro (com patch branco por trás)
+ */
 async function gerarQRCodeComLogoDataURL_(texto, logoSrc) {
   const QR = await garantirQrLib_();
   const size = 700;
@@ -1631,16 +1656,15 @@ async function gerarQRCodeComLogoDataURL_(texto, logoSrc) {
     width: size
   });
 
-  // overlay logo no centro
   const ctx = canvas.getContext('2d');
 
-  // tenta carregar logo como dataURL (evita CORS / cache weird)
+  // carrega logo como dataURL para evitar "canvas tainted"
   let logoDataUrl = null;
   try {
     logoDataUrl = await carregarImagemComoDataURL(logoSrc);
   } catch (e) {
-    console.warn('Logo não carregou:', logoSrc, e);
-    return canvas.toDataURL('image/png'); // QR sem logo
+    console.warn('Logo não carregou, QR sem logo:', e);
+    return canvas.toDataURL('image/png');
   }
 
   const logo = new Image();
@@ -1654,14 +1678,13 @@ async function gerarQRCodeComLogoDataURL_(texto, logoSrc) {
   const x = (size - logoSize) / 2;
   const y = (size - logoSize) / 2;
 
-  // patch branco por trás do logo
+  // patch branco por trás do logo (para legibilidade)
   const pad = Math.round(logoSize * 0.18);
   const rx = x - pad;
   const ry = y - pad;
   const rw = logoSize + pad * 2;
   const rh = logoSize + pad * 2;
 
-  // rounded rect
   const r = Math.round(logoSize * 0.2);
   ctx.save();
   ctx.fillStyle = '#fff';
@@ -1680,13 +1703,9 @@ async function gerarQRCodeComLogoDataURL_(texto, logoSrc) {
   return canvas.toDataURL('image/png');
 }
 
-    /*************************************************
-     * GERAR PDF
-     * - imagem quadrada (topo)
-     * - por baixo: descrição
-     * - por baixo: QRCode centrado (com logo)
-     * - sem nome do assistente; com nome da loja no rodapé
-     *************************************************/
+/*************************************************
+ * GERAR PDF (SUBSTITUI A TUA FUNÇÃO gerarPDFQRCodes)
+ *************************************************/
 async function gerarPDFQRCodes() {
   try {
     const { formato, loja } = obterSelecaoEfetivaQRCodes_();
@@ -1717,7 +1736,7 @@ async function gerarPDFQRCodes() {
       .filter(a => setSel.has(a.__index))
       .sort((a, b) => (a.label || a.nome || '').localeCompare((b.label || b.nome || ''), undefined, { sensitivity: 'base' }));
 
-    const semDescricao = assistentes.filter(a => !(a.descricao || a.desc || '').trim());
+    const semDescricao = assistentes.filter(a => !((a.descricao || a.desc || '').trim()));
     if (semDescricao.length) {
       abrirModalDescricaoEmFalta(semDescricao, () => gerarPDFQRCodes());
       return;
@@ -1744,7 +1763,7 @@ async function gerarPDFQRCodes() {
     const gap1 = 6;
     const gap2 = 6;
 
-    // espaço para descrição (deixa sempre rodapé + QR mínimo)
+    // espaço para descrição (garante sempre QR mínimo + rodapé)
     const available = usableBottom - yAfterImage;
     const descMax = Math.max(18, available - minQr - storeLineH - gap1 - gap2);
 
@@ -1763,13 +1782,12 @@ async function gerarPDFQRCodes() {
       // URL do QR
       const qrUrl = criarUrlQRCode(a, formatarTextoBonito(formato), loja);
 
-      // ✅ QR com logo (usa PNG e fallback)
+      // QR com logo
       let qrData = null;
       try {
         qrData = await gerarQRCodeComLogoDataURL_(qrUrl, 'AibyAuchan.png');
       } catch (e) {
         console.warn('QR com logo falhou, a tentar sem logo...', e);
-        // fallback sem logo
         const QR = await garantirQrLib_();
         const c = document.createElement('canvas');
         c.width = 700; c.height = 700;
@@ -1780,7 +1798,7 @@ async function gerarPDFQRCodes() {
       // 1) IMAGEM (quadrada)
       doc.addImage(imgData, 'PNG', margin, margin, imageWidth, imageHeight);
 
-      // 2) DESCRIÇÃO
+      // 2) DESCRIÇÃO (não invade o QR)
       const descricao = (a.descricao || a.desc || '').trim();
       doc.setTextColor(0);
       doc.setFontSize(11);
@@ -1793,24 +1811,24 @@ async function gerarPDFQRCodes() {
       let lineH = 4.8;
 
       // reduz fonte se for gigante
-      const estH = lines.length * lineH;
-      if (estH > descMax) {
+      if ((lines.length * lineH) > descMax) {
         doc.setFontSize(10);
         lines = doc.splitTextToSize(descricao, descW);
         lineH = 4.5;
       }
 
-      // corta com reticências até caber
-      while ((lines.length * lineH) > descMax && lines.length > 2) {
+      // corta até caber
+      while ((lines.length * lineH + 4) > descMax && lines.length > 2) {
         lines.pop();
         lines[lines.length - 1] = `${lines[lines.length - 1].replace(/\s*$/, '')}…`;
       }
 
-      doc.text(lines, descX, descY + 4);
+      const textStartY = descY + 4;
+      doc.text(lines, descX, textStartY);
 
-      // ✅ altura real usada pela descrição
-      const descUsedH = (lines.length * lineH) + 6;
-      const yAfterDesc = descY + Math.min(descMax, descUsedH);
+      // altura real usada pela descrição (offset + linhas)
+      const descUsedH = Math.min(descMax, 4 + (lines.length * lineH));
+      const yAfterDesc = descY + descUsedH;
 
       // 3) QR por baixo da descrição — e NUNCA invade o rodapé
       const footerY = usableBottom;
@@ -1818,11 +1836,10 @@ async function gerarPDFQRCodes() {
       const maxQrBottomY = footerY - footerReserve;
 
       const qrTopY = yAfterDesc + gap1;
-      let qrSize = Math.max(minQr, Math.min(maxQr, maxQrBottomY - qrTopY));
+      let qrSize = Math.min(maxQr, (maxQrBottomY - qrTopY));
+      qrSize = Math.max(minQr, qrSize);
 
-      if (!isFinite(qrSize) || qrSize < minQr) qrSize = minQr;
-
-      // último recurso: encolhe até caber
+      // último recurso: se mesmo assim não cabe, encolhe mais (mas sem ficar ridículo)
       if (qrTopY + qrSize > maxQrBottomY) {
         qrSize = Math.max(28, maxQrBottomY - qrTopY);
       }
@@ -1849,9 +1866,11 @@ async function gerarPDFQRCodes() {
     alert('Falhou a geração do PDF. Detalhe: ' + detalhe);
   }
 }
-  </script>
+</script>
+
 </body>
 </html>
+
 
 
 
