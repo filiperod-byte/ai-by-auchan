@@ -1562,13 +1562,7 @@ function renderizarListaQRCodes_() {
   return window.jspdf.jsPDF;
 }
 
-    async function garantirQrLib_() {
-      if (window.QRCode && typeof window.QRCode.toCanvas === 'function') return window.QRCode;
-      await carregarScript('https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js');
-      return window.QRCode;
-    }
-
-    function criarUrlQRCode(assistente, formato, loja) {
+   function criarUrlQRCode(assistente, formato, loja) {
       const base = `${window.location.origin}${window.location.pathname}`;
       const params = new URLSearchParams();
       params.set(QR_PARAM_ASSISTENTE, assistente.nome || assistente.label);
@@ -1594,63 +1588,71 @@ function renderizarListaQRCodes_() {
       });
     }
 
-    async function gerarQRCodeComLogoDataURL_(texto, logoSrc) {
-      const QR = await garantirQrLib_();
-      const size = 700;
+    function loadImage_(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
 
-      const canvas = document.createElement('canvas');
-      canvas.width = size;
-      canvas.height = size;
+async function gerarQRCodeComLogoDataURL_(texto, logoSrc) {
+  const size = 700;
 
-      await QR.toCanvas(canvas, texto, {
-        errorCorrectionLevel: 'H',
-        margin: 2,
-        width: size
-      });
+  // 1) Gerar QR via API (sem biblioteca)
+  const api = `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(texto)}&ecc=H&margin=2`;
+  const res = await fetch(api);
+  if (!res.ok) throw new Error('Falha a obter QRCode via API');
 
-      // overlay logo no centro
-      const ctx = canvas.getContext('2d');
-      const logo = new Image();
-      logo.crossOrigin = 'anonymous';
+  const blob = await res.blob();
+  const blobUrl = URL.createObjectURL(blob);
 
-      const logoDataUrl = await carregarImagemComoDataURL(logoSrc).catch(() => null);
-      if (!logoDataUrl) return canvas.toDataURL('image/png');
+  // 2) Desenhar QR no canvas (blobUrl evita canvas "tainted")
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
 
-      await new Promise((resolve, reject) => {
-        logo.onload = resolve;
-        logo.onerror = reject;
-        logo.src = logoDataUrl;
-      });
+  const ctx = canvas.getContext('2d');
+  const qrImg = await loadImage_(blobUrl).finally(() => URL.revokeObjectURL(blobUrl));
+  ctx.drawImage(qrImg, 0, 0, size, size);
 
-      const logoSize = Math.round(size * 0.18); // ~18%
-      const x = (size - logoSize) / 2;
-      const y = (size - logoSize) / 2;
+  // 3) Overlay do logo (se der)
+  const logoDataUrl = await carregarImagemComoDataURL(logoSrc).catch(() => null);
+  if (!logoDataUrl) return canvas.toDataURL('image/png');
 
-      // “patch” branco por trás do logo (para legibilidade)
-      const pad = Math.round(logoSize * 0.18);
-      const rx = x - pad;
-      const ry = y - pad;
-      const rw = logoSize + pad * 2;
-      const rh = logoSize + pad * 2;
+  const logo = await loadImage_(logoDataUrl).catch(() => null);
+  if (!logo) return canvas.toDataURL('image/png');
 
-      // rounded rect
-      const r = Math.round(logoSize * 0.2);
-      ctx.save();
-      ctx.fillStyle = '#fff';
-      ctx.beginPath();
-      ctx.moveTo(rx + r, ry);
-      ctx.arcTo(rx + rw, ry, rx + rw, ry + rh, r);
-      ctx.arcTo(rx + rw, ry + rh, rx, ry + rh, r);
-      ctx.arcTo(rx, ry + rh, rx, ry, r);
-      ctx.arcTo(rx, ry, rx + rw, ry, r);
-      ctx.closePath();
-      ctx.fill();
-      ctx.restore();
+  const logoSize = Math.round(size * 0.18); // ~18%
+  const x = (size - logoSize) / 2;
+  const y = (size - logoSize) / 2;
 
-      ctx.drawImage(logo, x, y, logoSize, logoSize);
+  // patch branco por trás do logo
+  const pad = Math.round(logoSize * 0.18);
+  const rx = x - pad;
+  const ry = y - pad;
+  const rw = logoSize + pad * 2;
+  const rh = logoSize + pad * 2;
 
-      return canvas.toDataURL('image/png');
-    }
+  const r = Math.round(logoSize * 0.2);
+  ctx.save();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath();
+  ctx.moveTo(rx + r, ry);
+  ctx.arcTo(rx + rw, ry, rx + rw, ry + rh, r);
+  ctx.arcTo(rx + rw, ry + rh, rx, ry + rh, r);
+  ctx.arcTo(rx, ry + rh, rx, ry, r);
+  ctx.arcTo(rx, ry, rx + rw, ry, r);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+
+  ctx.drawImage(logo, x, y, logoSize, logoSize);
+
+  return canvas.toDataURL('image/png');
+}
 
     /*************************************************
      * GERAR PDF
@@ -1802,5 +1804,6 @@ function renderizarListaQRCodes_() {
   </script>
 </body>
 </html>
+
 
 
