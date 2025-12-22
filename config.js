@@ -1,5 +1,5 @@
 // Ficheiro de Configuração Gerado Automaticamente
-const STORAGE_DATA_KEY = "appConfigData_v2.0.4";
+const STORAGE_DATA_KEY = "appConfigData_v2.0.5";
 
 const DADOS_PADRAO = {
   lojas: [
@@ -285,7 +285,8 @@ const DADOS_PADRAO = {
         "label": "AuchanAI",
         "url": "https://genai-platform.auchan.com/#/chat",
         "icone": "AuchanAI.jpg",
-        "descricao": "AuchanAI. O teu parceiro digital para gerar ideias, escrever melhor e organizar pensamentos. Está aqui para te inspirar, apoiar na criação de conteúdos e ajudar-te a pensar com mais clareza."
+        "descricao": "AuchanAI. O teu parceiro digital para gerar ideias, escrever melhor e organizar pensamentos. Está aqui para te inspirar, apoiar na criação de conteúdos e ajudar-te a pensar com mais clareza.",
+        "desc": "AuchanAI. O teu parceiro digital para gerar ideias, escrever melhor e organizar pensamentos. Está aqui para te inspirar, apoiar na criação de conteúdos e ajudar-te a pensar com mais clareza."
     },
     {
         "formato": "Hiper",
@@ -294,7 +295,8 @@ const DADOS_PADRAO = {
         "label": "Coach",
         "url": "https://genai-platform.auchan.com/#/share/30a0ad45-9568-4c37-956e-a36f7cb17ac6",
         "icone": "Coach.jpg",
-        "descricao": "Coach.  Ajuda a transformar desafios de liderança em planos de ação concretos, utilizando como referência os nossos modelos internos de competências, avaliação de desempenho e liderança."
+        "descricao": "Ajuda a transformar desafios de liderança em planos de ação concretos, utilizando como referência os nossos modelos internos de competências, avaliação de desempenho e liderança.",
+        "desc": "Ajuda a transformar desafios de liderança em planos de ação concretos, utilizando como referência os nossos modelos internos de competências, avaliação de desempenho e liderança."
     },
     {
         "formato": "Servicos",
@@ -303,7 +305,8 @@ const DADOS_PADRAO = {
         "label": "Contratos",
         "url": "https://genai-platform.auchan.com/#/share/6e5f9252-e132-4d4c-a308-3fc7ee54fddf",
         "icone": "Contratos.jpg",
-        "descricao": ""
+        "descricao": "1",
+        "desc": "1"
     },
     {
         "formato": "Hiper",
@@ -312,7 +315,8 @@ const DADOS_PADRAO = {
         "label": "Echo",
         "url": "https://genai-platform.auchan.com/#/share/e706fd1e-b79b-42cd-b369-14ac335302d5",
         "icone": "Echo.jpg",
-        "descricao": ""
+        "descricao": "Echo. Atua como o Diretório Humano Inteligente da organização, auxiliando colaboradores a encontrar o apoio especializado correto para a resolução de desafios operacionais e funcionais.",
+        "desc": "Echo. Atua como o Diretório Humano Inteligente da organização, auxiliando colaboradores a encontrar o apoio especializado correto para a resolução de desafios operacionais e funcionais."
     },
     {
         "formato": "Hiper",
@@ -321,16 +325,8 @@ const DADOS_PADRAO = {
         "label": "Echo",
         "url": "https://genai-platform.auchan.com/#/share/e706fd1e-b79b-42cd-b369-14ac335302d5",
         "icone": "Echo.jpg",
-        "descricao": "Echo. Atua como o Diretório Humano Inteligente da organização, auxiliando colaboradores a encontrar o apoio especializado correto para a resolução de desafios operacionais e funcionais."
-    },
-    {
-        "formato": "Servicos",
-        "loja": "*",
-        "nome": "Estudos(Compra)",
-        "label": "Estudos(Compra)",
-        "url": "URL",
-        "icone": "Estudos-Compra.jpg",
-        "descricao": ""
+        "descricao": "Echo. Atua como o Diretório Humano Inteligente da organização, auxiliando colaboradores a encontrar o apoio especializado correto para a resolução de desafios operacionais e funcionais.",
+        "desc": "Echo. Atua como o Diretório Humano Inteligente da organização, auxiliando colaboradores a encontrar o apoio especializado correto para a resolução de desafios operacionais e funcionais."
     },
     {
         "formato": "Servicos",
@@ -339,7 +335,8 @@ const DADOS_PADRAO = {
         "label": "Estudos(Oferta)",
         "url": "https://genai-platform.auchan.com/#/share/f50fe60a-7306-4427-8de9-7bf15f4643db",
         "icone": "Estudos-Oferta.jpg",
-        "descricao": ""
+        "descricao": "2",
+        "desc": "2"
     },
     {
         "formato": "Servicos",
@@ -348,7 +345,8 @@ const DADOS_PADRAO = {
         "label": "Estudos(Operações)",
         "url": "https://genai-platform.auchan.com/#/share/598e9e9e-b591-4705-bdbe-52f19d7eedc4",
         "icone": "Estudos-Operações.jpg",
-        "descricao": ""
+        "descricao": "3",
+        "desc": "3"
     },
     {
         "formato": "Hiper",
@@ -357,7 +355,8 @@ const DADOS_PADRAO = {
         "label": "Faisca",
         "url": "https://genai-platform.auchan.com/#/share/a389a983-adb8-42ab-b72e-31c56bfab267",
         "icone": "Faisca.jpg",
-        "descricao": ""
+        "descricao": "teste",
+        "desc": "teste"
     },
     {
         "formato": "Hiper",
@@ -366,7 +365,8 @@ const DADOS_PADRAO = {
         "label": "Faisca",
         "url": "https://genai-platform.auchan.com/#/share/a389a983-adb8-42ab-b72e-31c56bfab267",
         "icone": "Faisca.jpg",
-        "descricao": ""
+        "descricao": "Faísca. Ajuda no teu trabalho na loja. Disponível para esclarecer dúvidas, lembrar-te de procedimentos e guiar-te nos processos de melhoria contínua e ferramentas que usas todos os dias, com instruções visuais.",
+        "desc": "Faísca. Ajuda no teu trabalho na loja. Disponível para esclarecer dúvidas, lembrar-te de procedimentos e guiar-te nos processos de melhoria contínua e ferramentas que usas todos os dias, com instruções visuais."
     },
     {
         "formato": "Hiper",
@@ -375,7 +375,8 @@ const DADOS_PADRAO = {
         "label": "Faisca",
         "url": "https://genai-platform.auchan.com/#/share/a389a983-adb8-42ab-b72e-31c56bfab267",
         "icone": "Faisca.jpg",
-        "descricao": ""
+        "descricao": "teste",
+        "desc": "teste"
     },
     {
         "formato": "Servicos",
@@ -384,7 +385,18 @@ const DADOS_PADRAO = {
         "label": "Ficha de Produto",
         "url": "https://genai-platform.auchan.com/#/share/cb9d6925-ef73-41f2-a2ac-e92c4d4893c5",
         "icone": "Ficha-de-Produto.jpg",
-        "descricao": ""
+        "descricao": "4",
+        "desc": "4"
+    },
+    {
+        "formato": "Prox",
+        "loja": "*",
+        "nome": "Ficha de Produto",
+        "label": "Ficha de Produto",
+        "url": "https://genai-platform.auchan.com/#/share/cb9d6925-ef73-41f2-a2ac-e92c4d4893c5",
+        "icone": "Ficha-de-Produto.jpg",
+        "descricao": "4",
+        "desc": "4"
     },
     {
         "formato": "Servicos",
@@ -393,7 +405,8 @@ const DADOS_PADRAO = {
         "label": "Folhetos",
         "url": "https://genai-platform.auchan.com/#/share/d40417b7-1d75-48d5-b8b1-48e5b318d6db",
         "icone": "Folhetos.jpg",
-        "descricao": ""
+        "descricao": "5",
+        "desc": "5"
     },
     {
         "formato": "Hiper",
@@ -402,7 +415,8 @@ const DADOS_PADRAO = {
         "label": "Jade",
         "url": "https://genai-platform.auchan.com/#/share/dcd986cf-ca6e-41df-bb4e-8dc387eb0906",
         "icone": "Jade.jpg",
-        "descricao": "Jade. Ajuda no teu trabalho na Frente de Loja. Disponível para esclarecer dúvidas, lembrar-te de procedimentos e guiar-te nos processos e ferramentas que usas todos os dias."
+        "descricao": "Jade. Ajuda no teu trabalho na Frente de Loja. Disponível para esclarecer dúvidas, lembrar-te de procedimentos e guiar-te nos processos e ferramentas que usas todos os dias.",
+        "desc": "Jade. Ajuda no teu trabalho na Frente de Loja. Disponível para esclarecer dúvidas, lembrar-te de procedimentos e guiar-te nos processos e ferramentas que usas todos os dias."
     },
     {
         "formato": "Hiper",
@@ -411,7 +425,8 @@ const DADOS_PADRAO = {
         "label": "Manelinho",
         "url": "http://www.google.com",
         "icone": "AibyAuchan.png",
-        "descricao": ""
+        "descricao": "",
+        "desc": ""
     },
     {
         "formato": "Prox",
@@ -420,7 +435,8 @@ const DADOS_PADRAO = {
         "label": "MySafira",
         "url": "https://genai-platform.auchan.com/#/share/e7f3fdbd-7456-40d6-8f00-02c0f47c6344",
         "icone": "MySafira.jpg",
-        "descricao": "teste"
+        "descricao": "teste",
+        "desc": "teste"
     },
     {
         "formato": "Super",
@@ -429,7 +445,8 @@ const DADOS_PADRAO = {
         "label": "MySafira",
         "url": "https://genai-platform.auchan.com/#/share/e7f3fdbd-7456-40d6-8f00-02c0f47c6344",
         "icone": "MySafira.jpg",
-        "descricao": ""
+        "descricao": "",
+        "desc": ""
     },
     {
         "formato": "Servicos",
@@ -438,7 +455,28 @@ const DADOS_PADRAO = {
         "label": "Reunião com Fornecedor",
         "url": "https://genai-platform.auchan.com/#/share/a73adc68-2cd2-4a63-bf23-0747d914d5a5",
         "icone": "Reunião-Fornecedor.jpg",
-        "descricao": ""
+        "descricao": "6",
+        "desc": "6"
+    },
+    {
+        "formato": "Super",
+        "loja": "A11-SU D António Castro Meireles, Ermesinde",
+        "nome": "Teste",
+        "label": "Teste",
+        "url": "http://www.google.com",
+        "icone": "AibyAuchan.png",
+        "descricao": "teste",
+        "desc": "teste"
+    },
+    {
+        "formato": "*",
+        "loja": "A11-SU D António Castro Meireles, Ermesinde",
+        "nome": "Teste",
+        "label": "Teste",
+        "url": "www.google.com",
+        "icone": "AibyAuchan.png",
+        "descricao": "teste",
+        "desc": "teste"
     },
     {
         "formato": "*",
@@ -447,7 +485,8 @@ const DADOS_PADRAO = {
         "label": "Violeta",
         "url": "https://genai-platform.auchan.com/#/share/17fb9d00-4091-4c3f-91ac-6dfebabfecd6",
         "icone": "Violeta.jpg",
-        "descricao": "Violeta. A tua parceira de confiança para tudo o que envolve recursos humanos na Auchan. Está aqui para te ajudar a navegar pelos processos internos com facilidade."
+        "descricao": "Violeta. A tua parceira de confiança para tudo o que envolve recursos humanos na Auchan. Está aqui para te ajudar a navegar pelos processos internos com facilidade.",
+        "desc": "Violeta. A tua parceira de confiança para tudo o que envolve recursos humanos na Auchan. Está aqui para te ajudar a navegar pelos processos internos com facilidade."
     },
     {
         "formato": "Hiper",
@@ -456,7 +495,8 @@ const DADOS_PADRAO = {
         "label": "Wally",
         "url": "https://genai-platform.auchan.com/#/share/7f236c5d-c8de-4e6f-a8a3-19a542f68c51",
         "icone": "wally-512.jpg",
-        "descricao": "Wally. Ajuda-te a encontrar os artigos na loja.\nQuando o cliente tem dúvidas e não sabes onde está o produto, o Wally tem a resposta."
+        "descricao": "Wally. Ajuda-te a encontrar os artigos na loja.\nQuando o cliente tem dúvidas e não sabes onde está o produto, o Wally tem a resposta.",
+        "desc": "Wally. Ajuda-te a encontrar os artigos na loja.\nQuando o cliente tem dúvidas e não sabes onde está o produto, o Wally tem a resposta."
     },
     {
         "formato": "Hiper",
@@ -465,7 +505,8 @@ const DADOS_PADRAO = {
         "label": "Wally",
         "url": "https://genai-platform.auchan.com/#/share/e8eedf3c-7c3c-4eb4-95f0-8a583ac828fb",
         "icone": "wally-512.jpg",
-        "descricao": ""
+        "descricao": "",
+        "desc": ""
     }
   ]
 };
