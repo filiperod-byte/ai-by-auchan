@@ -2,16 +2,41 @@
 
 Esta é uma Web App (PWA) desenvolvida para centralizar o acesso aos assistentes de Inteligência Artificial da Auchan. Permite aos colaboradores selecionar a sua loja e aceder rapidamente às ferramentas relevantes para o seu formato.
 
-🔗 **Aceder à App:** [(https://filiperod-byte.github.io/ai-by-auchan/)]
+🔗 **Aceder à App:** https://filiperod-byte.github.io/ai-by-auchan/
 
 ---
 
 ## ✨ Funcionalidades
 
-* **Personalização:** Filtra assistentes com base no Formato (Hiper, Super, Prox, Serviços) e Loja.
-* **Mobile-First:** Desenhada para funcionar como uma App nativa no telemóvel.
-* **Painel de Administração:** Permite adicionar, editar e remover lojas e assistentes diretamente na App.
-* **Configuração Externa:** Os dados são carregados de um ficheiro `config.js` separado para facilitar a manutenção.
+### 🧩 App (Utilizador)
+* **Personalização:** Filtra assistentes com base no **Formato** (Hiper, Super, Prox, Serviços) e **Loja**.
+* **Mobile-First / PWA:** Desenhada para funcionar como App nativa no telemóvel.
+* **Acesso rápido:** Botões com imagem + label para abrir assistentes com 1 toque.
+* **Logging automático:** Regista acessos por assistente e loja via Google Forms (modo `no-cors`).
+
+### 🛠️ Admin (Gestão)
+* **Painel de Administração:** Permite **adicionar / editar / remover** lojas e assistentes diretamente na App.
+* **Scopes por Assistente:** Cada assistente pode ser configurado para:
+  - Formato específico + Loja específica  
+  - `*` (Qualquer Formato)  
+  - `*` (Qualquer Loja)
+* **Validações anti-caos:** Bloqueia conflitos de nome por sobreposição de escopo e duplicados exatos.
+* **Duplicar assistente:** Cria cópia rápida (e obriga a definir scope antes de “aparecer” sem querer).
+
+### 🧾 QRCodes (Novo)
+* **Separador “QRCodes” no Admin:** Geração de PDF para impressão de QRCodes **sem sair do Admin**.
+* **Formato/Loja dentro do Admin:** Permite imprimir QRCodes para qualquer loja/formato sem mexer na seleção da App.
+  - Pode usar: seleção do **Admin** ou “**Usar seleção da App**”.
+* **Lista de impressão com estado:**
+  - **🆕 Novo** → Assistente existente localmente mas não publicado no `config.js` (comparação por URL)
+  - **⚠️ Alterado** → Descrição local diferente da publicada (comparação por URL)
+  - Destaques visuais com sombreado para não passar nada “pela porta do cavalo”.
+* **Selecionar tudo / Seleção parcial:** Checkbox global com estado indeterminado.
+* **Validação de descrições:** Se algum assistente selecionado estiver sem descrição:
+  - abre modal para preencher,
+  - guarda no estado local,
+  - e **só depois** permite gerar o PDF.
+* **Aviso de sincronização:** Se existirem alterações face ao publicado, a App avisa para fazer download e atualizar o `config.js`.
 
 ---
 
@@ -33,32 +58,46 @@ A aplicação funciona como uma PWA (Progressive Web App). Para a melhor experi�
 
 ## ⚙️ Administração e Atualização
 
-A gestão de lojas e assistentes é feita através da própria aplicação, gerando um ficheiro de configuração que deve ser atualizado aqui no GitHub.
+A gestão de lojas e assistentes é feita através da própria aplicação, gerando um ficheiro de configuração que deve ser atualizado no GitHub.
 
 ### 1. Aceder ao Admin
-* Toque **5 vezes seguidas** no logótipo (AI by Auchan) no topo da App.
-* Insira a senha de administrador.
+* Toca **5 vezes seguidas** no logótipo (AI by Auchan) no topo da App.
+* Insere a senha de administrador.
 
 ### 2. Fluxo de Atualização (Como atualizar os dados)
 Como este projeto não usa base de dados online, o processo de atualização é:
 
-1.  Fazer as alterações (adicionar lojas/assistentes) no menu Admin da App.
-2.  Ir ao separador **"Guardar/Exportar"**.
-3.  Clicar em **"📥 Baixar Ficheiro de Configuração"**.
-4.  Será descarregado um ficheiro `config.js` para o seu computador.
-5.  **Fazer upload** desse ficheiro `config.js` para este repositório do GitHub (substituindo o existente).
+1. Fazer as alterações no menu Admin (Lojas / Assistentes).
+2. (Opcional) Ir ao separador **QRCodes** e gerar PDF(s) para impressão.
+3. Ir ao separador **Guardar**.
+4. Clicar em **"📥 Download Ficheiro de Configuração"**.
+5. Será descarregado um ficheiro `config.js`.
+6. **Fazer upload** desse `config.js` para este repositório (substituindo o existente).
 
-> **Nota:** As alterações só ficam visíveis para todos os utilizadores depois de o ficheiro `config.js` ser atualizado aqui no GitHub.
+> **Nota:** As alterações só ficam visíveis para todos os utilizadores depois de o ficheiro `config.js` ser atualizado no GitHub.
+
+---
+
+## 🧾 QRCodes (Como imprimir)
+
+1. Entrar no **Admin** → separador **QRCodes**
+2. Selecionar:
+   - Formato/Loja **no Admin** (ou clicar em “Usar seleção da App”)
+3. Selecionar os assistentes a imprimir (ou “Selecionar tudo”)
+4. Clicar **📄 Gerar PDF QRCodes**
+
+> Se aparecerem assistentes com badge **🆕 Novo** ou **⚠️ Alterado**, significa que existem diferenças face ao `config.js` publicado.  
+> Depois de imprimir, vai ao separador **Guardar** e atualiza o `config.js` no GitHub para ficar tudo alinhado.
 
 ---
 
 ## 📂 Estrutura do Projeto
 
-* `index.html`: O código principal da aplicação (Layout, Lógica e Estilos).
-* `config.js`: Ficheiro externo que contém a base de dados (Lojas e Assistentes). **É este ficheiro que é atualizado frequentemente.**
-* `manifest.json`: Configurações para a instalação no telemóvel (ícone, nome, cores).
-* `service-worker.js`: Script para gestão de cache e funcionamento offline.
-* `imagens/`: Pasta com os logótipos e ícones.
+* `index.html`: Código principal da aplicação (layout, lógica e estilos).
+* `config.js`: Base de dados (Lojas e Assistentes). **É o ficheiro mais atualizado com frequência.**
+* `manifest.json`: Configurações PWA (ícone, nome, cores).
+* `service-worker.js`: Gestão de cache e funcionamento offline.
+* `imagens/`: Logótipos e ícones.
 
 ---
 
@@ -66,4 +105,8 @@ Como este projeto não usa base de dados online, o processo de atualização é:
 * HTML5 / CSS3 / JavaScript (Vanilla)
 * PWA (Progressive Web App)
 * GitHub Pages (Hospedagem)
-* Desenvolvido por IAD3.0 no G2G
+
+---
+
+## 👷 Créditos
+Desenvolvido por IAD3.0 no G2G
