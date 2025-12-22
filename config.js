@@ -1,5 +1,5 @@
 // Ficheiro de Configuração Gerado Automaticamente
-const STORAGE_DATA_KEY = "appConfigData_v2.0.5";
+const STORAGE_DATA_KEY = "appConfigData_v2.0.6";
 
 const DADOS_PADRAO = {
   lojas: [
@@ -355,8 +355,8 @@ const DADOS_PADRAO = {
         "label": "Faisca",
         "url": "https://genai-platform.auchan.com/#/share/a389a983-adb8-42ab-b72e-31c56bfab267",
         "icone": "Faisca.jpg",
-        "descricao": "teste",
-        "desc": "teste"
+        "descricao": "Faísca. Ajuda no teu trabalho na loja. Disponível para esclarecer dúvidas, lembrar-te de procedimentos e guiar-te nos processos de melhoria contínua e ferramentas que usas todos os dias, com instruções visuais.",
+        "desc": "Faísca. Ajuda no teu trabalho na loja. Disponível para esclarecer dúvidas, lembrar-te de procedimentos e guiar-te nos processos de melhoria contínua e ferramentas que usas todos os dias, com instruções visuais."
     },
     {
         "formato": "Hiper",
@@ -375,21 +375,11 @@ const DADOS_PADRAO = {
         "label": "Faisca",
         "url": "https://genai-platform.auchan.com/#/share/a389a983-adb8-42ab-b72e-31c56bfab267",
         "icone": "Faisca.jpg",
-        "descricao": "teste",
-        "desc": "teste"
+        "descricao": "Faísca. Ajuda no teu trabalho na loja. Disponível para esclarecer dúvidas, lembrar-te de procedimentos e guiar-te nos processos de melhoria contínua e ferramentas que usas todos os dias, com instruções visuais.",
+        "desc": "Faísca. Ajuda no teu trabalho na loja. Disponível para esclarecer dúvidas, lembrar-te de procedimentos e guiar-te nos processos de melhoria contínua e ferramentas que usas todos os dias, com instruções visuais."
     },
     {
         "formato": "Servicos",
-        "loja": "*",
-        "nome": "Ficha de Produto",
-        "label": "Ficha de Produto",
-        "url": "https://genai-platform.auchan.com/#/share/cb9d6925-ef73-41f2-a2ac-e92c4d4893c5",
-        "icone": "Ficha-de-Produto.jpg",
-        "descricao": "4",
-        "desc": "4"
-    },
-    {
-        "formato": "Prox",
         "loja": "*",
         "nome": "Ficha de Produto",
         "label": "Ficha de Produto",
@@ -505,8 +495,8 @@ const DADOS_PADRAO = {
         "label": "Wally",
         "url": "https://genai-platform.auchan.com/#/share/e8eedf3c-7c3c-4eb4-95f0-8a583ac828fb",
         "icone": "wally-512.jpg",
-        "descricao": "",
-        "desc": ""
+        "descricao": "Wally. Ajuda-te a encontrar os artigos na loja.\nQuando o cliente tem dúvidas e não sabes onde está o produto, o Wally tem a resposta.",
+        "desc": "Wally. Ajuda-te a encontrar os artigos na loja.\nQuando o cliente tem dúvidas e não sabes onde está o produto, o Wally tem a resposta."
     }
   ]
 };
